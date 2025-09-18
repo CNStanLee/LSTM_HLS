@@ -15,34 +15,103 @@ sub_cnn_onnx_path = "models/subcnn_finn_streamlined.onnx"
 sub_lstm_onnx_path = "models/sublstm_finn_streamlined.onnx"
 sub_mlp_onnx_path = "models/submlp_finn_streamlined.onnx"
 
+# def add_reshape_to_model(model, output_shape):
+#     """
+#     Add a Reshape operation to convert output to desired shape
+#     """
+#     original_output = model.graph.output[0]
+#     original_output_name = original_output.name
+    
+#     reshape_output_name = original_output_name + "_reshaped"
+#     shape_tensor_name = "reshape_shape_const"
+    
+#     shape_values = np.array(output_shape, dtype=np.int64)
+#     shape_tensor = numpy_helper.from_array(shape_values, name=shape_tensor_name)
+    
+#     reshape_node = helper.make_node(
+#         'Reshape',
+#         inputs=[original_output_name, shape_tensor_name],
+#         outputs=[reshape_output_name],
+#         name='output_reshape'
+#     )
+    
+#     model.graph.initializer.append(shape_tensor)
+#     model.graph.node.append(reshape_node)
+    
+#     new_output = helper.make_tensor_value_info(
+#         reshape_output_name,
+#         original_output.type.tensor_type.elem_type,
+#         output_shape
+#     )
+    
+#     model.graph.output.remove(original_output)
+#     model.graph.output.append(new_output)
+    
+#     model = model.transform(InferShapes())
+#     model = model.transform(FoldConstants())
+    
+#     return model
 def add_reshape_to_model(model, output_shape):
     """
-    Add a Reshape operation to convert output to desired shape
+    Add a Reshape or Transpose operation to convert output to desired shape
     """
     original_output = model.graph.output[0]
     original_output_name = original_output.name
     
-    reshape_output_name = original_output_name + "_reshaped"
-    shape_tensor_name = "reshape_shape_const"
+    # Get original output shape
+    original_shape = []
+    for dim in original_output.type.tensor_type.shape.dim:
+        if dim.dim_value > 0:
+            original_shape.append(dim.dim_value)
+        else:
+            # Handle dynamic dimensions (if any)
+            original_shape.append(None)
     
-    shape_values = np.array(output_shape, dtype=np.int64)
-    shape_tensor = numpy_helper.from_array(shape_values, name=shape_tensor_name)
-    
-    reshape_node = helper.make_node(
-        'Reshape',
-        inputs=[original_output_name, shape_tensor_name],
-        outputs=[reshape_output_name],
-        name='output_reshape'
-    )
-    
-    model.graph.initializer.append(shape_tensor)
-    model.graph.node.append(reshape_node)
-    
-    new_output = helper.make_tensor_value_info(
-        reshape_output_name,
-        original_output.type.tensor_type.elem_type,
-        output_shape
-    )
+    # Check if the transformation is a transpose case (e.g., 64x1 -> 1x64)
+    if (len(original_shape) == 2 and len(output_shape) == 2 and
+        original_shape[0] == output_shape[1] and 
+        original_shape[1] == output_shape[0]):
+        # Use Transpose instead of Reshape
+        transpose_output_name = original_output_name + "_transposed"
+        
+        transpose_node = helper.make_node(
+            'Transpose',
+            inputs=[original_output_name],
+            outputs=[transpose_output_name],
+            perm=[1, 0],  # Swap the two dimensions
+            name='output_transpose'
+        )
+        
+        model.graph.node.append(transpose_node)
+        
+        new_output = helper.make_tensor_value_info(
+            transpose_output_name,
+            original_output.type.tensor_type.elem_type,
+            output_shape
+        )
+    else:
+        # Use Reshape for all other cases
+        reshape_output_name = original_output_name + "_reshaped"
+        shape_tensor_name = "reshape_shape_const"
+        
+        shape_values = np.array(output_shape, dtype=np.int64)
+        shape_tensor = numpy_helper.from_array(shape_values, name=shape_tensor_name)
+        
+        reshape_node = helper.make_node(
+            'Reshape',
+            inputs=[original_output_name, shape_tensor_name],
+            outputs=[reshape_output_name],
+            name='output_reshape'
+        )
+        
+        model.graph.initializer.append(shape_tensor)
+        model.graph.node.append(reshape_node)
+        
+        new_output = helper.make_tensor_value_info(
+            reshape_output_name,
+            original_output.type.tensor_type.elem_type,
+            output_shape
+        )
     
     model.graph.output.remove(original_output)
     model.graph.output.append(new_output)
@@ -51,6 +120,8 @@ def add_reshape_to_model(model, output_shape):
     model = model.transform(FoldConstants())
     
     return model
+
+
 
 
 def main():
