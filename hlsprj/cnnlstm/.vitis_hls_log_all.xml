@@ -2,9 +2,7 @@
 <vivadoHLSLog:LogRoot xmlns:vivadoHLSLog="www.xilinx.com/vivadoHLSLog">
   <errorLogs>
     <logs>
-      <synLog>
-        <logs message="ERROR: [HLS 207-812] 'pipeline-lstm-header.h' file not found (cnnlstm/src/top.cpp:1:10)" projectName="cnnlstm" solutionName="solution1" date="2025-09-19T16:23:15.802+0100"/>
-      </synLog>
+      <synLog/>
       <simLog/>
       <mgLog/>
       <packageLog/>

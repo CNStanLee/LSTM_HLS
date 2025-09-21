@@ -1,16 +1,28 @@
 INFO: [HLS 200-10] Running '/tools/Xilinx/Vitis_HLS/2022.2/bin/unwrapped/lnx64.o/vitis_hls'
-INFO: [HLS 200-10] For user 'changhong' on host 'changhong-Dell-Pro-Max-Tower-T2-FCT2250' (Linux_x86_64 version 6.8.0-60-generic) on Fri Sep 19 16:23:04 IST 2025
+INFO: [HLS 200-10] For user 'changhong' on host 'changhong-Alienware-m16-R2' (Linux_x86_64 version 6.8.0-83-generic) on Sun Sep 21 19:16:22 IST 2025
 INFO: [HLS 200-10] On os Ubuntu 22.04.5 LTS
-INFO: [HLS 200-10] In directory '/home/changhong/prj/finn/script/LSTM_HLS/hlsprj'
-Sourcing Tcl script '/home/changhong/prj/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/csynth.tcl'
-INFO: [HLS 200-1510] Running: source /home/changhong/prj/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/csynth.tcl
+INFO: [HLS 200-10] In directory '/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj'
+Sourcing Tcl script '/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/csynth.tcl'
+INFO: [HLS 200-1510] Running: source /home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/csynth.tcl
 INFO: [HLS 200-1510] Running: open_project cnnlstm 
-INFO: [HLS 200-10] Opening project '/home/changhong/prj/finn/script/LSTM_HLS/hlsprj/cnnlstm'.
+INFO: [HLS 200-10] Opening project '/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm'.
 INFO: [HLS 200-1510] Running: set_top main 
-INFO: [HLS 200-1510] Running: add_files cnnlstm/src/top.cpp -cflags -I/inc 
+INFO: [HLS 200-1510] Running: add_files cnnlstm/src/g_config.h 
+INFO: [HLS 200-10] Adding design file 'cnnlstm/src/g_config.h' to the project
+INFO: [HLS 200-1510] Running: add_files cnnlstm/src/global_nn_def.h 
+INFO: [HLS 200-10] Adding design file 'cnnlstm/src/global_nn_def.h' to the project
+INFO: [HLS 200-1510] Running: add_files cnnlstm/src/n_cnn.hpp 
+INFO: [HLS 200-10] Adding design file 'cnnlstm/src/n_cnn.hpp' to the project
+INFO: [HLS 200-1510] Running: add_files cnnlstm/src/n_cnn_weights.hpp 
+INFO: [HLS 200-10] Adding design file 'cnnlstm/src/n_cnn_weights.hpp' to the project
+INFO: [HLS 200-1510] Running: add_files cnnlstm/src/test.h 
+INFO: [HLS 200-10] Adding design file 'cnnlstm/src/test.h' to the project
+INFO: [HLS 200-1510] Running: add_files cnnlstm/src/top.cpp 
 INFO: [HLS 200-10] Adding design file 'cnnlstm/src/top.cpp' to the project
+INFO: [HLS 200-1510] Running: add_files -tb cnnlstm/src/test_tb.cpp 
+INFO: [HLS 200-10] Adding test bench file 'cnnlstm/src/test_tb.cpp' to the project
 INFO: [HLS 200-1510] Running: open_solution solution1 -flow_target vivado 
-INFO: [HLS 200-10] Opening solution '/home/changhong/prj/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1'.
+INFO: [HLS 200-10] Opening solution '/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1'.
 INFO: [SYN 201-201] Setting up clock 'default' with a period of 10ns.
 INFO: [HLS 200-1611] Setting target device to 'xczu7ev-ffvc1156-2-e'
 INFO: [HLS 200-1505] Using flow_target 'vivado'
@@ -18,20 +30,43 @@ Resolution: For help on HLS 200-1505 see www.xilinx.com/cgi-bin/docs/rdoc?v=2022
 INFO: [HLS 200-1510] Running: set_part xczu7ev-ffvc1156-2-e 
 INFO: [HLS 200-1510] Running: create_clock -period 10 -name default 
 INFO: [HLS 200-1510] Running: csynth_design 
-Running Dispatch Server on port: 39529
-INFO: [HLS 200-111] Finished File checks and directory preparation: CPU user time: 0.01 seconds. CPU system time: 0.01 seconds. Elapsed time: 10.02 seconds; current allocated memory: 1.072 GB.
+Running Dispatch Server on port: 44391
+INFO: [HLS 200-111] Finished File checks and directory preparation: CPU user time: 0.01 seconds. CPU system time: 0.01 seconds. Elapsed time: 10.03 seconds; current allocated memory: 1.072 GB.
 INFO: [HLS 200-10] Analyzing design file 'cnnlstm/src/top.cpp' ... 
-ERROR: [HLS 207-812] 'pipeline-lstm-header.h' file not found (cnnlstm/src/top.cpp:1:10)
-INFO: [HLS 200-111] Finished Command csynth_design CPU user time: 0.07 seconds. CPU system time: 0.05 seconds. Elapsed time: 0.1 seconds; current allocated memory: 0.000 MB.
-command 'ap_source' returned error code
-    while executing
-"source /home/changhong/prj/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/csynth.tcl"
-    invoked from within
-"hls::main /home/changhong/prj/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/csynth.tcl"
-    ("uplevel" body line 1)
-    invoked from within
-"uplevel 1 hls::main {*}$newargs"
-    (procedure "hls_proc" line 16)
-    invoked from within
-"hls_proc [info nameofexecutable] $argv"
-INFO: [HLS 200-112] Total CPU user time: 1.33 seconds. Total CPU system time: 0.41 seconds. Total elapsed time: 11.66 seconds; peak allocated memory: 1.072 GB.
+INFO: [HLS 200-111] Finished Source Code Analysis and Preprocessing: CPU user time: 3.38 seconds. CPU system time: 0.68 seconds. Elapsed time: 4.08 seconds; current allocated memory: 1.074 GB.
+INFO: [HLS 200-777] Using interface defaults for 'Vivado' flow target.
+INFO: [HLS 200-111] Finished Compiling Optimization and Transform: CPU user time: 1.92 seconds. CPU system time: 0.39 seconds. Elapsed time: 2.3 seconds; current allocated memory: 1.075 GB.
+INFO: [HLS 200-111] Finished Checking Pragmas: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0 seconds; current allocated memory: 1.075 GB.
+INFO: [HLS 200-10] Starting code transformations ...
+INFO: [HLS 200-111] Finished Standard Transforms: CPU user time: 0.01 seconds. CPU system time: 0 seconds. Elapsed time: 0.01 seconds; current allocated memory: 1.076 GB.
+INFO: [HLS 200-10] Checking synthesizability ...
+INFO: [HLS 200-111] Finished Checking Synthesizability: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.01 seconds; current allocated memory: 1.076 GB.
+INFO: [HLS 200-111] Finished Loop, function and other optimizations: CPU user time: 0.02 seconds. CPU system time: 0 seconds. Elapsed time: 0.01 seconds; current allocated memory: 1.097 GB.
+INFO: [HLS 200-111] Finished Architecture Synthesis: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.01 seconds; current allocated memory: 1.097 GB.
+INFO: [HLS 200-10] Starting hardware synthesis ...
+INFO: [HLS 200-10] Synthesizing 'main' ...
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-42] -- Implementing module 'main' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [SCHED 204-11] Starting scheduling ...
+INFO: [SCHED 204-11] Finished scheduling.
+INFO: [HLS 200-111] Finished Scheduling: CPU user time: 0.01 seconds. CPU system time: 0.03 seconds. Elapsed time: 0.04 seconds; current allocated memory: 1.097 GB.
+INFO: [BIND 205-100] Starting micro-architecture generation ...
+INFO: [BIND 205-101] Performing variable lifetime analysis.
+INFO: [BIND 205-101] Exploring resource sharing.
+INFO: [BIND 205-101] Binding ...
+INFO: [BIND 205-100] Finished micro-architecture generation.
+INFO: [HLS 200-111] Finished Binding: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0 seconds; current allocated memory: 1.097 GB.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-10] -- Generating RTL for module 'main' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [RTGEN 206-500] Setting interface mode on function 'main' to 'ap_ctrl_hs'.
+INFO: [RTGEN 206-100] Finished creating RTL model for 'main'.
+INFO: [HLS 200-111] Finished Creating RTL model: CPU user time: 0.01 seconds. CPU system time: 0 seconds. Elapsed time: 0.01 seconds; current allocated memory: 1.097 GB.
+INFO: [HLS 200-111] Finished Generating all RTL models: CPU user time: 0.09 seconds. CPU system time: 0 seconds. Elapsed time: 0.09 seconds; current allocated memory: 1.097 GB.
+INFO: [HLS 200-111] Finished Updating report files: CPU user time: 0.12 seconds. CPU system time: 0.01 seconds. Elapsed time: 0.13 seconds; current allocated memory: 1.098 GB.
+INFO: [VHDL 208-304] Generating VHDL RTL for main.
+INFO: [VLOG 209-307] Generating Verilog RTL for main.
+INFO: [HLS 200-789] **** Estimated Fmax: 0.00 MHz
+INFO: [HLS 200-111] Finished Command csynth_design CPU user time: 5.57 seconds. CPU system time: 1.12 seconds. Elapsed time: 6.69 seconds; current allocated memory: 26.379 MB.
+INFO: [HLS 200-112] Total CPU user time: 7.64 seconds. Total CPU system time: 1.57 seconds. Total elapsed time: 19.13 seconds; peak allocated memory: 1.098 GB.

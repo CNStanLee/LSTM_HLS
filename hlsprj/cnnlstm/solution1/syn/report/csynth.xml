@@ -1,0 +1,314 @@
+<profile>
+    <ReportVersion>
+        <Version>2022.2</Version>
+    </ReportVersion>
+    <UserAssignments>
+        <unit>ns</unit>
+        <ProductFamily>zynquplus</ProductFamily>
+        <Part>xczu7ev-ffvc1156-2-e</Part>
+        <TopModelName>main</TopModelName>
+        <TargetClockPeriod>10.00</TargetClockPeriod>
+        <ClockUncertainty>2.70</ClockUncertainty>
+        <FlowTarget>vivado</FlowTarget>
+    </UserAssignments>
+    <PerformanceEstimates>
+        <PipelineType>no</PipelineType>
+        <SummaryOfTimingAnalysis>
+            <unit>ns</unit>
+            <EstimatedClockPeriod>0.000</EstimatedClockPeriod>
+        </SummaryOfTimingAnalysis>
+        <SummaryOfOverallLatency>
+            <unit>clock cycles</unit>
+            <Best-caseLatency>0</Best-caseLatency>
+            <Average-caseLatency>0</Average-caseLatency>
+            <Worst-caseLatency>0</Worst-caseLatency>
+            <Best-caseRealTimeLatency>0 ns</Best-caseRealTimeLatency>
+            <Average-caseRealTimeLatency>0 ns</Average-caseRealTimeLatency>
+            <Worst-caseRealTimeLatency>0 ns</Worst-caseRealTimeLatency>
+            <Interval-min>1</Interval-min>
+            <Interval-max>1</Interval-max>
+        </SummaryOfOverallLatency>
+    </PerformanceEstimates>
+    <AreaEstimates>
+        <Resources>
+            <BRAM_18K>0</BRAM_18K>
+            <DSP>0</DSP>
+            <FF>0</FF>
+            <LUT>0</LUT>
+            <URAM>0</URAM>
+        </Resources>
+        <AvailableResources>
+            <BRAM_18K>624</BRAM_18K>
+            <DSP>1728</DSP>
+            <FF>460800</FF>
+            <LUT>230400</LUT>
+            <URAM>96</URAM>
+        </AvailableResources>
+    </AreaEstimates>
+    <InterfaceSummary>
+        <RtlPorts>
+            <name>ap_start</name>
+            <Object>main</Object>
+            <Type>return value</Type>
+            <Scope/>
+            <IOProtocol>ap_ctrl_hs</IOProtocol>
+            <IOConfig/>
+            <Dir>in</Dir>
+            <Bits>1</Bits>
+            <Attribute>control</Attribute>
+        </RtlPorts>
+        <RtlPorts>
+            <name>ap_done</name>
+            <Object>main</Object>
+            <Type>return value</Type>
+            <Scope/>
+            <IOProtocol>ap_ctrl_hs</IOProtocol>
+            <IOConfig/>
+            <Dir>out</Dir>
+            <Bits>1</Bits>
+            <Attribute>control</Attribute>
+        </RtlPorts>
+        <RtlPorts>
+            <name>ap_idle</name>
+            <Object>main</Object>
+            <Type>return value</Type>
+            <Scope/>
+            <IOProtocol>ap_ctrl_hs</IOProtocol>
+            <IOConfig/>
+            <Dir>out</Dir>
+            <Bits>1</Bits>
+            <Attribute>control</Attribute>
+        </RtlPorts>
+        <RtlPorts>
+            <name>ap_ready</name>
+            <Object>main</Object>
+            <Type>return value</Type>
+            <Scope/>
+            <IOProtocol>ap_ctrl_hs</IOProtocol>
+            <IOConfig/>
+            <Dir>out</Dir>
+            <Bits>1</Bits>
+            <Attribute>control</Attribute>
+        </RtlPorts>
+        <RtlPorts>
+            <name>ap_return</name>
+            <Object>main</Object>
+            <Type>return value</Type>
+            <Scope/>
+            <IOProtocol>ap_ctrl_hs</IOProtocol>
+            <IOConfig/>
+            <Dir>out</Dir>
+            <Bits>32</Bits>
+            <Attribute>data</Attribute>
+        </RtlPorts>
+    </InterfaceSummary>
+    <RTLDesignHierarchy>
+        <TopModule MAX_DEPTH="1">
+            <ModuleName>main</ModuleName>
+        </TopModule>
+    </RTLDesignHierarchy>
+    <ModuleInformation>
+        <Module>
+            <Name>main</Name>
+            <PerformanceEstimates>
+                <SummaryOfTimingAnalysis>
+                    <TargetClockPeriod>10.00</TargetClockPeriod>
+                    <ClockUncertainty>2.70</ClockUncertainty>
+                    <EstimatedClockPeriod>0.000</EstimatedClockPeriod>
+                </SummaryOfTimingAnalysis>
+                <SummaryOfOverallLatency>
+                    <Best-caseLatency>0</Best-caseLatency>
+                    <Average-caseLatency>0</Average-caseLatency>
+                    <Worst-caseLatency>0</Worst-caseLatency>
+                    <Best-caseRealTimeLatency>0 ns</Best-caseRealTimeLatency>
+                    <Average-caseRealTimeLatency>0 ns</Average-caseRealTimeLatency>
+                    <Worst-caseRealTimeLatency>0 ns</Worst-caseRealTimeLatency>
+                    <PipelineInitiationInterval>1</PipelineInitiationInterval>
+                    <PipelineType>no</PipelineType>
+                </SummaryOfOverallLatency>
+            </PerformanceEstimates>
+            <AreaEstimates>
+                <Resources>
+                    <BRAM_18K>0</BRAM_18K>
+                    <AVAIL_BRAM>624</AVAIL_BRAM>
+                    <UTIL_BRAM>0</UTIL_BRAM>
+                    <DSP>0</DSP>
+                    <AVAIL_DSP>1728</AVAIL_DSP>
+                    <UTIL_DSP>0</UTIL_DSP>
+                    <FF>0</FF>
+                    <AVAIL_FF>460800</AVAIL_FF>
+                    <UTIL_FF>0</UTIL_FF>
+                    <LUT>0</LUT>
+                    <AVAIL_LUT>230400</AVAIL_LUT>
+                    <UTIL_LUT>0</UTIL_LUT>
+                    <URAM>0</URAM>
+                    <AVAIL_URAM>96</AVAIL_URAM>
+                    <UTIL_URAM>0</UTIL_URAM>
+                </Resources>
+            </AreaEstimates>
+        </Module>
+    </ModuleInformation>
+    <FIFOInformation/>
+    <UserConfigCommands/>
+    <ReturnValue ReturnValueName="srcType">int</ReturnValue>
+    <ReturnValue ReturnValueName="srcSize">32</ReturnValue>
+    <ReturnValue ReturnValueName="hwRefs" type="port" interface="ap_return" name="ap_return" usage="data" direction="out"/>
+    <Interfaces>
+        <Interface InterfaceName="ap_ctrl" type="ap_ctrl" busTypeName="acc_handshake" mode="slave">
+            <portMaps>
+                <portMap portMapName="ap_start">start</portMap>
+                <portMap portMapName="ap_done">done</portMap>
+                <portMap portMapName="ap_idle">idle</portMap>
+                <portMap portMapName="ap_ready">ready</portMap>
+            </portMaps>
+            <ports>
+                <port>ap_done</port>
+                <port>ap_idle</port>
+                <port>ap_ready</port>
+                <port>ap_start</port>
+            </ports>
+        </Interface>
+        <Interface InterfaceName="ap_return" type="data" busTypeName="data" protocol="ap_ctrl_hs" mode="master" dataWidth="32">
+            <portMaps>
+                <portMap portMapName="ap_return">DATA</portMap>
+            </portMaps>
+            <ports>
+                <port>ap_return</port>
+            </ports>
+        </Interface>
+    </Interfaces>
+    <ReportHWInterface>
+        <section name="HW Interfaces" level="0">
+            <item name="Other Ports">
+                <table isCollapsed="0">
+                    <keys size="2">Interface, Bitwidth</keys>
+                    <column name="ap_return">32, , , </column>
+                </table>
+            </item>
+            <item name="TOP LEVEL CONTROL">
+                <table isCollapsed="0">
+                    <keys size="3">Interface, Type, Ports</keys>
+                    <column name="ap_ctrl">ap_ctrl_hs, ap_done ap_idle ap_ready ap_start, </column>
+                </table>
+            </item>
+        </section>
+    </ReportHWInterface>
+    <ReportSWInterface>
+        <section name="SW I/O Information" level="0">
+            <item name="Top Function Arguments">
+                <table isCollapsed="1">
+                    <keys size="3">Argument, Direction, Datatype</keys>
+                    <column name="return">out, int</column>
+                </table>
+            </item>
+            <item name="SW-to-HW Mapping">
+                <table isCollapsed="1">
+                    <keys size="3">Argument, HW Interface, HW Type</keys>
+                    <column name="return">ap_return, port, , </column>
+                </table>
+            </item>
+        </section>
+    </ReportSWInterface>
+    <PragmaReport>
+        <Pragma type="inline" location="cnnlstm/src/activations.hpp:145" status="valid" parentFunction="init" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="cnnlstm/src/activations.hpp:163" status="valid" parentFunction="activate" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="cnnlstm/src/activations.hpp:180" status="valid" parentFunction="thresholdactivation&lt;ta, compare&gt;" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="cnnlstm/src/activations.hpp:185" status="valid" parentFunction="activate" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="cnnlstm/src/activations.hpp:208" status="valid" parentFunction="init" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="cnnlstm/src/activations.hpp:214" status="valid" parentFunction="activate" variable="" isDirective="0" options=""/>
+        <Pragma type="unroll" location="cnnlstm/src/activations.hpp:217" status="valid" parentFunction="activate" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="cnnlstm/src/activations.hpp:248" status="valid" parentFunction="init" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="cnnlstm/src/activations.hpp:253" status="valid" parentFunction="activate" variable="" isDirective="0" options=""/>
+        <Pragma type="pipeline" location="cnnlstm/src/activations.hpp:297" status="valid" parentFunction="thresholding_batch" variable="" isDirective="0" options="style=flp II=1"/>
+        <Pragma type="unroll" location="cnnlstm/src/activations.hpp:303" status="valid" parentFunction="thresholding_batch" variable="" isDirective="0" options=""/>
+        <Pragma type="array_partition" location="cnnlstm/src/activations.hpp:353" status="valid" parentFunction="thresholding_stream_batch" variable="internal_thr.m_thresholds" isDirective="0" options="variable=internal_thr.m_thresholds complete dim=0"/>
+        <Pragma type="pipeline" location="cnnlstm/src/activations.hpp:359" status="valid" parentFunction="thresholding_stream_batch" variable="" isDirective="0" options="style=flp II=1"/>
+        <Pragma type="unroll" location="cnnlstm/src/activations.hpp:372" status="valid" parentFunction="thresholding_stream_batch" variable="" isDirective="0" options=""/>
+        <Pragma type="unroll" location="cnnlstm/src/activations.hpp:377" status="valid" parentFunction="thresholding_stream_batch" variable="" isDirective="0" options=""/>
+        <Pragma type="pipeline" location="cnnlstm/src/eltwise.hpp:52" status="valid" parentFunction="streamingeltwise" variable="" isDirective="0" options="style=flp II=1"/>
+        <Pragma type="unroll" location="cnnlstm/src/eltwise.hpp:57" status="valid" parentFunction="streamingeltwise" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="cnnlstm/src/interpret.hpp:62" status="valid" parentFunction="xnormul" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="cnnlstm/src/interpret.hpp:67" status="valid" parentFunction="operator*" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="cnnlstm/src/interpret.hpp:72" status="valid" parentFunction="operator*" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="cnnlstm/src/interpret.hpp:80" status="valid" parentFunction="binary" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="cnnlstm/src/interpret.hpp:89" status="valid" parentFunction="operator*" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="cnnlstm/src/interpret.hpp:97" status="valid" parentFunction="operator*" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="cnnlstm/src/interpret.hpp:102" status="valid" parentFunction="operator*" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="cnnlstm/src/interpret.hpp:116" status="valid" parentFunction="operator()" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="cnnlstm/src/interpret.hpp:122" status="valid" parentFunction="operator()" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="cnnlstm/src/interpret.hpp:138" status="valid" parentFunction="container&lt;tv&gt;" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="cnnlstm/src/interpret.hpp:143" status="valid" parentFunction="operator[]" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="cnnlstm/src/interpret.hpp:147" status="valid" parentFunction="operator[]" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="cnnlstm/src/interpret.hpp:151" status="valid" parentFunction="operator()" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="cnnlstm/src/interpret.hpp:155" status="valid" parentFunction="operator const type-parameter-1-0 &amp;" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="cnnlstm/src/interpret.hpp:163" status="valid" parentFunction="operator()" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="cnnlstm/src/interpret.hpp:168" status="valid" parentFunction="operator()" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="cnnlstm/src/interpret.hpp:173" status="valid" parentFunction="operator()" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="cnnlstm/src/interpret.hpp:204" status="valid" parentFunction="container&lt;tv&gt;" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="cnnlstm/src/interpret.hpp:207" status="valid" parentFunction="container&lt;tv&gt;" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="cnnlstm/src/interpret.hpp:211" status="valid" parentFunction="operator()" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="cnnlstm/src/interpret.hpp:215" status="valid" parentFunction="operator()" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="cnnlstm/src/interpret.hpp:220" status="valid" parentFunction="operator[]" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="cnnlstm/src/interpret.hpp:224" status="valid" parentFunction="operator const type-parameter-1-0 &amp;" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="cnnlstm/src/interpret.hpp:232" status="valid" parentFunction="operator()" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="cnnlstm/src/interpret.hpp:237" status="valid" parentFunction="operator()" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="cnnlstm/src/interpret.hpp:242" status="valid" parentFunction="operator()" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="cnnlstm/src/interpret.hpp:261" status="valid" parentFunction="container&lt;tv&gt;" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="cnnlstm/src/interpret.hpp:264" status="valid" parentFunction="container&lt;tv&gt;" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="cnnlstm/src/interpret.hpp:267" status="valid" parentFunction="container&lt;tv&gt;" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="cnnlstm/src/interpret.hpp:271" status="valid" parentFunction="operator const type-parameter-1-0 &amp;" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="cnnlstm/src/interpret.hpp:275" status="valid" parentFunction="operator()" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="cnnlstm/src/interpret.hpp:279" status="valid" parentFunction="operator()" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="cnnlstm/src/interpret.hpp:284" status="valid" parentFunction="operator[]" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="cnnlstm/src/interpret.hpp:292" status="valid" parentFunction="operator()" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="cnnlstm/src/interpret.hpp:297" status="valid" parentFunction="operator()" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="cnnlstm/src/interpret.hpp:302" status="valid" parentFunction="operator()" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="cnnlstm/src/mac.hpp:89" status="valid" parentFunction="mul" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="cnnlstm/src/mac.hpp:114" status="valid" parentFunction="mul" variable="" isDirective="0" options=""/>
+        <Pragma type="bind_op" location="cnnlstm/src/mac.hpp:116" status="valid" parentFunction="mul" variable="res" isDirective="0" options="variable=res op=mul impl=fabric"/>
+        <Pragma type="inline" location="cnnlstm/src/mac.hpp:140" status="valid" parentFunction="mul" variable="" isDirective="0" options=""/>
+        <Pragma type="bind_op" location="cnnlstm/src/mac.hpp:142" status="valid" parentFunction="mul" variable="res" isDirective="0" options="variable=res op=mul impl=dsp"/>
+        <Pragma type="inline" location="cnnlstm/src/mac.hpp:171" status="valid" parentFunction="mac" variable="" isDirective="0" options=""/>
+        <Pragma type="unroll" location="cnnlstm/src/mac.hpp:174" status="valid" parentFunction="mac" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="cnnlstm/src/mac.hpp:198" status="valid" parentFunction="mac" variable="" isDirective="0" options=""/>
+        <Pragma type="unroll" location="cnnlstm/src/mac.hpp:201" status="valid" parentFunction="mac" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="cnnlstm/src/mac.hpp:208" status="valid" parentFunction="mac" variable="" isDirective="0" options=""/>
+        <Pragma type="array_partition" location="cnnlstm/src/mvau.hpp:111" status="valid" parentFunction="matrix_vector_activate_batch" variable="inputBuf" isDirective="0" options="variable=inputBuf complete dim=0"/>
+        <Pragma type="array_partition" location="cnnlstm/src/mvau.hpp:115" status="valid" parentFunction="matrix_vector_activate_batch" variable="accu" isDirective="0" options="variable=accu complete dim=0"/>
+        <Pragma type="pipeline" location="cnnlstm/src/mvau.hpp:125" status="valid" parentFunction="matrix_vector_activate_batch" variable="" isDirective="0" options="style=flp II=1"/>
+        <Pragma type="unroll" location="cnnlstm/src/mvau.hpp:141" status="valid" parentFunction="matrix_vector_activate_batch" variable="" isDirective="0" options=""/>
+        <Pragma type="unroll" location="cnnlstm/src/mvau.hpp:143" status="valid" parentFunction="matrix_vector_activate_batch" variable="" isDirective="0" options=""/>
+        <Pragma type="unroll" location="cnnlstm/src/mvau.hpp:152" status="valid" parentFunction="matrix_vector_activate_batch" variable="" isDirective="0" options=""/>
+        <Pragma type="unroll" location="cnnlstm/src/mvau.hpp:166" status="valid" parentFunction="matrix_vector_activate_batch" variable="" isDirective="0" options=""/>
+        <Pragma type="unroll" location="cnnlstm/src/mvau.hpp:168" status="valid" parentFunction="matrix_vector_activate_batch" variable="" isDirective="0" options=""/>
+        <Pragma type="array_partition" location="cnnlstm/src/mvau.hpp:233" status="valid" parentFunction="matrix_vector_activate_stream_batch" variable="inputBuf" isDirective="0" options="variable=inputBuf complete dim=1"/>
+        <Pragma type="array_partition" location="cnnlstm/src/mvau.hpp:236" status="valid" parentFunction="matrix_vector_activate_stream_batch" variable="accu" isDirective="0" options="variable=accu complete dim=0"/>
+        <Pragma type="array_partition" location="cnnlstm/src/mvau.hpp:239" status="valid" parentFunction="matrix_vector_activate_stream_batch" variable="w.m_weights" isDirective="0" options="variable=w.m_weights complete dim=0"/>
+        <Pragma type="pipeline" location="cnnlstm/src/mvau.hpp:251" status="valid" parentFunction="matrix_vector_activate_stream_batch" variable="" isDirective="0" options="style=flp II=1"/>
+        <Pragma type="unroll" location="cnnlstm/src/mvau.hpp:268" status="valid" parentFunction="matrix_vector_activate_stream_batch" variable="" isDirective="0" options=""/>
+        <Pragma type="unroll" location="cnnlstm/src/mvau.hpp:275" status="valid" parentFunction="matrix_vector_activate_stream_batch" variable="" isDirective="0" options=""/>
+        <Pragma type="unroll" location="cnnlstm/src/mvau.hpp:282" status="valid" parentFunction="matrix_vector_activate_stream_batch" variable="" isDirective="0" options=""/>
+        <Pragma type="unroll" location="cnnlstm/src/mvau.hpp:295" status="valid" parentFunction="matrix_vector_activate_stream_batch" variable="" isDirective="0" options=""/>
+        <Pragma type="interface" location="cnnlstm/src/n_cnn.hpp:21" status="valid" parentFunction="n_cnn_layer_module" variable="cnn_input" isDirective="0" options="mode=axis port=cnn_input"/>
+        <Pragma type="interface" location="cnnlstm/src/n_cnn.hpp:22" status="valid" parentFunction="n_cnn_layer_module" variable="cnn_output" isDirective="0" options="mode=axis port=cnn_output"/>
+        <Pragma type="interface" location="cnnlstm/src/n_cnn.hpp:23" status="valid" parentFunction="n_cnn_layer_module" variable="return" isDirective="0" options="s_axilite port=return"/>
+        <Pragma type="stream" location="cnnlstm/src/n_cnn.hpp:38" status="valid" parentFunction="n_cnn_layer_module" variable="MultiThreshold_0_out0" isDirective="0" options="variable=MultiThreshold_0_out0 depth=128"/>
+        <Pragma type="stream" location="cnnlstm/src/n_cnn.hpp:39" status="valid" parentFunction="n_cnn_layer_module" variable="Conv_0_out0" isDirective="0" options="variable=Conv_0_out0 depth=128"/>
+        <Pragma type="stream" location="cnnlstm/src/n_cnn.hpp:40" status="valid" parentFunction="n_cnn_layer_module" variable="MultiThreshold_3_out0" isDirective="0" options="variable=MultiThreshold_3_out0 depth=128"/>
+        <Pragma type="stream" location="cnnlstm/src/n_cnn.hpp:41" status="valid" parentFunction="n_cnn_layer_module" variable="Conv_1_out0" isDirective="0" options="variable=Conv_1_out0 depth=128"/>
+        <Pragma type="stream" location="cnnlstm/src/n_cnn.hpp:42" status="valid" parentFunction="n_cnn_layer_module" variable="MultiThreshold_4_out0" isDirective="0" options="variable=MultiThreshold_4_out0 depth=128"/>
+        <Pragma type="stream" location="cnnlstm/src/n_cnn.hpp:43" status="valid" parentFunction="n_cnn_layer_module" variable="MaxPool_0_out0" isDirective="0" options="variable=MaxPool_0_out0 depth=128"/>
+        <Pragma type="stream" location="cnnlstm/src/n_cnn.hpp:44" status="valid" parentFunction="n_cnn_layer_module" variable="Transpose_0_out0" isDirective="0" options="variable=Transpose_0_out0 depth=128"/>
+        <Pragma type="stream" location="cnnlstm/src/n_cnn.hpp:45" status="valid" parentFunction="n_cnn_layer_module" variable="Reshape_0_out0" isDirective="0" options="variable=Reshape_0_out0 depth=128"/>
+        <Pragma type="inline" location="cnnlstm/src/weights.hpp:83" status="valid" parentFunction="tileindex" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="cnnlstm/src/weights.hpp:88" status="valid" parentFunction="operator[]" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="cnnlstm/src/weights.hpp:95" status="valid" parentFunction="weights" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="cnnlstm/src/weights.hpp:127" status="valid" parentFunction="tileindex" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="cnnlstm/src/weights.hpp:132" status="valid" parentFunction="operator[]" variable="" isDirective="0" options=""/>
+        <Pragma type="unroll" location="cnnlstm/src/weights.hpp:135" status="valid" parentFunction="operator[]" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="cnnlstm/src/weights.hpp:145" status="valid" parentFunction="weights" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="cnnlstm/src/weights.hpp:157" status="valid" parentFunction="operator[]" variable="" isDirective="0" options=""/>
+        <Pragma type="unroll" location="cnnlstm/src/weights.hpp:160" status="valid" parentFunction="operator[]" variable="" isDirective="0" options=""/>
+    </PragmaReport>
+</profile>
+

@@ -29,37 +29,82 @@
 		<link>
 			<name>source</name>
 			<type>2</type>
-			<location>/home/changhong/prj/finn/script/LSTM_HLS/hlsprj/cnnlstm/.apc/.src</location>
+			<location>/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/.apc/.src</location>
 		</link>
 		<link>
 			<name>testbench</name>
 			<type>2</type>
-			<location>/home/changhong/prj/finn/script/LSTM_HLS/hlsprj/cnnlstm/.apc/.tb</location>
+			<location>/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/.apc/.tb</location>
+		</link>
+		<link>
+			<name>.reference/ap_int.h</name>
+			<type>1</type>
+			<location>/tools/Xilinx/Vitis_HLS/2022.2/include/ap_int.h</location>
 		</link>
 		<link>
 			<name>solution1/constraints</name>
 			<type>2</type>
-			<location>/home/changhong/prj/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.tcls</location>
+			<location>/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.tcls</location>
+		</link>
+		<link>
+			<name>source/convlayer.h</name>
+			<type>1</type>
+			<location>/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/src/convlayer.h</location>
+		</link>
+		<link>
+			<name>source/g_config.h</name>
+			<type>1</type>
+			<location>/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/src/g_config.h</location>
+		</link>
+		<link>
+			<name>source/global_nn_def.h</name>
+			<type>1</type>
+			<location>/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/src/global_nn_def.h</location>
+		</link>
+		<link>
+			<name>source/n_cnn.hpp</name>
+			<type>1</type>
+			<location>/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/src/n_cnn.hpp</location>
+		</link>
+		<link>
+			<name>source/n_cnn_weights.hpp</name>
+			<type>1</type>
+			<location>/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/src/n_cnn_weights.hpp</location>
+		</link>
+		<link>
+			<name>source/test.h</name>
+			<type>1</type>
+			<location>/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/src/test.h</location>
+		</link>
+		<link>
+			<name>source/tmrcheck.hpp</name>
+			<type>1</type>
+			<location>/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/src/tmrcheck.hpp</location>
 		</link>
 		<link>
 			<name>source/top.cpp</name>
 			<type>1</type>
-			<location>/home/changhong/prj/finn/script/LSTM_HLS/hlsprj/cnnlstm/src/top.cpp</location>
+			<location>/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/src/top.cpp</location>
+		</link>
+		<link>
+			<name>testbench/test_tb.cpp</name>
+			<type>1</type>
+			<location>/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/src/test_tb.cpp</location>
 		</link>
 		<link>
 			<name>solution1/constraints/.xml.directive</name>
 			<type>1</type>
-			<location>/home/changhong/prj/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/solution1.directive</location>
+			<location>/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/solution1.directive</location>
 		</link>
 		<link>
 			<name>solution1/constraints/directives.tcl</name>
 			<type>1</type>
-			<location>/home/changhong/prj/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/directives.tcl</location>
+			<location>/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/directives.tcl</location>
 		</link>
 		<link>
 			<name>solution1/constraints/script.tcl</name>
 			<type>1</type>
-			<location>/home/changhong/prj/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/script.tcl</location>
+			<location>/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/script.tcl</location>
 		</link>
 	</linkedResources>
 </projectDescription>

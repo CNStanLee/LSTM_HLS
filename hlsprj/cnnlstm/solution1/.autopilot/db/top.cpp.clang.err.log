@@ -1,4 +1,0 @@
-cnnlstm/src/top.cpp:1:10: fatal error: 'pipeline-lstm-header.h' file not found
-#include "pipeline-lstm-header.h"
-         ^~~~~~~~~~~~~~~~~~~~~~~~
-1 error generated.

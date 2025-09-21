@@ -1,0 +1,161 @@
+/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp:1425:7: warning: Added loop label VITIS_LOOP_1211_1:   [xilinx-label-all-loops]
+      for (i = 0; i < __N - 1; ++i) {
+      ^~~
+      VITIS_LOOP_1211_1: 
+/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp:1425:7: note: FIX-IT applied suggested code changes
+/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp:2399:5: warning: Added loop label VITIS_LOOP_676_1:   [xilinx-label-all-loops]
+    for (unsigned i = low; i != high; ++i) {
+    ^~~
+    VITIS_LOOP_676_1: 
+/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp:2399:5: note: FIX-IT applied suggested code changes
+/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp:2413:5: warning: Added loop label VITIS_LOOP_690_1:   [xilinx-label-all-loops]
+    for (unsigned i = low; i != high; ++i) {
+    ^~~
+    VITIS_LOOP_690_1: 
+/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp:2413:5: note: FIX-IT applied suggested code changes
+/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp:2427:5: warning: Added loop label VITIS_LOOP_704_1:   [xilinx-label-all-loops]
+    for (unsigned i = low; i != high; ++i) {
+    ^~~
+    VITIS_LOOP_704_1: 
+/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp:2427:5: note: FIX-IT applied suggested code changes
+/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp:4038:7: warning: Added loop label VITIS_LOOP_1245_1:   [xilinx-label-all-loops]
+      for (i = 0; i < __N - 1; ++i) {
+      ^~~
+      VITIS_LOOP_1245_1: 
+/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp:4038:7: note: FIX-IT applied suggested code changes
+/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp:53558:2: warning: Added loop label VITIS_LOOP_216_1:   [xilinx-label-all-loops]
+ for(unsigned int i=0; i< NumTH; i++){
+ ^~~
+ VITIS_LOOP_216_1: 
+/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp:53558:2: note: FIX-IT applied suggested code changes
+/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp:53602:3: warning: Added loop label VITIS_LOOP_296_1:   [xilinx-label-all-loops]
+  for (unsigned i = 0; i < reps * ImgDim * NF; i++) {
+  ^~~
+  VITIS_LOOP_296_1: 
+/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp:53602:3: note: FIX-IT applied suggested code changes
+/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp:53607:5: warning: Added loop label VITIS_LOOP_301_2:   [xilinx-label-all-loops]
+    for (unsigned pe = 0; pe < PE; pe++)
+    ^~~
+    VITIS_LOOP_301_2: 
+/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp:53607:5: note: FIX-IT applied suggested code changes
+/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp:53641:2: warning: Added loop label VITIS_LOOP_357_1:   [xilinx-label-all-loops]
+ for (unsigned i = 0; i < reps * ImgDim * NF; i++)
+ ^~~
+ VITIS_LOOP_357_1: 
+/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp:53641:2: note: FIX-IT applied suggested code changes
+/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp:53654:5: warning: Added loop label VITIS_LOOP_370_2:   [xilinx-label-all-loops]
+    for (unsigned pe = 0; pe < PE; pe++)
+    ^~~
+    VITIS_LOOP_370_2: 
+/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp:53654:5: note: FIX-IT applied suggested code changes
+/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp:53659:7: warning: Added loop label VITIS_LOOP_375_3:   [xilinx-label-all-loops]
+      for (unsigned nt = 0; nt < NumSteps; nt++)
+      ^~~
+      VITIS_LOOP_375_3: 
+/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp:53659:7: note: FIX-IT applied suggested code changes
+/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp:53689:2: warning: Added loop label VITIS_LOOP_51_1:   [xilinx-label-all-loops]
+ for(unsigned i = 0; i < TOTAL_FOLD; i++) {
+ ^~~
+ VITIS_LOOP_51_1: 
+/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp:53689:2: note: FIX-IT applied suggested code changes
+/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp:53694:3: warning: Added loop label VITIS_LOOP_56_2:   [xilinx-label-all-loops]
+  for(unsigned pe = 0; pe < PE; pe++) {
+  ^~~
+  VITIS_LOOP_56_2: 
+/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp:53694:3: note: FIX-IT applied suggested code changes
+/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp:53759:3: warning: Added loop label VITIS_LOOP_93_1:   [xilinx-label-all-loops]
+  while(!log.empty()){
+  ^~~~~
+  VITIS_LOOP_93_1: 
+/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp:53759:3: note: FIX-IT applied suggested code changes
+/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp:53765:3: warning: Added loop label VITIS_LOOP_99_2:   [xilinx-label-all-loops]
+  while(!tmp_stream.empty()){
+  ^~~~~
+  VITIS_LOOP_99_2: 
+/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp:53765:3: note: FIX-IT applied suggested code changes
+/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp:53785:9: error: Invalid Directive: for current device, mul + fabric is invalid combination for bind_op [clang-diagnostic-error]
+#pragma HLS BIND_OP variable=res op=mul impl=fabric
+        ^
+/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp:53793:9: error: Invalid Directive: for current device, mul + dsp is invalid combination for bind_op [clang-diagnostic-error]
+#pragma HLS BIND_OP variable=res op=mul impl=dsp
+        ^
+/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp:53801:3: warning: Added loop label VITIS_LOOP_173_1:   [xilinx-label-all-loops]
+  for(unsigned i = 0; i < N; i++) {
+  ^~~
+  VITIS_LOOP_173_1: 
+/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp:53801:3: note: FIX-IT applied suggested code changes
+/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp:53812:3: warning: Added loop label VITIS_LOOP_200_1:   [xilinx-label-all-loops]
+  for(unsigned i = 0; i < N; i++) {
+  ^~~
+  VITIS_LOOP_200_1: 
+/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp:53812:3: note: FIX-IT applied suggested code changes
+/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp:53888:4: warning: Added loop label VITIS_LOOP_134_1:   [xilinx-label-all-loops]
+   for(unsigned int i=0; i<SIMD; i++) {
+   ^~~
+   VITIS_LOOP_134_1: 
+/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp:53888:4: note: FIX-IT applied suggested code changes
+/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp:53913:5: warning: Added loop label VITIS_LOOP_159_1:   [xilinx-label-all-loops]
+    for(unsigned int i=0; i<SIMD; i++) {
+    ^~~
+    VITIS_LOOP_159_1: 
+/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp:53913:5: note: FIX-IT applied suggested code changes
+/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp:53958:3: warning: Added loop label VITIS_LOOP_124_1:   [xilinx-label-all-loops]
+  for(unsigned i = 0; i < reps * TOTAL_FOLD; i++) {
+  ^~~
+  VITIS_LOOP_124_1: 
+/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp:53958:3: note: FIX-IT applied suggested code changes
+/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp:53974:7: warning: Added loop label VITIS_LOOP_140_2:   [xilinx-label-all-loops]
+      for(unsigned pe = 0; pe < PE; pe++) {
+      ^~~
+      VITIS_LOOP_140_2: 
+/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp:53974:7: note: FIX-IT applied suggested code changes
+/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp:53976:2: warning: Added loop label VITIS_LOOP_142_3:   [xilinx-label-all-loops]
+ for(unsigned mmv = 0; mmv < MMV; mmv++) {
+ ^~~
+ VITIS_LOOP_142_3: 
+/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp:53976:2: note: FIX-IT applied suggested code changes
+/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp:53985:5: warning: Added loop label VITIS_LOOP_151_4:   [xilinx-label-all-loops]
+    for(unsigned pe = 0; pe < PE; pe++) {
+    ^~~
+    VITIS_LOOP_151_4: 
+/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp:53985:5: note: FIX-IT applied suggested code changes
+/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp:53988:7: warning: Added loop label VITIS_LOOP_154_5:   [xilinx-label-all-loops]
+      for (unsigned mmv = 0; mmv < MMV; mmv++){
+      ^~~
+      VITIS_LOOP_154_5: 
+/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp:53988:7: note: FIX-IT applied suggested code changes
+/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp:53999:7: warning: Added loop label VITIS_LOOP_165_6:   [xilinx-label-all-loops]
+      for (unsigned pe = 0; pe < PE; pe++) {
+      ^~~
+      VITIS_LOOP_165_6: 
+/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp:53999:7: note: FIX-IT applied suggested code changes
+/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp:54001:2: warning: Added loop label VITIS_LOOP_167_7:   [xilinx-label-all-loops]
+ for (unsigned mmv = 0; mmv < MMV; mmv++){
+ ^~~
+ VITIS_LOOP_167_7: 
+/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp:54001:2: note: FIX-IT applied suggested code changes
+/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp:54056:3: warning: Added loop label VITIS_LOOP_250_1:   [xilinx-label-all-loops]
+  for(unsigned i = 0; i < reps * TOTAL_FOLD; i++) {
+  ^~~
+  VITIS_LOOP_250_1: 
+/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp:54056:3: note: FIX-IT applied suggested code changes
+/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp:54073:5: warning: Added loop label VITIS_LOOP_267_2:   [xilinx-label-all-loops]
+    for (unsigned pe = 0; pe < PE; pe++) {
+    ^~~
+    VITIS_LOOP_267_2: 
+/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp:54073:5: note: FIX-IT applied suggested code changes
+/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp:54080:7: warning: Added loop label VITIS_LOOP_274_3:   [xilinx-label-all-loops]
+      for(unsigned pe = 0; pe < PE; pe++) {
+      ^~~
+      VITIS_LOOP_274_3: 
+/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp:54080:7: note: FIX-IT applied suggested code changes
+/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp:54087:5: warning: Added loop label VITIS_LOOP_281_4:   [xilinx-label-all-loops]
+    for(unsigned pe = 0; pe < PE; pe++) {
+    ^~~
+    VITIS_LOOP_281_4: 
+/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp:54087:5: note: FIX-IT applied suggested code changes
+/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp:54100:7: warning: Added loop label VITIS_LOOP_294_5:   [xilinx-label-all-loops]
+      for (unsigned pe = 0; pe < PE; pe++) {
+      ^~~
+      VITIS_LOOP_294_5: 
+/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp:54100:7: note: FIX-IT applied suggested code changes

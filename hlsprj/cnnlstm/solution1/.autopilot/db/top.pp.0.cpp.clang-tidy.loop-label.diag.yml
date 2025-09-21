@@ -1,0 +1,293 @@
+---
+MainSourceFile:  /home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp
+Diagnostics:     
+  - DiagnosticName:  xilinx-label-all-loops
+    Message:         'Added loop label VITIS_LOOP_1211_1:  '
+    FileOffset:      1211
+    FilePath:        /tools/Xilinx/Vitis_HLS/2022.2/common/technology/autopilot/ap_int_base.h
+    Replacements:    
+      - FilePath:        /home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp
+        Offset:          57745
+        Length:          0
+        ReplacementText: 'VITIS_LOOP_1211_1: '
+  - DiagnosticName:  xilinx-label-all-loops
+    Message:         'Added loop label VITIS_LOOP_676_1:  '
+    FileOffset:      676
+    FilePath:        /tools/Xilinx/Vitis_HLS/2022.2/common/technology/autopilot/ap_int_ref.h
+    Replacements:    
+      - FilePath:        /home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp
+        Offset:          264845
+        Length:          0
+        ReplacementText: 'VITIS_LOOP_676_1: '
+  - DiagnosticName:  xilinx-label-all-loops
+    Message:         'Added loop label VITIS_LOOP_690_1:  '
+    FileOffset:      690
+    FilePath:        /tools/Xilinx/Vitis_HLS/2022.2/common/technology/autopilot/ap_int_ref.h
+    Replacements:    
+      - FilePath:        /home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp
+        Offset:          265284
+        Length:          0
+        ReplacementText: 'VITIS_LOOP_690_1: '
+  - DiagnosticName:  xilinx-label-all-loops
+    Message:         'Added loop label VITIS_LOOP_704_1:  '
+    FileOffset:      704
+    FilePath:        /tools/Xilinx/Vitis_HLS/2022.2/common/technology/autopilot/ap_int_ref.h
+    Replacements:    
+      - FilePath:        /home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp
+        Offset:          265724
+        Length:          0
+        ReplacementText: 'VITIS_LOOP_704_1: '
+  - DiagnosticName:  xilinx-label-all-loops
+    Message:         'Added loop label VITIS_LOOP_1245_1:  '
+    FileOffset:      1245
+    FilePath:        /tools/Xilinx/Vitis_HLS/2022.2/common/technology/autopilot/ap_fixed_base.h
+    Replacements:    
+      - FilePath:        /home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp
+        Offset:          527554
+        Length:          0
+        ReplacementText: 'VITIS_LOOP_1245_1: '
+  - DiagnosticName:  xilinx-label-all-loops
+    Message:         'Added loop label VITIS_LOOP_216_1:  '
+    FileOffset:      216
+    FilePath:        /home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/src/activations.hpp
+    Replacements:    
+      - FilePath:        /home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp
+        Offset:          2218643
+        Length:          0
+        ReplacementText: 'VITIS_LOOP_216_1: '
+  - DiagnosticName:  xilinx-label-all-loops
+    Message:         'Added loop label VITIS_LOOP_296_1:  '
+    FileOffset:      296
+    FilePath:        /home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/src/activations.hpp
+    Replacements:    
+      - FilePath:        /home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp
+        Offset:          2219771
+        Length:          0
+        ReplacementText: 'VITIS_LOOP_296_1: '
+  - DiagnosticName:  xilinx-label-all-loops
+    Message:         'Added loop label VITIS_LOOP_301_2:  '
+    FileOffset:      301
+    FilePath:        /home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/src/activations.hpp
+    Replacements:    
+      - FilePath:        /home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp
+        Offset:          2219948
+        Length:          0
+        ReplacementText: 'VITIS_LOOP_301_2: '
+  - DiagnosticName:  xilinx-label-all-loops
+    Message:         'Added loop label VITIS_LOOP_357_1:  '
+    FileOffset:      357
+    FilePath:        /home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/src/activations.hpp
+    Replacements:    
+      - FilePath:        /home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp
+        Offset:          2220875
+        Length:          0
+        ReplacementText: 'VITIS_LOOP_357_1: '
+  - DiagnosticName:  xilinx-label-all-loops
+    Message:         'Added loop label VITIS_LOOP_370_2:  '
+    FileOffset:      370
+    FilePath:        /home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/src/activations.hpp
+    Replacements:    
+      - FilePath:        /home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp
+        Offset:          2221219
+        Length:          0
+        ReplacementText: 'VITIS_LOOP_370_2: '
+  - DiagnosticName:  xilinx-label-all-loops
+    Message:         'Added loop label VITIS_LOOP_375_3:  '
+    FileOffset:      375
+    FilePath:        /home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/src/activations.hpp
+    Replacements:    
+      - FilePath:        /home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp
+        Offset:          2221344
+        Length:          0
+        ReplacementText: 'VITIS_LOOP_375_3: '
+  - DiagnosticName:  xilinx-label-all-loops
+    Message:         'Added loop label VITIS_LOOP_51_1:  '
+    FileOffset:      51
+    FilePath:        /home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/src/eltwise.hpp
+    Replacements:    
+      - FilePath:        /home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp
+        Offset:          2222085
+        Length:          0
+        ReplacementText: 'VITIS_LOOP_51_1: '
+  - DiagnosticName:  xilinx-label-all-loops
+    Message:         'Added loop label VITIS_LOOP_56_2:  '
+    FileOffset:      56
+    FilePath:        /home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/src/eltwise.hpp
+    Replacements:    
+      - FilePath:        /home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp
+        Offset:          2222348
+        Length:          0
+        ReplacementText: 'VITIS_LOOP_56_2: '
+  - DiagnosticName:  xilinx-label-all-loops
+    Message:         'Added loop label VITIS_LOOP_93_1:  '
+    FileOffset:      93
+    FilePath:        /home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/src/utils.hpp
+    Replacements:    
+      - FilePath:        /home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp
+        Offset:          2224169
+        Length:          0
+        ReplacementText: 'VITIS_LOOP_93_1: '
+  - DiagnosticName:  xilinx-label-all-loops
+    Message:         'Added loop label VITIS_LOOP_99_2:  '
+    FileOffset:      99
+    FilePath:        /home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/src/utils.hpp
+    Replacements:    
+      - FilePath:        /home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp
+        Offset:          2224325
+        Length:          0
+        ReplacementText: 'VITIS_LOOP_99_2: '
+  - DiagnosticName:  clang-diagnostic-error
+    Message:         'Invalid Directive: for current device, mul + fabric is invalid combination for bind_op'
+    FileOffset:      116
+    FilePath:        /home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/src/mac.hpp
+    Replacements:    
+  - DiagnosticName:  clang-diagnostic-error
+    Message:         'Invalid Directive: for current device, mul + dsp is invalid combination for bind_op'
+    FileOffset:      142
+    FilePath:        /home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/src/mac.hpp
+    Replacements:    
+  - DiagnosticName:  xilinx-label-all-loops
+    Message:         'Added loop label VITIS_LOOP_173_1:  '
+    FileOffset:      173
+    FilePath:        /home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/src/mac.hpp
+    Replacements:    
+      - FilePath:        /home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp
+        Offset:          2225399
+        Length:          0
+        ReplacementText: 'VITIS_LOOP_173_1: '
+  - DiagnosticName:  xilinx-label-all-loops
+    Message:         'Added loop label VITIS_LOOP_200_1:  '
+    FileOffset:      200
+    FilePath:        /home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/src/mac.hpp
+    Replacements:    
+      - FilePath:        /home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp
+        Offset:          2225694
+        Length:          0
+        ReplacementText: 'VITIS_LOOP_200_1: '
+  - DiagnosticName:  xilinx-label-all-loops
+    Message:         'Added loop label VITIS_LOOP_134_1:  '
+    FileOffset:      134
+    FilePath:        /home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/src/weights.hpp
+    Replacements:    
+      - FilePath:        /home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp
+        Offset:          2227331
+        Length:          0
+        ReplacementText: 'VITIS_LOOP_134_1: '
+  - DiagnosticName:  xilinx-label-all-loops
+    Message:         'Added loop label VITIS_LOOP_159_1:  '
+    FileOffset:      159
+    FilePath:        /home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/src/weights.hpp
+    Replacements:    
+      - FilePath:        /home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp
+        Offset:          2227906
+        Length:          0
+        ReplacementText: 'VITIS_LOOP_159_1: '
+  - DiagnosticName:  xilinx-label-all-loops
+    Message:         'Added loop label VITIS_LOOP_124_1:  '
+    FileOffset:      124
+    FilePath:        /home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/src/mvau.hpp
+    Replacements:    
+      - FilePath:        /home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp
+        Offset:          2228957
+        Length:          0
+        ReplacementText: 'VITIS_LOOP_124_1: '
+  - DiagnosticName:  xilinx-label-all-loops
+    Message:         'Added loop label VITIS_LOOP_140_2:  '
+    FileOffset:      140
+    FilePath:        /home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/src/mvau.hpp
+    Replacements:    
+      - FilePath:        /home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp
+        Offset:          2229209
+        Length:          0
+        ReplacementText: 'VITIS_LOOP_140_2: '
+  - DiagnosticName:  xilinx-label-all-loops
+    Message:         'Added loop label VITIS_LOOP_142_3:  '
+    FileOffset:      142
+    FilePath:        /home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/src/mvau.hpp
+    Replacements:    
+      - FilePath:        /home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp
+        Offset:          2229267
+        Length:          0
+        ReplacementText: 'VITIS_LOOP_142_3: '
+  - DiagnosticName:  xilinx-label-all-loops
+    Message:         'Added loop label VITIS_LOOP_151_4:  '
+    FileOffset:      151
+    FilePath:        /home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/src/mvau.hpp
+    Replacements:    
+      - FilePath:        /home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp
+        Offset:          2229443
+        Length:          0
+        ReplacementText: 'VITIS_LOOP_151_4: '
+  - DiagnosticName:  xilinx-label-all-loops
+    Message:         'Added loop label VITIS_LOOP_154_5:  '
+    FileOffset:      154
+    FilePath:        /home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/src/mvau.hpp
+    Replacements:    
+      - FilePath:        /home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp
+        Offset:          2229543
+        Length:          0
+        ReplacementText: 'VITIS_LOOP_154_5: '
+  - DiagnosticName:  xilinx-label-all-loops
+    Message:         'Added loop label VITIS_LOOP_165_6:  '
+    FileOffset:      165
+    FilePath:        /home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/src/mvau.hpp
+    Replacements:    
+      - FilePath:        /home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp
+        Offset:          2229812
+        Length:          0
+        ReplacementText: 'VITIS_LOOP_165_6: '
+  - DiagnosticName:  xilinx-label-all-loops
+    Message:         'Added loop label VITIS_LOOP_167_7:  '
+    FileOffset:      167
+    FilePath:        /home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/src/mvau.hpp
+    Replacements:    
+      - FilePath:        /home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp
+        Offset:          2229871
+        Length:          0
+        ReplacementText: 'VITIS_LOOP_167_7: '
+  - DiagnosticName:  xilinx-label-all-loops
+    Message:         'Added loop label VITIS_LOOP_250_1:  '
+    FileOffset:      250
+    FilePath:        /home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/src/mvau.hpp
+    Replacements:    
+      - FilePath:        /home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp
+        Offset:          2231129
+        Length:          0
+        ReplacementText: 'VITIS_LOOP_250_1: '
+  - DiagnosticName:  xilinx-label-all-loops
+    Message:         'Added loop label VITIS_LOOP_267_2:  '
+    FileOffset:      267
+    FilePath:        /home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/src/mvau.hpp
+    Replacements:    
+      - FilePath:        /home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp
+        Offset:          2231392
+        Length:          0
+        ReplacementText: 'VITIS_LOOP_267_2: '
+  - DiagnosticName:  xilinx-label-all-loops
+    Message:         'Added loop label VITIS_LOOP_274_3:  '
+    FileOffset:      274
+    FilePath:        /home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/src/mvau.hpp
+    Replacements:    
+      - FilePath:        /home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp
+        Offset:          2231554
+        Length:          0
+        ReplacementText: 'VITIS_LOOP_274_3: '
+  - DiagnosticName:  xilinx-label-all-loops
+    Message:         'Added loop label VITIS_LOOP_281_4:  '
+    FileOffset:      281
+    FilePath:        /home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/src/mvau.hpp
+    Replacements:    
+      - FilePath:        /home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp
+        Offset:          2231671
+        Length:          0
+        ReplacementText: 'VITIS_LOOP_281_4: '
+  - DiagnosticName:  xilinx-label-all-loops
+    Message:         'Added loop label VITIS_LOOP_294_5:  '
+    FileOffset:      294
+    FilePath:        /home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/src/mvau.hpp
+    Replacements:    
+      - FilePath:        /home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/.autopilot/db/top.pp.0.cpp
+        Offset:          2231973
+        Length:          0
+        ReplacementText: 'VITIS_LOOP_294_5: '
+...
