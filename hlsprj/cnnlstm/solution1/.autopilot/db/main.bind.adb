@@ -22,7 +22,7 @@
 						<id>3</id>
 						<name>_ln18</name>
 						<fileName>cnnlstm/src/top.cpp</fileName>
-						<fileDirectory>/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj</fileDirectory>
+						<fileDirectory>/home/changhong/prj/finn/script/LSTM_HLS/hlsprj</fileDirectory>
 						<lineNumber>18</lineNumber>
 						<contextFuncName>main</contextFuncName>
 						<contextNormFuncName>main</contextNormFuncName>
@@ -30,7 +30,7 @@
 							<count>1</count>
 							<item_version>0</item_version>
 							<item class_id="8" tracking_level="0" version="0">
-								<first>/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj</first>
+								<first>/home/changhong/prj/finn/script/LSTM_HLS/hlsprj</first>
 								<second class_id="9" tracking_level="0" version="0">
 									<count>1</count>
 									<item_version>0</item_version>
@@ -52,7 +52,7 @@
 						<coreName></coreName>
 						<isStorage>0</isStorage>
 						<storageDepth>0</storageDepth>
-						<coreId>1667592275</coreId>
+						<coreId>4294967295</coreId>
 						<rtlModuleName></rtlModuleName>
 					</Obj>
 					<bitwidth>0</bitwidth>
@@ -132,7 +132,7 @@
 					<coreName></coreName>
 					<isStorage>0</isStorage>
 					<storageDepth>0</storageDepth>
-					<coreId>3815569840</coreId>
+					<coreId>1852404850</coreId>
 					<rtlModuleName></rtlModuleName>
 				</Obj>
 				<node_objs>

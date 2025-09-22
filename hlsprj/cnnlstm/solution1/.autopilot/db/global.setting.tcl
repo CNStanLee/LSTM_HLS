@@ -43,14 +43,14 @@ set SCTraceFileFormat vcd
 set SCTraceOption all
 set TargetInfo xczu7ev:-ffvc1156:-2-e
 set SourceFiles {sc {} c ../src/top.cpp}
-set SourceFlags {sc {} c {{}}}
-set DirectiveFile /home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/solution1.directive
-set TBFiles {verilog ../src/test_tb.cpp bc ../src/test_tb.cpp vhdl ../src/test_tb.cpp sc ../src/test_tb.cpp cas ../src/test_tb.cpp c {}}
+set SourceFlags {sc {} c -I/inc}
+set DirectiveFile /home/changhong/prj/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/solution1.directive
+set TBFiles {bc {} c {} sc {} cas {} vhdl {} verilog {}}
 set SpecLanguage C
 set TVInFiles {bc {} c {} sc {} cas {} vhdl {} verilog {}}
 set TVOutFiles {bc {} c {} sc {} cas {} vhdl {} verilog {}}
-set TBTops {verilog {} bc {} vhdl {} sc {} cas {} c {}}
-set TBInstNames {verilog {} bc {} vhdl {} sc {} cas {} c {}}
+set TBTops {bc "" c "" sc "" cas "" vhdl "" verilog ""}
+set TBInstNames {bc "" c "" sc "" cas "" vhdl "" verilog ""}
 set XDCFiles {}
 set ExtraGlobalOptions {"area_timing" 1 "clock_gate" 1 "impl_flow" map "power_gate" 0}
 set TBTVFileNotFound {}

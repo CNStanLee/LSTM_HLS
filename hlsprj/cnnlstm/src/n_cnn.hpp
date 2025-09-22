@@ -1,3 +1,6 @@
+#ifndef N_CNN_HPP
+#define N_CNN_HPP
+// *************************************
 #include "ap_axi_sdata.h"
 #include <stdio.h>
 #include "hls_stream.h"
@@ -11,6 +14,8 @@
 #include "g_config.h"
 #include "n_cnn_weights.hpp"
 // *************************************
+
+#define INPUT_FEATURE_SIZE 32
 
 void n_cnn_layer_module(
 		hls::stream<ap_axis<32,2,5,6>>& cnn_input,
@@ -46,9 +51,76 @@ void n_cnn_layer_module(
 	// ------------------------------------------------------------------------------------
 	// Initializations of ops
 	// ------------------------------------------------------------------------------------
-	ThresholdsActivation<1, 1, Act_N_255, nn_f32_t, nn_int8_t,-128> MultiThreshold_0;
-	//ThresholdsActivation<1, 1, Act_N_255, nn_int32_t, nn_uint4_t,-128> MultiThreshold_3;
+	// ------------------------------------------------------------------------------------
+	// Multi-Thresholding
+	// ------------------------------------------------------------------------------------
+	ThresholdsActivation<
+		1, // NF
+	 	1, // PE
+	  	Act_N_255, // NumTh
+	   	nn_f32_t, // InputType
+	    nn_int8_t, // OutputType
+		-128 // ActVal
+	> MultiThreshold_0;
+	// ------------------------------------------------------------------------------------
+	ThresholdsActivation<
+		32, // NF
+	 	1, // PE
+	  	Act_N_255, // NumTh
+	   	nn_int32_t, // InputType
+	    nn_uint4_t, // OutputType
+		0 // ActVal
+	> MultiThreshold_3;
+	// ------------------------------------------------------------------------------------
+	ThresholdsActivation<
+		64, // NF
+		1, // PE
+		Act_N_255, // NumTh
+		nn_int32_t, // InputType
+		nn_uint4_t, // OutputType
+		0 // ActVal
+	> MultiThreshold_4;
+	// ------------------------------------------------------------------------------------
+	// Convs
+	// ------------------------------------------------------------------------------------
+	myConvLayer_Batch<
+		3,  // ConvKernelDim (3x1)
+		1,  // InuputFeatureMapChannels
+		32, // InuputFeatureMapDim(shape)
+		32,  // OFMChannels
+		30, // OFMDim (32-3+1)
+		1,  // SIMD
+		1,  // PE
+		nn_int8_t,//TSrcI,
+		nn_int32_t,//TDstI,
+		nn_int4_t, //TWeightI
+		8, // Input Stream width
+		8, // Output Stream widths
+		nn_int4_t,
+		PassThroughActivation<nn_int4_t>,
+		ap_resource_dsp()
+	> Conv_0;
+	// ------------------------------------------------------------------------------------
+	myConvLayer_Batch<
+		3,  // ConvKernelDim (3x1)
+		32, // InuputFeatureMapChannels
+		30, // InuputFeatureMapDim(shape)
+		64,  // OFMChannels
+		28, // OFMDim (30-3+1)
+		1,  // SIMD
+		1,  // PE
+		nn_uint4_t,//TSrcI,
+		nn_int32_t,//TDstI,
+		nn_int4_t,//TWeightI,
+		8, // Input Stream width
+		8, // Output Stream widths
+		nn_int4_t,
+		PassThroughActivation<nn_int4_t>,
+		ap_resource_dsp()
+	> Conv_1;
 	// ------------------------------------------------------------------------------------
 	// Initializations of weights and thresholds
 	// ------------------------------------------------------------------------------------
 }
+// *************************************
+#endif

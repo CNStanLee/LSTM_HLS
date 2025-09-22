@@ -1,16 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <autopilotfilemapping:AutoPilotFileMapping xmlns:autopilotfilemapping="www.autoesl.com/autopilotfilemapping">
   <source>
-    <originFiles name="top.cpp" path="/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/src/top.cpp"/>
-    <originFiles name="test.h" path="/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/src/test.h"/>
-    <originFiles name="global_nn_def.h" path="/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/src/global_nn_def.h"/>
-    <originFiles name="g_config.h" path="/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/src/g_config.h"/>
-    <originFiles name="n_cnn.hpp" path="/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/src/n_cnn.hpp"/>
-    <originFiles name="n_cnn_weights.hpp" path="/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/src/n_cnn_weights.hpp"/>
-    <originFiles name="convlayer.h" path="/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/src/convlayer.h"/>
-    <originFiles name="tmrcheck.hpp" path="/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/src/tmrcheck.hpp"/>
+    <originFiles name="top.cpp" path="/home/changhong/prj/finn/script/LSTM_HLS/hlsprj/cnnlstm/src/top.cpp"/>
   </source>
-  <testbench>
-    <originFiles name="test_tb.cpp" path="/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/src/test_tb.cpp"/>
-  </testbench>
+  <testbench/>
 </autopilotfilemapping:AutoPilotFileMapping>

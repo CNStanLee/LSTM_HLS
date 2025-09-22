@@ -308,4 +308,74 @@ void ConvLayer_Batch_MMV(hls::stream<ap_uint<InStreamW>>  &in,
   
 }
 
+
+// self defined conv function class
+template<
+    unsigned int ConvKernelDim,        
+    unsigned int IFMChannels,        
+    unsigned int IFMDim,            
+    unsigned int OFMChannels,        
+    unsigned int OFMDim,            
+    
+    unsigned int SIMD,                 // number of SIMD lanes
+    unsigned int PE,                // number of PEs
+    
+    typename TSrcI = Identity,      // redefine I/O interpretation as needed for input activations
+    typename TDstI = Identity,        // redefine I/O interpretation as needed for output activations
+    typename TWeightI = Identity,    // redefine I/O interpretation as needed for weigths
+
+    int InStreamW = 32, int OutStreamW = 32,  // 提供默认值
+    typename TW = int,              // 添加默认类型
+    typename TA = ThresholdActivation<int>,  // 添加默认类型
+    typename R = int                // 添加默认类型
+>
+class myConvLayer_Batch {
+public:
+    // Constructor - empty, just like ThresholdActivation
+    myConvLayer_Batch() {
+#pragma HLS inline
+    }
+
+public:
+    // Forward method - mirrors the original function signature
+    void forward(hls::stream<ap_uint<InStreamW>>& in,
+                 hls::stream<ap_uint<OutStreamW>>& out,
+                 TW const& weights,
+                 TA const& activation,
+                 unsigned const reps,
+                 R const& r) const {
+#pragma HLS INLINE
+        
+        unsigned const MatrixW = ConvKernelDim * ConvKernelDim * IFMChannels;
+        unsigned const MatrixH = OFMChannels;
+        unsigned const InpPerImage = IFMDim * IFMDim * IFMChannels * TSrcI::width / InStreamW;
+        
+        hls::stream<ap_uint<SIMD*TSrcI::width>> wa_in("StreamingConvLayer_Batch.wa_in");
+        hls::stream<ap_uint<SIMD*TSrcI::width>> convInp("StreamingConvLayer_Batch.convInp");
+        hls::stream<ap_uint<PE*TDstI::width>> mvOut("StreamingConvLayer_Batch.mvOut");
+        
+        StreamingDataWidthConverter_Batch<InStreamW, SIMD*TSrcI::width, InpPerImage>(in, wa_in, reps);
+        ConvolutionInputGenerator<ConvKernelDim, IFMChannels, TSrcI::width, IFMDim, OFMDim, SIMD, 1>
+            (wa_in, convInp, reps, ap_resource_dflt());
+        Matrix_Vector_Activate_Batch<MatrixW, MatrixH, SIMD, PE, 1, TSrcI, TDstI, TWeightI>
+            (static_cast<hls::stream<ap_uint<SIMD*TSrcI::width>>&>(convInp),
+             static_cast<hls::stream<ap_uint<PE*TDstI::width>>&>(mvOut),
+             weights, activation, reps * OFMDim * OFMDim, r);
+        StreamingDataWidthConverter_Batch<PE*TDstI::width, OutStreamW, OFMDim * OFMDim * (OFMChannels / PE)>
+            (mvOut, out, reps);
+    }
+};
+
+
+
+// MyConvLayer conv_layer;
+
+
+// auto weights = load_weights();
+// ThresholdActivation<int> activation(128);
+// ResourceConfig r_config = get_resource_config();
+
+
+// conv_layer.forward(input_stream, output_stream, weights, activation, 10, r_config);
+
 #endif

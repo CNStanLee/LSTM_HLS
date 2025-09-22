@@ -53142,7 +53142,7 @@ using namespace std;
 # 13 "cnnlstm/src/top.cpp" 2
 
 # 1 "cnnlstm/src/n_cnn.hpp" 1
-# 11 "cnnlstm/src/n_cnn.hpp"
+# 14 "cnnlstm/src/n_cnn.hpp"
 # 1 "cnnlstm/src/g_config.h" 1
 
 
@@ -54117,6 +54117,2598 @@ void Matrix_Vector_Activate_Stream_Batch(hls::stream<TI> &in,
 
 
 
+# 1 "cnnlstm/src/convlayer.h" 1
+# 52 "cnnlstm/src/convlayer.h"
+# 1 "/tools/Xilinx/Vitis_HLS/2022.2/common/technology/autopilot/ap_int.h" 1
+# 53 "cnnlstm/src/convlayer.h" 2
+
+
+# 1 "cnnlstm/src/streamtools.h" 1
+# 52 "cnnlstm/src/streamtools.h"
+# 1 "cnnlstm/src/mmv.hpp" 1
+# 49 "cnnlstm/src/mmv.hpp"
+template <unsigned int NumChannels, unsigned int DataWidth>
+class MultiChanData {
+public: ap_uint<DataWidth> data[NumChannels];
+    auto operator[](unsigned const mm) -> decltype(data[mm]) {
+#pragma HLS inline
+ return data[mm];
+    }
+
+};
+# 53 "cnnlstm/src/streamtools.h" 2
+# 69 "cnnlstm/src/streamtools.h"
+template<unsigned int DataWidth,
+  unsigned int NumAllowed,
+  unsigned int NumTotal
+>
+void StreamLimiter(hls::stream<ap_uint<DataWidth> > & in,
+  hls::stream<ap_uint<DataWidth> > & out) {
+  static_assert(NumTotal >= NumAllowed, "");
+  unsigned int numLeft = NumAllowed;
+  VITIS_LOOP_77_1: for (unsigned int i = 0; i < NumTotal; i++) {
+#pragma HLS pipeline style=flp II=1
+ ap_uint<DataWidth> e = in.read();
+    if (numLeft > 0) {
+      out.write(e);
+      numLeft--;
+    }
+  }
+}
+# 103 "cnnlstm/src/streamtools.h"
+template<unsigned int DataWidth,
+  unsigned int NumAllowed,
+  unsigned int NumTotal
+>
+void StreamLimiter_Batch(hls::stream<ap_uint<DataWidth> > & in,
+  hls::stream<ap_uint<DataWidth> > & out, unsigned int numReps) {
+  VITIS_LOOP_109_1: for (unsigned int rep = 0; rep < numReps; rep++) {
+    StreamLimiter<DataWidth, NumAllowed, NumTotal>(in, out);
+  }
+}
+# 132 "cnnlstm/src/streamtools.h"
+template< unsigned int ImgDim,
+   unsigned int KernelDim,
+   unsigned int Stride,
+   unsigned int NumChannels,
+   typename In_t,
+      unsigned int PaddingStyle=2>
+void SameResize(hls::stream<ap_uint<NumChannels* In_t::width> > &in,
+  hls::stream<ap_uint<NumChannels* In_t::width> > &out){
+
+
+ constexpr unsigned int SameWindows = (ImgDim) / Stride + ((ImgDim % Stride) > 0);
+
+
+ constexpr unsigned int OutputDim = KernelDim + Stride * (SameWindows - 1);
+
+
+ constexpr unsigned int Padding = OutputDim - ImgDim;
+
+
+  constexpr unsigned int PaddingUp = Padding/2 + ((PaddingStyle == 2) ? ((Padding % 2) > 0) : 0);
+  constexpr unsigned int PaddingLeft = Padding/2 + ((PaddingStyle == 2) ? ((Padding % 2) > 0) : 0);
+
+
+ constexpr unsigned int PaddingDown = Padding - PaddingUp;
+ constexpr unsigned int PaddingRight = Padding - PaddingLeft;
+ ap_uint<NumChannels* In_t::width> outData, inData;
+
+ VITIS_LOOP_159_1: for(unsigned int y = 0; y<OutputDim; y++){
+  VITIS_LOOP_160_2: for(unsigned int x=0; x < OutputDim; x++){
+#pragma HLS pipeline style=flp II=1
+
+
+ if(y < PaddingUp || y >= (OutputDim - PaddingDown)){
+    outData = 0;
+   }
+
+   else if(x < PaddingLeft || x >= (OutputDim - PaddingRight)){
+    outData = 0;
+   }
+
+   else{
+    inData = in.read();
+    outData = inData;
+   }
+
+   out.write(outData);
+  }
+ }
+}
+# 201 "cnnlstm/src/streamtools.h"
+template< unsigned int ImgDim,
+   unsigned int KernelDim,
+   unsigned int Stride,
+   unsigned int NumChannels,
+   typename In_t,
+      unsigned int PaddingStyle=2>
+void SameResize_Batch(hls::stream<ap_uint<NumChannels* In_t::width> > &in,
+  hls::stream<ap_uint<NumChannels* In_t::width> > &out,
+  const unsigned int numReps) {
+ VITIS_LOOP_210_1: for (unsigned int rep = 0; rep < numReps; rep++) {
+  SameResize<ImgDim, KernelDim, Stride, NumChannels, In_t, PaddingStyle>(in, out);
+ }
+
+}
+# 232 "cnnlstm/src/streamtools.h"
+template<typename InT, typename OutT>
+void StreamingCast(hls::stream<InT> & in, hls::stream<OutT> & out, unsigned int numReps) {
+  VITIS_LOOP_234_1: for(unsigned int i = 0; i < numReps; i++) {
+#pragma HLS pipeline style=flp II=1
+ out.write((OutT) in.read());
+  }
+}
+# 260 "cnnlstm/src/streamtools.h"
+template<
+ unsigned OutputDim_x,
+ unsigned OutputDim_y,
+ unsigned PaddingLeft,
+ unsigned PaddingRight,
+ unsigned PaddingTop,
+ unsigned PaddingBottom,
+ unsigned NumChannels,
+ unsigned SIMD,
+ typename In_t
+>
+void FMPadding_nonsquare(
+ hls::stream<ap_uint<SIMD*In_t::width>> &in,
+ hls::stream<ap_uint<SIMD*In_t::width>> &out
+){
+ static_assert(NumChannels%SIMD == 0, "Channel count must be a SIMD multiple.");
+ constexpr unsigned Folding = NumChannels/SIMD;
+
+ VITIS_LOOP_278_1: for(unsigned y = 0; y < OutputDim_y; y++) {
+  VITIS_LOOP_279_2: for(unsigned x = 0; x < OutputDim_x; x++) {
+   VITIS_LOOP_280_3: for(unsigned sf = 0; sf < Folding; sf++) {
+#pragma HLS pipeline style=flp II=1
+ ap_uint<SIMD*In_t::width> outData = 0;
+
+
+    if(
+                (PaddingTop <= y) && (y < OutputDim_y - PaddingBottom) &&
+                (PaddingLeft <= x) && (x < OutputDim_x - PaddingRight)
+    ) {
+     outData = in.read();
+    }
+    out.write(outData);
+   }
+  }
+ }
+}
+# 318 "cnnlstm/src/streamtools.h"
+template<
+ unsigned OutputDim_x,
+ unsigned OutputDim_y,
+ unsigned PaddingLeft,
+ unsigned PaddingRight,
+ unsigned PaddingTop,
+ unsigned PaddingBottom,
+ unsigned NumChannels,
+ unsigned SIMD,
+ typename In_t
+>
+void FMPadding_nonsquare_Batch(
+ hls::stream<ap_uint<SIMD*In_t::width>> &in,
+ hls::stream<ap_uint<SIMD*In_t::width>> &out,
+ unsigned const numReps
+) {
+ VITIS_LOOP_334_1: for (unsigned int rep = 0; rep < numReps; rep++) {
+  FMPadding_nonsquare<
+   OutputDim_x, OutputDim_y,
+   PaddingLeft, PaddingRight, PaddingTop, PaddingBottom,
+   NumChannels, SIMD, In_t
+  >(in, out);
+ }
+}
+# 362 "cnnlstm/src/streamtools.h"
+template<
+ unsigned ImgDim,
+ unsigned OutputDim,
+ unsigned PaddingBefore,
+ unsigned PaddingBehind,
+ unsigned NumChannels,
+ unsigned SIMD,
+ typename In_t
+>
+void FMPadding(
+ hls::stream<ap_uint<SIMD*In_t::width>> &in,
+ hls::stream<ap_uint<SIMD*In_t::width>> &out
+){
+#pragma HLS inline
+ FMPadding_nonsquare<
+  OutputDim, OutputDim,
+  PaddingBefore, PaddingBehind, PaddingBefore, PaddingBehind,
+  NumChannels, SIMD, In_t
+ >(in, out);
+}
+# 402 "cnnlstm/src/streamtools.h"
+template<
+ unsigned ImgDim,
+ unsigned OutputDim,
+ unsigned PaddingBefore,
+ unsigned PaddingBehind,
+ unsigned NumChannels,
+ unsigned SIMD,
+ typename In_t
+>
+void FMPadding_Batch(
+ hls::stream<ap_uint<SIMD*In_t::width>> &in,
+ hls::stream<ap_uint<SIMD*In_t::width>> &out,
+ unsigned const numReps
+) {
+ VITIS_LOOP_416_1: for (unsigned int rep = 0; rep < numReps; rep++) {
+  FMPadding<ImgDim, OutputDim, PaddingBefore, PaddingBehind, NumChannels, SIMD, In_t>(in, out);
+ }
+}
+# 437 "cnnlstm/src/streamtools.h"
+template<unsigned int InWidth,
+  unsigned int OutWidth,
+  unsigned int NumInWords
+>
+void StreamingDataWidthConverter_Batch(hls::stream<ap_uint<InWidth> > & in,
+  hls::stream<ap_uint<OutWidth> > & out, const unsigned int numReps) {
+  static_assert((InWidth % OutWidth == 0) || (OutWidth % InWidth == 0), "");
+
+  if (InWidth > OutWidth) {
+
+    const unsigned int outPerIn = InWidth / OutWidth;
+    const unsigned int totalIters = NumInWords * outPerIn * numReps;
+    unsigned int o = 0;
+    ap_uint<InWidth> ei = 0;
+    VITIS_LOOP_451_1: for (unsigned int t = 0; t < totalIters; t++) {
+#pragma HLS pipeline style=flp II=1
+
+ if (o == 0) {
+        ei = in.read();
+   }
+
+      ap_uint<OutWidth> eo = ei(OutWidth - 1, 0);
+      out.write(eo);
+
+      ei = ei >> OutWidth;
+
+      o++;
+
+      if (o == outPerIn) {
+        o = 0;
+      }
+    }
+  } else if (InWidth == OutWidth) {
+
+    VITIS_LOOP_471_2: for (unsigned int i = 0; i < NumInWords * numReps; i++) {
+#pragma HLS pipeline style=flp II=1
+ ap_uint<InWidth> e = in.read();
+      out.write(e);
+    }
+  } else {
+
+    const unsigned int inPerOut = OutWidth / InWidth;
+    const unsigned int totalIters = NumInWords * numReps;
+    unsigned int i = 0;
+    ap_uint<OutWidth> eo = 0;
+    VITIS_LOOP_482_3: for (unsigned int t = 0; t < totalIters; t++) {
+#pragma HLS pipeline style=flp II=1
+
+ ap_uint<InWidth> ei = in.read();
+      eo = eo >> InWidth;
+      eo(OutWidth - 1, OutWidth - InWidth) = ei;
+
+      i++;
+
+      if (i == inPerOut) {
+        i = 0;
+        out.write(eo);
+      }
+    }
+  }
+}
+# 513 "cnnlstm/src/streamtools.h"
+template<
+    unsigned int InWidth,
+    unsigned int OutWidth
+>
+void StreamingDataWidthConverterNoMultiple(
+    hls::stream<ap_uint<InWidth> > & in,
+    hls::stream<ap_uint<OutWidth> > & out) {
+    static_assert((InWidth % 2) == 0, "");
+    static_assert((OutWidth % 2) == 0, "");
+    static_assert(InWidth != OutWidth, "");
+    static unsigned int offset = 0;
+
+    if (InWidth > OutWidth){
+
+      static ap_uint<OutWidth> remainder = 0;
+      ap_uint<InWidth> valueIn = in.read();
+
+      if(offset !=0) {
+        ap_uint<OutWidth> valueOut = 0;
+        valueOut = (valueIn(offset-1,0),remainder(OutWidth-offset-1,0));
+        valueIn = valueIn(InWidth-1,offset);
+        out.write(valueOut);
+      }
+      VITIS_LOOP_536_1: for (; offset <= (InWidth-OutWidth) ; offset+=OutWidth){
+        ap_uint<OutWidth> valueOut = valueIn(OutWidth-1,0);
+        valueIn = valueIn(InWidth-1,OutWidth);
+        out.write(valueOut);
+      }
+      remainder = valueIn;
+      if (offset == InWidth)
+        offset = 0;
+      else
+        offset = offset + OutWidth - InWidth;
+    }
+    else {
+
+      static ap_uint<InWidth> remainder = 0;
+      ap_uint<OutWidth> value = 0;
+      if (offset !=0) {
+        value(offset-1,0) = remainder(InWidth-1,InWidth-offset);
+      }
+      VITIS_LOOP_554_2: for (; offset <= (OutWidth-InWidth); offset+=InWidth){
+        ap_uint<InWidth> aux = in.read();
+        value(offset+InWidth-1,offset) = aux;
+      }
+      if (offset != OutWidth){
+        ap_uint<InWidth> aux = in.read();
+        value(OutWidth-1,offset) = aux(OutWidth-offset-1,0);
+        remainder = aux;
+        offset = offset + InWidth - OutWidth;
+      }
+      else
+        offset = 0;
+      out.write(value);
+    }
+
+}
+# 585 "cnnlstm/src/streamtools.h"
+template<unsigned int DataWidth,
+  unsigned int NumTotal
+>
+void DuplicateStreams(hls::stream<ap_uint<DataWidth> > & in, hls::stream<ap_uint<DataWidth> > & out1,
+  hls::stream<ap_uint<DataWidth> > & out2) {
+
+ VITIS_LOOP_591_1: for (unsigned int i = 0; i < NumTotal; i++) {
+#pragma HLS pipeline style=flp II=1
+ ap_uint<DataWidth> e = in.read();
+
+  out1.write(e);
+  out2.write(e);
+ }
+}
+# 614 "cnnlstm/src/streamtools.h"
+template<unsigned int DataWidth,
+  unsigned int NumTotal
+>
+void DuplicateStreams_Batch(hls::stream<ap_uint<DataWidth> > & in, hls::stream<ap_uint<DataWidth> > & out1,
+  hls::stream<ap_uint<DataWidth> > & out2, const unsigned int numReps) {
+ VITIS_LOOP_619_1: for (unsigned int image = 0; image < numReps; image++) {
+  DuplicateStreams<DataWidth, NumTotal>(in, out1, out2);
+ }
+}
+# 640 "cnnlstm/src/streamtools.h"
+template <unsigned int NumChannels,
+          typename In1_t,
+          typename In2_t,
+          typename Out_t,
+          unsigned int NumTotal,
+          int offset = 0>
+void AddStreams(hls::stream<ap_uint<NumChannels * In1_t::width>> &in1, hls::stream<ap_uint<NumChannels * In2_t::width>> &in2,
+                hls::stream<ap_uint<NumChannels * Out_t::width>> &out) {
+
+  VITIS_LOOP_649_1: for (unsigned int i = 0; i < NumTotal; i++) {
+#pragma HLS pipeline style=flp II=1
+ ap_uint<NumChannels * In1_t::width> e1 = in1.read();
+    ap_uint<NumChannels * In2_t::width> e2 = in2.read();
+    ap_uint<NumChannels * Out_t::width> e;
+    VITIS_LOOP_654_2: for (unsigned int j = 0; j < NumChannels; j++) {
+#pragma HLS UNROLL
+ In1_t op1 = e1((j + 1) * In1_t::width - 1, j * In1_t::width);
+      In2_t op2 = e2((j + 1) * In2_t::width - 1, j * In2_t::width);
+      Out_t sum = op1 + op2 + offset;
+      e((j + 1) * Out_t::width - 1, j * Out_t::width) = sum;
+    }
+    out.write(e);
+  }
+}
+# 684 "cnnlstm/src/streamtools.h"
+template <unsigned int NumChannels,
+          typename In1_t,
+          typename In2_t,
+          typename Out_t,
+          unsigned int NumTotal,
+          int offset = 0>
+void AddStreams_Batch(hls::stream<ap_uint<NumChannels * In1_t::width>> &in1, hls::stream<ap_uint<NumChannels * In2_t::width>> &in2,
+                hls::stream<ap_uint<NumChannels * Out_t::width>> &out, const unsigned int numReps) {
+  VITIS_LOOP_692_1: for (unsigned int image = 0; image < numReps; image++) {
+    AddStreams<NumChannels, In1_t, In2_t, Out_t, NumTotal, offset>(in1, in2, out);
+  }
+}
+# 715 "cnnlstm/src/streamtools.h"
+template <unsigned int NumChannels,
+          typename In1_t,
+          typename In2_t,
+          typename Out_t,
+          unsigned int NumTotal,
+          unsigned int PECount,
+          int offset = 0>
+void AddStreamsLayer_Batch(hls::stream<ap_uint<NumChannels * In1_t::width>> &in1, hls::stream<ap_uint<NumChannels * In2_t::width>> &in2,
+                           hls::stream<ap_uint<NumChannels * Out_t::width>> &out, const unsigned int numReps) {
+#pragma HLS INLINE
+ static_assert(NumChannels % PECount == 0, "");
+  hls::stream<ap_uint<PECount * In1_t::width>> in_folded1;
+  hls::stream<ap_uint<PECount * In2_t::width>> in_folded2;
+  hls::stream<ap_uint<PECount * Out_t::width>> out_folded;
+  StreamingDataWidthConverter_Batch<NumChannels * In1_t::width, PECount * In1_t::width, NumTotal>(in1, in_folded1, numReps);
+  StreamingDataWidthConverter_Batch<NumChannels * In2_t::width, PECount * In2_t::width, NumTotal>(in2, in_folded2, numReps);
+  AddStreams_Batch<PECount, In1_t, In2_t, Out_t, NumTotal *(NumChannels / PECount),offset>(in_folded1, in_folded2, out_folded, numReps);
+  StreamingDataWidthConverter_Batch<PECount * Out_t::width, NumChannels * Out_t::width, NumTotal *(NumChannels / PECount)>(out_folded, out, numReps);
+}
+# 754 "cnnlstm/src/streamtools.h"
+template<unsigned int InWidth,
+  unsigned int OutWidth,
+  unsigned int NumInWords,
+  unsigned int NumVecs
+>
+void MultiChanDataWidthConverter_Batch(
+ hls::stream<MultiChanData<NumVecs, InWidth> > & in,
+ hls::stream<MultiChanData<NumVecs, OutWidth> > & out,
+ const unsigned int numReps) {
+ static_assert((InWidth % OutWidth == 0) || (OutWidth % InWidth == 0), "");
+ if (InWidth > OutWidth) {
+
+  const unsigned int outPerIn = InWidth / OutWidth;
+  const unsigned int totalIters = NumInWords * outPerIn * numReps;
+  unsigned int o = 0;
+  MultiChanData<NumVecs, InWidth> ei;
+  VITIS_LOOP_770_1: for (unsigned int t = 0; t < totalIters; t++) {
+#pragma HLS pipeline style=flp II=1
+
+ if (o == 0)
+    ei = in.read();
+
+   MultiChanData<NumVecs, OutWidth> eo;
+   VITIS_LOOP_777_2: for(unsigned int v = 0; v < NumVecs; v++) {
+#pragma HLS UNROLL
+ eo.data[v] = (ei.data[v])(OutWidth - 1, 0);
+
+    ei.data[v] = ei.data[v] >> OutWidth;
+   }
+   out.write(eo);
+
+   o++;
+
+   if (o == outPerIn) {
+    o = 0;
+   }
+  }
+ } else if (InWidth == OutWidth) {
+
+  VITIS_LOOP_793_3: for (unsigned int i = 0; i < NumInWords * numReps; i++) {
+#pragma HLS pipeline style=flp II=1
+ MultiChanData<NumVecs, InWidth> e = in.read();
+   MultiChanData<NumVecs, OutWidth> eo;
+
+
+   VITIS_LOOP_799_4: for(unsigned int v=0; v < NumVecs; v++) {
+#pragma HLS UNROLL
+ eo.data[v] = e.data[v];
+   }
+   out.write(eo);
+  }
+ } else {
+
+  const unsigned int inPerOut = OutWidth / InWidth;
+  const unsigned int totalIters = NumInWords * numReps;
+  unsigned int i = 0;
+  MultiChanData<NumVecs, OutWidth> eo;
+  VITIS_LOOP_811_5: for (unsigned int t = 0; t < totalIters; t++) {
+#pragma HLS pipeline style=flp II=1
+
+ MultiChanData<NumVecs, InWidth> ei = in.read();
+   VITIS_LOOP_815_6: for(unsigned int v = 0; v < NumVecs; v++) {
+#pragma HLS UNROLL
+ eo.data[v] = eo.data[v] >> InWidth;
+    (eo.data[v])(OutWidth - 1, OutWidth - InWidth) = ei.data[v];
+   }
+
+   i++;
+
+   if (i == inPerOut) {
+    i = 0;
+    out.write(eo);
+   }
+  }
+ }
+}
+# 845 "cnnlstm/src/streamtools.h"
+template <unsigned int NumChannels, unsigned int DataWidth>
+void FlattenMultiChanData(
+ hls::stream<MultiChanData<NumChannels, DataWidth> > & in,
+ hls::stream<ap_uint<NumChannels*DataWidth> > & out,
+ const unsigned int numReps
+) {
+ VITIS_LOOP_851_1: for(unsigned int r = 0; r < numReps; r++) {
+#pragma HLS pipeline style=flp II=1
+ MultiChanData<NumChannels, DataWidth> e = in.read();
+  ap_uint<NumChannels*DataWidth> o = 0;
+  VITIS_LOOP_855_2: for(unsigned int v = 0; v < NumChannels; v++) {
+#pragma HLS UNROLL
+ o(DataWidth*(v+1)-1, DataWidth*v) = e.data[v];
+  }
+  out.write(o);
+ }
+}
+# 876 "cnnlstm/src/streamtools.h"
+template <unsigned int NumChannels, unsigned int DataWidth>
+void PackMultiChanData(
+ hls::stream<ap_uint<NumChannels*DataWidth> > & in,
+ hls::stream<MultiChanData<NumChannels, DataWidth> > & out,
+ const unsigned int numReps
+) {
+ VITIS_LOOP_882_1: for(unsigned int r = 0; r < numReps; r++) {
+#pragma HLS pipeline style=flp II=1
+ ap_uint<NumChannels*DataWidth> e = in.read();
+  MultiChanData<NumChannels, DataWidth> o;
+  VITIS_LOOP_886_2: for(unsigned int v = 0; v < NumChannels; v++) {
+#pragma HLS UNROLL
+ o.data[v] = e(DataWidth*(v+1)-1, DataWidth*v);
+  }
+  out.write(o);
+ }
+}
+
+
+template<unsigned IW, unsigned OW, unsigned N>
+ class WidthAdjustedInputStream {
+  hls::stream<ap_uint<OW>> m_target;
+
+ public:
+  WidthAdjustedInputStream(hls::stream<ap_uint<IW> >& source, unsigned const reps) {
+    StreamingDataWidthConverter_Batch<IW, OW, N>(source, m_target, reps);
+  }
+  ~WidthAdjustedInputStream() {}
+
+ public:
+  operator hls::stream<ap_uint<OW> >&() {
+    return m_target;
+  }
+};
+template<unsigned W, unsigned N>
+ class WidthAdjustedInputStream<W, W, N> {
+
+  hls::stream<ap_uint<W>> &m_source;
+
+ public:
+  WidthAdjustedInputStream(hls::stream<ap_uint<W> >& source, __attribute__((unused)) unsigned const reps) : m_source(source) {}
+  ~WidthAdjustedInputStream() {}
+
+ public:
+  operator hls::stream<ap_uint<W> >&() {
+    return m_source;
+  }
+};
+
+
+template<unsigned IW, unsigned OW, unsigned N>
+class WidthAdjustedOutputStream {
+  hls::stream<ap_uint<IW>> m_buffer;
+  hls::stream<ap_uint<OW>> &m_target;
+  unsigned const m_reps;
+
+ public:
+  WidthAdjustedOutputStream(hls::stream<ap_uint<OW> >& target, unsigned const reps) : m_target(target), m_reps(reps) {}
+  ~WidthAdjustedOutputStream() {
+    StreamingDataWidthConverter_Batch<IW, OW, N>(m_buffer, m_target, m_reps);
+  }
+
+ public:
+  operator hls::stream<ap_uint<IW> >&() {
+    return m_buffer;
+  }
+};
+template<unsigned W, unsigned N>
+ class WidthAdjustedOutputStream<W, W, N> {
+  hls::stream<ap_uint<W>> &m_target;
+
+ public:
+  WidthAdjustedOutputStream(hls::stream<ap_uint<W> >& target, __attribute__((unused)) unsigned const reps)
+    : m_target(target) {}
+  ~WidthAdjustedOutputStream() {}
+
+ public:
+  operator hls::stream<ap_uint<W> >&() {
+    return m_target;
+  }
+};
+# 971 "cnnlstm/src/streamtools.h"
+template<unsigned int DataWidth, unsigned int NumTotal>
+void Qdma2Stream_Batch(hls::stream<qdma_axis<DataWidth,0,0,0> > & in, hls::stream<ap_uint<DataWidth> > & out, const unsigned int numReps){
+
+ VITIS_LOOP_974_1: for (unsigned int image = 0; image < numReps; image++) {
+  VITIS_LOOP_975_2: for (unsigned int word = 0; word < NumTotal; word++) {
+#pragma HLS pipeline style=flp II=1
+ out.write(in.read().get_data());
+  }
+ }
+}
+# 995 "cnnlstm/src/streamtools.h"
+template<unsigned int DataWidth, unsigned int NumTotal>
+void Stream2Qdma_Batch(hls::stream<ap_uint<DataWidth> > & in, hls::stream<qdma_axis<DataWidth,0,0,0> > & out, const unsigned int numReps){
+ VITIS_LOOP_997_1: for (unsigned int image = 0; image < numReps; image++) {
+  VITIS_LOOP_998_2: for (unsigned int word = 0; word < NumTotal; word++) {
+#pragma HLS pipeline style=flp II=1
+ qdma_axis<DataWidth,0,0,0> temp;
+   temp.set_data(in.read());
+   temp.set_keep(-1);
+   temp.set_last(word == NumTotal-1);
+   out.write(temp);
+  }
+ }
+}
+# 56 "cnnlstm/src/convlayer.h" 2
+# 1 "cnnlstm/src/slidingwindow.h" 1
+# 72 "cnnlstm/src/slidingwindow.h"
+template <typename T>
+void memory_resource(T inputBuf, ap_resource_dflt const&){
+#pragma HLS BIND_STORAGE variable=inputBuf type=RAM_2P
+}
+# 93 "cnnlstm/src/slidingwindow.h"
+template <typename T>
+void memory_resource(T inputBuf, ap_resource_bram const&){
+#pragma HLS BIND_STORAGE variable=inputBuf type=RAM_S2P impl=BRAM
+}
+# 114 "cnnlstm/src/slidingwindow.h"
+template <typename T>
+void memory_resource(T inputBuf, ap_resource_uram const&){
+#pragma HLS BIND_STORAGE variable=inputBuf type=RAM_S2P impl=URAM
+}
+# 135 "cnnlstm/src/slidingwindow.h"
+template <typename T>
+void memory_resource(T inputBuf, ap_resource_lutram const&){
+#pragma HLS BIND_STORAGE variable=inputBuf type=RAM_S2P impl=LUTRAM
+}
+# 159 "cnnlstm/src/slidingwindow.h"
+template<unsigned int ConvKernelDim,
+   unsigned int IFMChannels,
+   unsigned int Input_precision,
+   unsigned int IFMDim,
+   unsigned int OFMDim,
+   unsigned int SIMD,
+   unsigned int Stride,
+   typename R>
+void ConvolutionInputGenerator(
+  hls::stream<ap_uint<SIMD*Input_precision> > & in,
+  hls::stream<ap_uint<SIMD*Input_precision> > & out,
+  const unsigned int numReps,
+  R const &r) {
+  static_assert(IFMChannels % SIMD == 0, "");
+  static_assert(ConvKernelDim % Stride == 0, "");
+  const unsigned int multiplying_factor = IFMChannels/SIMD;
+  const unsigned int number_blocks = ConvKernelDim/Stride + 1 ;
+  ap_uint<SIMD*Input_precision> inputBuf[number_blocks][Stride * IFMDim * multiplying_factor];
+#pragma HLS ARRAY_PARTITION variable=inputBuf complete dim=1
+ memory_resource(inputBuf, r);
+  const unsigned int cycles_write_block = (OFMDim * ConvKernelDim * ConvKernelDim * multiplying_factor);
+  const unsigned int cycles_read_block = Stride * IFMDim * multiplying_factor;
+  const unsigned int max_cycles = std::max(cycles_write_block,cycles_read_block);
+  const unsigned int baseIter = IFMDim * ConvKernelDim * multiplying_factor
+                     + OFMDim * std::max(cycles_write_block,cycles_read_block);
+  unsigned int counter_internal_block = 0;
+  unsigned int current_block_write = 0;
+  unsigned int current_line = 0;
+  unsigned int read_block = 0;
+  unsigned int inp = 0, ofm_y = 0, ofm_x = 0, k_y = 0, k_x = 0, count_simd =0;
+
+  VITIS_LOOP_190_1: for (unsigned int count_image = 0; count_image < numReps; count_image++) {
+    VITIS_LOOP_191_2: for (unsigned int i = 0; i < baseIter; i++) {
+#pragma HLS pipeline style=flp II=1
+ if (inp < IFMDim * ConvKernelDim*multiplying_factor) {
+        ap_uint<SIMD*Input_precision> inElem;
+        inElem = in.read();
+        inputBuf[current_block_write][current_line] = inElem;
+        current_line++;
+        inp++;
+        if (current_line == Stride * IFMDim * multiplying_factor ) {
+          current_line = 0;
+          current_block_write++;
+          if (current_block_write == number_blocks) {
+            current_block_write=0;
+          }
+          read_block++;
+          counter_internal_block = 0;
+        }
+      } else {
+        if (counter_internal_block < cycles_write_block-1) {
+          unsigned int current_block_read = (current_block_write + 1 + k_y / Stride);
+          if (current_block_read >= number_blocks) {
+            current_block_read-= number_blocks;
+    }
+          unsigned int current_line_in_block = ((k_y%Stride) * IFMDim + ofm_x*Stride + k_x)*multiplying_factor + count_simd;
+          ap_uint<SIMD*Input_precision> outElem = inputBuf[current_block_read][(current_line_in_block)];
+          out.write(outElem);
+          count_simd++;
+          if (count_simd == multiplying_factor) {
+            count_simd=0;
+            k_x++;
+            if (k_x == ConvKernelDim) {
+              k_x = 0;
+              k_y++;
+              if (k_y == ConvKernelDim) {
+                k_y = 0;
+                ofm_x ++;
+                if (ofm_x == OFMDim) {
+                  ofm_x = 0;
+                  ofm_y++;
+                  if (ofm_y == OFMDim) {
+                    ofm_y = 0;
+                    inp = 0;
+                  }
+                }
+              }
+            }
+          }
+        }
+        if ((counter_internal_block < cycles_read_block-1) && (read_block<IFMDim/Stride)) {
+          ap_uint<SIMD*Input_precision> inElem;
+          inElem = in.read();
+          inputBuf[current_block_write][current_line] = inElem;
+#pragma AP dependence variable=inputBuf intra false
+#pragma AP dependence variable=inputBuf inter false
+ current_line++;
+          if (current_line == Stride * IFMDim * multiplying_factor) {
+
+            current_line = 0;
+            read_block++;
+            current_block_write++;
+            if (current_block_write == number_blocks) {
+              current_block_write=0;
+   }
+#pragma AP dependence variable=current_block_write intra false
+ }
+        }
+        counter_internal_block++;
+        if (counter_internal_block == (max_cycles-1)) {
+          counter_internal_block = 0;
+        }
+      }
+    }
+ read_block = 0;
+  }
+}
+# 287 "cnnlstm/src/slidingwindow.h"
+template<unsigned int ConvKernelDim,
+  unsigned int IFMChannels,
+  unsigned int Input_precision,
+  unsigned int IFMDim,
+  unsigned int OFMDim,
+  unsigned int SIMD,
+  unsigned int Stride,
+  unsigned int MMV,
+  typename R>
+void ConvolutionInputGenerator_MMV(
+  hls::stream<ap_uint<SIMD*Input_precision> > & in,
+  hls::stream<MultiChanData<MMV, SIMD*Input_precision> > & out,
+  const unsigned int numReps,
+  R const &r) {
+ static_assert(IFMChannels % SIMD == 0, "");
+ static_assert(OFMDim % MMV == 0, "");
+ static_assert(ConvKernelDim % Stride == 0, "");
+ static_assert(MMV <= OFMDim, "");
+ constexpr unsigned int multiplying_factor = IFMChannels/SIMD;
+ constexpr unsigned int number_blocks = ConvKernelDim/Stride + 1 ;
+  ap_uint<SIMD*Input_precision> inputBuf[MMV][number_blocks][Stride * IFMDim * multiplying_factor];
+#pragma HLS DEPENDENCE variable=inputBuf inter false
+#pragma HLS DEPENDENCE variable=inputBuf intra false
+#pragma HLS ARRAY_PARTITION variable=inputBuf complete dim=1
+#pragma HLS ARRAY_PARTITION variable=inputBuf complete dim=2
+ memory_resource(inputBuf, r);
+ constexpr unsigned int cycles_write_block = (OFMDim * ConvKernelDim * ConvKernelDim * multiplying_factor)/MMV;
+ constexpr unsigned int cycles_read_block = Stride * IFMDim * multiplying_factor;
+ constexpr unsigned int max_cycles = std::max(cycles_write_block,cycles_read_block);
+ const unsigned int baseIter = IFMDim * ConvKernelDim * multiplying_factor
+   + OFMDim * std::max(cycles_write_block,cycles_read_block);
+ unsigned int counter_internal_block = 0;
+ unsigned int current_block_write = 0;
+ unsigned int current_line = 0;
+ unsigned int read_block = 0;
+ unsigned int inp = 0, ofm_y = 0, ofm_x = 0, k_y = 0, k_x = 0, count_simd =0;
+
+ VITIS_LOOP_324_1: for (unsigned int count_image = 0; count_image < numReps; count_image++) {
+  VITIS_LOOP_325_2: for (unsigned int i = 0; i < baseIter; i++) {
+#pragma HLS pipeline style=flp II=1
+ if (inp < IFMDim * ConvKernelDim*multiplying_factor)
+    {
+    ap_uint<SIMD*Input_precision> inElem;
+    inElem = in.read();
+    VITIS_LOOP_331_3: for(unsigned int v = 0; v < MMV; v++)
+     {
+#pragma HLS UNROLL
+ inputBuf[v][current_block_write][current_line] = inElem;
+     }
+    current_line++;
+    inp++;
+    if (current_line == Stride * IFMDim * multiplying_factor )
+     {
+     current_line = 0;
+     current_block_write++;
+     if (current_block_write == number_blocks)
+      current_block_write=0;
+     read_block++;
+     counter_internal_block = 0;
+     }
+    }
+   else
+    {
+    if (counter_internal_block < cycles_write_block-1)
+    {
+     unsigned int current_block_read = (current_block_write + 1 + k_y / Stride);
+     if (current_block_read >= number_blocks)
+      current_block_read-= number_blocks;
+     unsigned int current_line_in_block = ((k_y%Stride) * IFMDim + ofm_x*Stride + k_x)*multiplying_factor + count_simd;
+     MultiChanData<MMV, SIMD*Input_precision> outElem;
+
+     VITIS_LOOP_358_4: for(unsigned int v = 0; v < MMV; v++) {
+#pragma HLS UNROLL
+
+ ap_uint<SIMD*Input_precision> temp_value = inputBuf[v][current_block_read][(current_line_in_block + v*Stride*multiplying_factor)];
+      outElem.data[v] = temp_value;
+     }
+     out.write(outElem);
+     count_simd++;
+     if (count_simd == multiplying_factor) {
+      count_simd=0;
+      k_x++;
+      if (k_x == ConvKernelDim) {
+       k_x = 0;
+       k_y++;
+       if (k_y == ConvKernelDim) {
+        k_y = 0;
+        ofm_x += MMV;
+        if (ofm_x == OFMDim) {
+         ofm_x = 0;
+         ofm_y++;
+         if (ofm_y == OFMDim) {
+          ofm_y = 0;
+          inp = 0;
+         }
+        }
+       }
+      }
+     }
+    }
+    if ((counter_internal_block < cycles_read_block-1) && (read_block<IFMDim/Stride))
+    {
+     ap_uint<SIMD*Input_precision> inElem;
+     inElem = in.read();
+     VITIS_LOOP_391_5: for(unsigned int v = 0; v < MMV; v++) {
+#pragma HLS UNROLL
+ inputBuf[v][current_block_write][current_line] = inElem;
+#pragma AP dependence variable=inputBuf intra false
+#pragma AP dependence variable=inputBuf inter false
+ }
+
+     current_line++;
+     if (current_line == Stride * IFMDim * multiplying_factor)
+     {
+      current_line = 0;
+      read_block++;
+      current_block_write++;
+      if (current_block_write == number_blocks)
+       current_block_write=0;
+#pragma AP dependence variable=current_block_write intra false
+ }
+    }
+    counter_internal_block++;
+    if (counter_internal_block == (max_cycles-1))
+    {
+     counter_internal_block = 0;
+    }
+   }
+  }
+ read_block = 0;
+ }
+}
+# 441 "cnnlstm/src/slidingwindow.h"
+template<unsigned int ConvKernelDim,
+   unsigned int IFMChannels,
+   unsigned int Input_precision,
+   unsigned int IFMDim,
+   unsigned int OFMDim,
+   unsigned int SIMD,
+   unsigned int Stride,
+   typename R>
+void ConvolutionInputGenerator_kernel_stride(
+  hls::stream<ap_uint<SIMD*Input_precision> > & in,
+  hls::stream<ap_uint<SIMD*Input_precision> > & out,
+  const unsigned int numReps,
+  R const &r) {
+ static_assert(IFMChannels % SIMD == 0, "");
+    static_assert(ConvKernelDim % Stride != 0, "");
+ constexpr unsigned multiplying_factor = IFMChannels/SIMD;
+ constexpr unsigned number_blocks = ConvKernelDim + Stride ;
+ constexpr unsigned cycles_write_block = OFMDim * ConvKernelDim * ConvKernelDim * multiplying_factor;
+ constexpr unsigned cycles_read_block = IFMDim * Stride * multiplying_factor;
+ constexpr unsigned max_cycles = std::max(cycles_write_block, cycles_read_block);
+ constexpr unsigned baseIter = (IFMDim * ConvKernelDim * multiplying_factor) + (OFMDim-1) * max_cycles+std::max(cycles_write_block,OFMDim);
+ constexpr unsigned initial_buffer_cycles = (IFMDim * ConvKernelDim * multiplying_factor) ;
+
+ ap_uint<SIMD*Input_precision> inputBuf[number_blocks][IFMDim * multiplying_factor];
+ memory_resource(inputBuf, r);
+#pragma HLS ARRAY_PARTITION variable=inputBuf complete dim=1
+#pragma HLS DEPENDENCE variable=inputBuf inter false
+#pragma HLS DEPENDENCE variable=inputBuf intra false
+ unsigned int counter_internal_block = 0;
+ unsigned int current_line = 0;
+ unsigned int inp = 0, ofm_y = 0, ofm_x = 0, k_y = 0, k_x = 0, count_simd =0;
+
+VITIS_LOOP_473_1: for (unsigned int count_image = 0; count_image < numReps; count_image++) {
+  unsigned int floor_block_read = 0, ceil_block_read = number_blocks;
+  unsigned int current_block_write = 0;
+#pragma HLS DEPENDENCE variable=current_block_write intra false
+ unsigned int read_block = 0;
+  VITIS_LOOP_478_2: for (unsigned int i = 0; i < baseIter; i++) {
+#pragma HLS pipeline style=flp II=1
+ if (inp < initial_buffer_cycles)
+   {
+    ap_uint<SIMD*Input_precision> inElem;
+    inElem = in.read();
+    inputBuf[current_block_write][current_line] = inElem;
+    current_line++;
+    inp++;
+    if (current_line == IFMDim * multiplying_factor)
+    {
+     current_line = 0;
+     current_block_write++;
+     if (current_block_write == number_blocks)
+      current_block_write = 0;
+     read_block++;
+     counter_internal_block = 0;
+    }
+   }
+   else
+   {
+    if (counter_internal_block < cycles_write_block-1 || read_block==IFMDim)
+    {
+
+          unsigned int current_block_read = (ofm_y*Stride + k_y);
+
+            if (current_block_read >= ceil_block_read)
+            {
+              floor_block_read += number_blocks;
+              ceil_block_read += number_blocks;
+            }else if(current_block_read < floor_block_read){
+              ceil_block_read -= number_blocks;
+              floor_block_read -= number_blocks;
+            }
+            current_block_read -= floor_block_read;
+
+     unsigned int current_line_in_block = (ofm_x * Stride + k_x)*multiplying_factor + count_simd;
+     ap_uint<SIMD*Input_precision> outElem = inputBuf[current_block_read][(current_line_in_block)];
+     out.write(outElem);
+     count_simd++;
+     if (count_simd == multiplying_factor) {
+      count_simd=0;
+      k_x++;
+      if (k_x == ConvKernelDim) {
+       k_x = 0;
+       k_y++;
+       if (k_y == ConvKernelDim) {
+        k_y = 0;
+        ofm_x++;
+        if (ofm_x == OFMDim) {
+         ofm_x = 0;
+         ofm_y++;
+         if (ofm_y == OFMDim) {
+          ofm_y = 0;
+          inp = 0;
+         }
+        }
+       }
+      }
+     }
+    }
+    if ((counter_internal_block < cycles_read_block - 1) && (read_block<IFMDim))
+    {
+     ap_uint<SIMD*Input_precision> inElem;
+     inElem = in.read();
+     inputBuf[current_block_write][current_line] = inElem;
+#pragma HLS DEPENDENCE variable=inputBuf inter false
+#pragma HLS DEPENDENCE variable=inputBuf intra false
+ current_line++;
+     if (current_line == IFMDim * multiplying_factor)
+     {
+      current_line = 0;
+      read_block++;
+      current_block_write++;
+      if (current_block_write == number_blocks)
+       current_block_write = 0;
+#pragma HLS DEPENDENCE variable=current_block_write intra false
+ }
+    }
+    counter_internal_block++;
+                if (counter_internal_block == (max_cycles-1))
+    {
+       counter_internal_block = 0;
+    }
+   }
+  }
+  }
+}
+# 588 "cnnlstm/src/slidingwindow.h"
+template<unsigned int ConvKernelDim,
+   unsigned int IFMChannels,
+   unsigned int Input_precision,
+   unsigned int IFMDim,
+   unsigned int OFMDim,
+   unsigned int SIMD,
+   unsigned int Stride,
+   unsigned int MMV,
+   typename R>
+void ConvolutionInputGenerator_kernel_stride_MMV(
+  hls::stream<ap_uint<SIMD*Input_precision> > & in,
+  hls::stream<MultiChanData<MMV, SIMD*Input_precision> > & out,
+  const unsigned int numReps,
+  R const &r) {
+ static_assert(IFMChannels % SIMD == 0, "");
+ static_assert(ConvKernelDim % Stride != 0, "");
+ static_assert(OFMDim % MMV == 0, "");
+ static_assert(MMV <= OFMDim, "");
+
+ const unsigned int multiplying_factor = IFMChannels/SIMD;
+ const unsigned int number_blocks = ConvKernelDim + Stride ;
+ ap_uint<SIMD*Input_precision> inputBuf[MMV][number_blocks][IFMDim * multiplying_factor];
+#pragma HLS DEPENDENCE variable=inputBuf inter false
+#pragma HLS DEPENDENCE variable=inputBuf intra false
+#pragma HLS ARRAY_PARTITION variable=inputBuf complete dim=1
+#pragma HLS ARRAY_PARTITION variable=inputBuf complete dim=2
+ memory_resource(inputBuf, r);
+ const unsigned int cycles_write_block = (OFMDim * ConvKernelDim * ConvKernelDim * multiplying_factor)/MMV;
+ const unsigned int cycles_read_block = IFMDim * Stride * multiplying_factor;
+ const unsigned int max_cycles = std::max(cycles_write_block, cycles_read_block);
+ const unsigned int baseIter = (IFMDim * ConvKernelDim * multiplying_factor) + (OFMDim-1) * max_cycles+std::max(cycles_write_block,OFMDim);
+ const unsigned int initial_buffer_cycles = (IFMDim * ConvKernelDim * multiplying_factor) ;
+ unsigned int counter_internal_block = 0;
+ unsigned int current_line = 0;
+
+ unsigned int inp = 0, ofm_y = 0, ofm_x = 0, k_y = 0, k_x = 0, count_simd =0;
+
+VITIS_LOOP_625_1: for (unsigned int count_image = 0; count_image < numReps; count_image++) {
+  unsigned int floor_block_read = 0, ceil_block_read = number_blocks;
+  unsigned int current_block_write = 0;
+#pragma HLS DEPENDENCE variable=current_block_write intra false
+ unsigned int read_block = 0;
+  VITIS_LOOP_630_2: for (unsigned int i = 0; i < baseIter; i++) {
+#pragma HLS pipeline style=flp II=1
+ if (inp < initial_buffer_cycles)
+   {
+    ap_uint<SIMD*Input_precision> inElem;
+    inElem = in.read();
+    VITIS_LOOP_636_3: for(unsigned int v = 0; v < MMV; v++)
+     {
+#pragma HLS UNROLL
+ inputBuf[v][current_block_write][current_line] = inElem;
+     }
+    current_line++;
+    inp++;
+    if (current_line == IFMDim * multiplying_factor)
+    {
+     current_line = 0;
+     current_block_write++;
+     if (current_block_write == number_blocks)
+      current_block_write = 0;
+     read_block++;
+     counter_internal_block = 0;
+    }
+   }
+   else
+   {
+    if (counter_internal_block < cycles_write_block-1 || read_block==IFMDim)
+    {
+
+            unsigned int current_block_read = (ofm_y*Stride + k_y);
+
+            if (current_block_read >= ceil_block_read)
+            {
+              floor_block_read += number_blocks;
+              ceil_block_read += number_blocks;
+            }else if(current_block_read < floor_block_read){
+              ceil_block_read -= number_blocks;
+              floor_block_read -= number_blocks;
+            }
+            current_block_read -= floor_block_read;
+   unsigned int current_line_in_block = (ofm_x * Stride + k_x)*multiplying_factor + count_simd;
+   MultiChanData<MMV, SIMD*Input_precision> outElem;
+   VITIS_LOOP_671_4: for(unsigned int v = 0; v < MMV; v++) {
+#pragma HLS UNROLL
+
+ ap_uint<SIMD*Input_precision> temp_value = inputBuf[v][current_block_read][(current_line_in_block + v*Stride*multiplying_factor)];
+    outElem.data[v] = temp_value;
+   }
+   out.write(outElem);
+   count_simd++;
+   if (count_simd == multiplying_factor) {
+    count_simd=0;
+    k_x++;
+    if (k_x == ConvKernelDim) {
+     k_x = 0;
+     k_y++;
+     if (k_y == ConvKernelDim) {
+      k_y = 0;
+      ofm_x += MMV;
+      if (ofm_x == OFMDim) {
+       ofm_x = 0;
+       ofm_y++;
+       if (ofm_y == OFMDim) {
+        ofm_y = 0;
+        inp = 0;
+        }
+       }
+      }
+     }
+    }
+   }
+   if ((counter_internal_block < cycles_read_block - 1) && (read_block<IFMDim))
+   {
+    ap_uint<SIMD*Input_precision> inElem;
+    inElem = in.read();
+    VITIS_LOOP_704_5: for(unsigned int v = 0; v < MMV; v++) {
+#pragma HLS UNROLL
+ inputBuf[v][current_block_write][current_line] = inElem;
+     }
+    current_line++;
+    if (current_line == IFMDim * multiplying_factor)
+    {
+     current_line = 0;
+     read_block++;
+     current_block_write++;
+     if (current_block_write == number_blocks)
+      current_block_write = 0;
+#pragma HLS DEPENDENCE variable=current_block_write intra false
+ }
+   }
+   counter_internal_block++;
+   if (counter_internal_block == (max_cycles-1))
+   {
+      counter_internal_block = 0;
+   }
+  }
+ }
+  }
+}
+# 749 "cnnlstm/src/slidingwindow.h"
+template<unsigned int ConvKernelDim,
+   unsigned int IFMChannels,
+   unsigned int Input_precision,
+   unsigned int IFMDim,
+   unsigned int OFMDim,
+   unsigned int SIMD,
+   unsigned int Stride,
+   typename R>
+void ConvolutionInputGenerator_dws(
+  hls::stream<ap_uint<SIMD*Input_precision> > & in,
+  hls::stream<ap_uint<SIMD*Input_precision> > & out,
+  const unsigned int numReps,
+  R const &r) {
+  static_assert(IFMChannels % SIMD == 0, "");
+  static_assert(ConvKernelDim % Stride == 0, "");
+  const unsigned int multiplying_factor = IFMChannels/SIMD;
+  const unsigned int number_blocks = ConvKernelDim/Stride + 1 ;
+  ap_uint<SIMD*Input_precision> inputBuf[number_blocks][Stride * IFMDim * multiplying_factor];
+#pragma HLS ARRAY_PARTITION variable=inputBuf complete dim=1
+ memory_resource(inputBuf, r);
+  const unsigned int cycles_write_block = (OFMDim * ConvKernelDim * ConvKernelDim * multiplying_factor);
+  const unsigned int cycles_read_block = Stride * IFMDim * multiplying_factor;
+  const unsigned int max_cycles = std::max(cycles_write_block,cycles_read_block);
+  const unsigned int baseIter = IFMDim * ConvKernelDim * multiplying_factor
+                     + OFMDim * std::max(cycles_write_block,cycles_read_block);
+  unsigned int counter_internal_block = 0;
+  unsigned int current_block_write = 0;
+  unsigned int current_line = 0;
+  unsigned int read_block = 0;
+  unsigned int inp = 0, ofm_y = 0, ofm_x = 0, k_y = 0, k_x = 0, count_simd =0;
+
+  VITIS_LOOP_780_1: for (unsigned int count_image = 0; count_image < numReps; count_image++) {
+    VITIS_LOOP_781_2: for (unsigned int i = 0; i < baseIter; i++) {
+#pragma HLS pipeline style=flp II=1
+ if (inp < IFMDim * ConvKernelDim*multiplying_factor) {
+        ap_uint<SIMD*Input_precision> inElem;
+        inElem = in.read();
+        inputBuf[current_block_write][current_line] = inElem;
+        current_line++;
+        inp++;
+        if (current_line == Stride * IFMDim * multiplying_factor ) {
+          current_line = 0;
+          current_block_write++;
+          if (current_block_write == number_blocks) {
+            current_block_write=0;
+          }
+          read_block++;
+          counter_internal_block = 0;
+        }
+      } else {
+        if (counter_internal_block < cycles_write_block-1) {
+          unsigned int current_block_read = (current_block_write + 1 + k_y / Stride);
+          if (current_block_read >= number_blocks) {
+            current_block_read-= number_blocks;
+    }
+          unsigned int current_line_in_block = ((k_y%Stride) * IFMDim + ofm_x*Stride + k_x)*multiplying_factor + count_simd;
+          ap_uint<SIMD*Input_precision> outElem = inputBuf[current_block_read][(current_line_in_block)];
+          out.write(outElem);
+    k_x++;
+    if (k_x == ConvKernelDim) {
+      k_x = 0;
+      k_y++;
+      if (k_y == ConvKernelDim) {
+     k_y = 0;
+     count_simd++;
+     if (count_simd == multiplying_factor) {
+       count_simd=0;
+                ofm_x ++;
+                if (ofm_x == OFMDim) {
+                  ofm_x = 0;
+                  ofm_y++;
+                  if (ofm_y == OFMDim) {
+                    ofm_y = 0;
+                    inp = 0;
+                  }
+                }
+              }
+            }
+          }
+        }
+        if ((counter_internal_block < cycles_read_block-1) && (read_block<IFMDim/Stride)) {
+          ap_uint<SIMD*Input_precision> inElem;
+          inElem = in.read();
+          inputBuf[current_block_write][current_line] = inElem;
+#pragma AP dependence variable=inputBuf intra false
+#pragma AP dependence variable=inputBuf inter false
+ current_line++;
+          if (current_line == Stride * IFMDim * multiplying_factor) {
+
+            current_line = 0;
+            read_block++;
+            current_block_write++;
+            if (current_block_write == number_blocks) {
+              current_block_write=0;
+   }
+#pragma AP dependence variable=current_block_write intra false
+ }
+        }
+        counter_internal_block++;
+        if (counter_internal_block == (max_cycles-1)) {
+          counter_internal_block = 0;
+        }
+      }
+    }
+ read_block = 0;
+  }
+}
+# 878 "cnnlstm/src/slidingwindow.h"
+template<unsigned int ConvKernelDim,
+         unsigned int IFMChannels,
+         unsigned int Input_precision,
+         unsigned int IFMDim,
+         unsigned int OFMDim,
+         unsigned int SIMD,
+         unsigned int Stride,
+         typename R>
+void ConvolutionInputGenerator_kernel_stride_dws(
+    hls::stream<ap_uint<SIMD*Input_precision> > & in,
+    hls::stream<ap_uint<SIMD*Input_precision> > & out,
+    const unsigned int numReps,
+    R const &r) {
+    static_assert(IFMChannels % SIMD == 0, "");
+    static_assert(ConvKernelDim % Stride != 0, "");
+    constexpr unsigned multiplying_factor = IFMChannels/SIMD;
+    constexpr unsigned number_blocks = ConvKernelDim + Stride ;
+    constexpr unsigned cycles_write_block = OFMDim * ConvKernelDim * ConvKernelDim * multiplying_factor;
+    constexpr unsigned cycles_read_block = IFMDim * Stride * multiplying_factor;
+    constexpr unsigned max_cycles = std::max(cycles_write_block, cycles_read_block);
+    constexpr unsigned baseIter = (IFMDim * ConvKernelDim * multiplying_factor) + (OFMDim-1) * max_cycles+std::max(cycles_write_block,OFMDim);
+    constexpr unsigned initial_buffer_cycles = (IFMDim * ConvKernelDim * multiplying_factor) ;
+
+    ap_uint<SIMD*Input_precision> inputBuf[number_blocks][IFMDim * multiplying_factor];
+    memory_resource(inputBuf, r);
+#pragma HLS ARRAY_PARTITION variable=inputBuf complete dim=1
+#pragma HLS DEPENDENCE variable=inputBuf inter false
+#pragma HLS DEPENDENCE variable=inputBuf intra false
+ unsigned int counter_internal_block = 0;
+    unsigned int current_line = 0;
+    unsigned int inp = 0, ofm_y = 0, ofm_x = 0, k_y = 0, k_x = 0, count_simd =0;
+
+  VITIS_LOOP_910_1: for (unsigned int count_image = 0; count_image < numReps; count_image++) {
+      unsigned int floor_block_read = 0, ceil_block_read = number_blocks;
+      unsigned int read_block = 0;
+      unsigned int current_block_write = 0;
+      VITIS_LOOP_914_2: for (unsigned int i = 0; i < baseIter; i++) {
+#pragma HLS pipeline style=flp II=1
+
+#pragma HLS DEPENDENCE variable=current_block_write intra false
+
+ if (inp < initial_buffer_cycles)
+            {
+                ap_uint<SIMD*Input_precision> inElem;
+                inElem = in.read();
+                inputBuf[current_block_write][current_line] = inElem;
+                current_line++;
+                inp++;
+                if (current_line == IFMDim * multiplying_factor)
+                {
+                    current_line = 0;
+                    current_block_write++;
+                    if (current_block_write == number_blocks)
+                        current_block_write = 0;
+                    read_block++;
+                    counter_internal_block = 0;
+                }
+            }
+            else
+            {
+                if (counter_internal_block < cycles_write_block-1 || read_block==IFMDim)
+                {
+
+            unsigned int current_block_read = (ofm_y*Stride + k_y);
+
+            if (current_block_read >= ceil_block_read)
+            {
+              floor_block_read += number_blocks;
+              ceil_block_read += number_blocks;
+            }else if(current_block_read < floor_block_read){
+              ceil_block_read -= number_blocks;
+              floor_block_read -= number_blocks;
+            }
+            current_block_read -= floor_block_read;
+
+                    unsigned int current_line_in_block = (ofm_x * Stride + k_x)*multiplying_factor + count_simd;
+                    ap_uint<SIMD*Input_precision> outElem = inputBuf[current_block_read][(current_line_in_block)];
+                    out.write(outElem);
+                    k_x++;
+                    if (k_x == ConvKernelDim) {
+                        k_x = 0;
+                        k_y++;
+                        if (k_y == ConvKernelDim) {
+                            k_y = 0;
+                            count_simd++;
+                            if (count_simd == multiplying_factor) {
+                                count_simd=0;
+                                ofm_x++;
+                                if (ofm_x == OFMDim) {
+                                    ofm_x = 0;
+                                    ofm_y++;
+                                    if (ofm_y == OFMDim) {
+                                        ofm_y = 0;
+                                        inp = 0;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                if ((counter_internal_block < cycles_read_block - 1) && (read_block<IFMDim))
+                {
+                    ap_uint<SIMD*Input_precision> inElem;
+                    inElem = in.read();
+                    inputBuf[current_block_write][current_line] = inElem;
+#pragma HLS DEPENDENCE variable=inputBuf inter false
+#pragma HLS DEPENDENCE variable=inputBuf intra false
+ current_line++;
+                    if (current_line == IFMDim * multiplying_factor)
+                    {
+                        current_line = 0;
+                        read_block++;
+                        current_block_write++;
+                        if (current_block_write == number_blocks)
+                            current_block_write = 0;
+#pragma HLS DEPENDENCE variable=current_block_write intra false
+ }
+                }
+                counter_internal_block++;
+                if (counter_internal_block == (max_cycles-1))
+                {
+                   counter_internal_block = 0;
+                }
+            }
+        }
+  }
+}
+# 1027 "cnnlstm/src/slidingwindow.h"
+template<unsigned int ConvKernelDim,
+  unsigned int IFMChannels,
+  unsigned int Input_precision,
+  unsigned int IFMDim,
+  unsigned int OFMDim,
+  unsigned int SIMD,
+  unsigned int Stride,
+  unsigned int MMV,
+  typename R>
+void ConvolutionInputGenerator_dws_MMV(
+  hls::stream<ap_uint<SIMD*Input_precision> > & in,
+  hls::stream<MultiChanData<MMV, SIMD*Input_precision> > & out,
+  const unsigned int numReps,
+  R const &r) {
+ static_assert(IFMChannels % SIMD == 0, "");
+ static_assert(OFMDim % MMV == 0, "");
+ static_assert(ConvKernelDim % Stride == 0, "");
+ static_assert(MMV <= OFMDim, "");
+ constexpr unsigned int multiplying_factor = IFMChannels/SIMD;
+ constexpr unsigned int number_blocks = ConvKernelDim/Stride + 1 ;
+  ap_uint<SIMD*Input_precision> inputBuf[MMV][number_blocks][Stride * IFMDim * multiplying_factor];
+#pragma HLS DEPENDENCE variable=inputBuf inter false
+#pragma HLS DEPENDENCE variable=inputBuf intra false
+#pragma HLS ARRAY_PARTITION variable=inputBuf complete dim=1
+#pragma HLS ARRAY_PARTITION variable=inputBuf complete dim=2
+ memory_resource(inputBuf, r);
+ constexpr unsigned int cycles_write_block = (OFMDim * ConvKernelDim * ConvKernelDim * multiplying_factor)/MMV;
+ constexpr unsigned int cycles_read_block = Stride * IFMDim * multiplying_factor;
+ constexpr unsigned int max_cycles = std::max(cycles_write_block,cycles_read_block);
+ const unsigned int baseIter = IFMDim * ConvKernelDim * multiplying_factor
+   + OFMDim * std::max(cycles_write_block,cycles_read_block);
+ unsigned int counter_internal_block = 0;
+ unsigned int current_block_write = 0;
+ unsigned int current_line = 0;
+ unsigned int read_block = 0;
+ unsigned int inp = 0, ofm_y = 0, ofm_x = 0, k_y = 0, k_x = 0, count_simd =0;
+
+ VITIS_LOOP_1064_1: for (unsigned int count_image = 0; count_image < numReps; count_image++) {
+  VITIS_LOOP_1065_2: for (unsigned int i = 0; i < baseIter; i++) {
+#pragma HLS pipeline style=flp II=1
+ if (inp < IFMDim * ConvKernelDim*multiplying_factor)
+    {
+    ap_uint<SIMD*Input_precision> inElem;
+    inElem = in.read();
+    VITIS_LOOP_1071_3: for(unsigned int v = 0; v < MMV; v++)
+     {
+#pragma HLS UNROLL
+ inputBuf[v][current_block_write][current_line] = inElem;
+     }
+    current_line++;
+    inp++;
+    if (current_line == Stride * IFMDim * multiplying_factor )
+     {
+     current_line = 0;
+     current_block_write++;
+     if (current_block_write == number_blocks)
+      current_block_write=0;
+     read_block++;
+     counter_internal_block = 0;
+     }
+    }
+   else
+    {
+    if (counter_internal_block < cycles_write_block-1)
+    {
+     unsigned int current_block_read = (current_block_write + 1 + k_y / Stride);
+     if (current_block_read >= number_blocks)
+      current_block_read-= number_blocks;
+     unsigned int current_line_in_block = ((k_y%Stride) * IFMDim + ofm_x*Stride + k_x)*multiplying_factor + count_simd;
+     MultiChanData<MMV, SIMD*Input_precision> outElem;
+
+     VITIS_LOOP_1098_4: for(unsigned int v = 0; v < MMV; v++) {
+#pragma HLS UNROLL
+
+ ap_uint<SIMD*Input_precision> temp_value = inputBuf[v][current_block_read][(current_line_in_block + v*Stride*multiplying_factor)];
+      outElem.data[v] = temp_value;
+     }
+     out.write(outElem);
+     k_x++;
+     if (k_x == ConvKernelDim) {
+      k_x = 0;
+      k_y++;
+      if (k_y == ConvKernelDim) {
+       k_y = 0;
+       count_simd++;
+       if (count_simd == multiplying_factor) {
+        count_simd=0;
+        ofm_x += MMV;
+        if (ofm_x == OFMDim) {
+         ofm_x = 0;
+         ofm_y++;
+         if (ofm_y == OFMDim) {
+          ofm_y = 0;
+          inp = 0;
+         }
+        }
+       }
+      }
+     }
+    }
+    if ((counter_internal_block < cycles_read_block-1) && (read_block<IFMDim/Stride))
+    {
+     ap_uint<SIMD*Input_precision> inElem;
+     inElem = in.read();
+     VITIS_LOOP_1131_5: for(unsigned int v = 0; v < MMV; v++) {
+#pragma HLS UNROLL
+ inputBuf[v][current_block_write][current_line] = inElem;
+#pragma AP dependence variable=inputBuf intra false
+#pragma AP dependence variable=inputBuf inter false
+ }
+
+     current_line++;
+     if (current_line == Stride * IFMDim * multiplying_factor)
+     {
+      current_line = 0;
+      read_block++;
+      current_block_write++;
+      if (current_block_write == number_blocks)
+       current_block_write=0;
+#pragma AP dependence variable=current_block_write intra false
+ }
+    }
+    counter_internal_block++;
+    if (counter_internal_block == (max_cycles-1))
+    {
+     counter_internal_block = 0;
+    }
+   }
+  }
+ read_block = 0;
+ }
+}
+# 1177 "cnnlstm/src/slidingwindow.h"
+template< unsigned int IFMChannels,
+  unsigned int Input_precision,
+  unsigned int IFMDim,
+  unsigned int SIMD,
+  unsigned int Stride>
+void ConvolutionInputGenerator_2D_kernel1(
+  hls::stream<ap_uint<SIMD*Input_precision> > & in,
+  hls::stream<ap_uint<SIMD*Input_precision> > & out,
+  const unsigned int numReps) {
+static_assert(IFMChannels % SIMD == 0, "");
+constexpr unsigned COUNTER_WIDTH = clog2(Stride-1) + 1;
+constexpr unsigned COUNTER_RESET = Stride - 2;
+constexpr unsigned MULTIPLYING_FACTOR = IFMChannels/SIMD;
+ VITIS_LOOP_1190_1: for (unsigned int im=0; im<numReps; im++) {
+#pragma HLS performance target_ti=IFMDim*IFMDim*IFMChannels/SIMD
+ ap_int<COUNTER_WIDTH> counter_y = -1;
+  VITIS_LOOP_1193_2: for (unsigned int y = 0; y < IFMDim; y++) {
+   const bool keep_y = counter_y < 0;
+   counter_y = keep_y ? ap_int<COUNTER_WIDTH>(COUNTER_RESET) : ap_int<COUNTER_WIDTH>(counter_y - 1);
+   ap_int<COUNTER_WIDTH> counter_x = -1;
+   VITIS_LOOP_1197_3: for (unsigned int x = 0; x < IFMDim; x++) {
+#pragma HLS pipeline style=flp II=IFMChannels/SIMD
+ const bool keep_x = counter_x < 0;
+    counter_x = keep_x ? ap_int<COUNTER_WIDTH>(COUNTER_RESET) : ap_int<COUNTER_WIDTH>(counter_x - 1);
+    VITIS_LOOP_1201_4: for (unsigned int count_simd = 0; count_simd < MULTIPLYING_FACTOR; count_simd++) {
+     ap_uint<SIMD*Input_precision> inElem = in.read();
+     if (keep_y && keep_x) {
+      out.write(inElem);
+     }
+    }
+   }
+  }
+ }
+}
+# 1227 "cnnlstm/src/slidingwindow.h"
+template< unsigned int IFMChannels,
+  unsigned int Input_precision,
+  unsigned int IFMDim,
+  unsigned int SIMD,
+  unsigned int Stride>
+void ConvolutionInputGenerator_1D_kernel1(
+  hls::stream<ap_uint<SIMD*Input_precision> > & in,
+  hls::stream<ap_uint<SIMD*Input_precision> > & out,
+  const unsigned int numReps) {
+static_assert(IFMChannels % SIMD == 0, "");
+constexpr unsigned COUNTER_WIDTH = clog2(Stride-1) + 1;
+constexpr unsigned COUNTER_RESET = Stride - 2;
+ VITIS_LOOP_1239_1: for (unsigned int im=0; im<numReps; im++) {
+  ap_int<COUNTER_WIDTH> counter_x = -1;
+  VITIS_LOOP_1241_2: for (unsigned int x = 0; x < IFMDim; x++) {
+   const bool keep_x = counter_x < 0;
+   counter_x = keep_x ? ap_int<COUNTER_WIDTH>(COUNTER_RESET) : ap_int<COUNTER_WIDTH>(counter_x - 1);
+   VITIS_LOOP_1244_3: for (unsigned int count_simd = 0; count_simd < IFMChannels/SIMD; count_simd++) {
+#pragma HLS pipeline style=flp II=1
+ ap_uint<SIMD*Input_precision> inElem = in.read();
+    if (keep_x) {
+     out.write(inElem);
+    }
+   }
+  }
+ }
+}
+# 1278 "cnnlstm/src/slidingwindow.h"
+template<unsigned int ConvKernelDim_x,
+   unsigned int ConvKernelDim_y,
+   unsigned int IFMChannels,
+   unsigned int Input_precision,
+   unsigned int IFMDim_x,
+   unsigned int IFMDim_y,
+   unsigned int OFMDim_x,
+   unsigned int OFMDim_y,
+   unsigned int SIMD,
+   unsigned int Stride_x,
+   unsigned int Stride_y,
+   typename R>
+void ConvolutionInputGenerator_NonSquare(
+  hls::stream<ap_uint<SIMD*Input_precision> > & in,
+  hls::stream<ap_uint<SIMD*Input_precision> > & out,
+  const unsigned int numReps,
+  R const &r) {
+  static_assert(IFMChannels % SIMD == 0, "");
+  const unsigned int multiplying_factor = IFMChannels/SIMD;
+  const unsigned int number_blocks = ConvKernelDim_y/Stride_y + 1 ;
+  ap_uint<SIMD*Input_precision> inputBuf[number_blocks][Stride_x * IFMDim_x * multiplying_factor];
+
+#pragma HLS ARRAY_PARTITION variable=inputBuf complete dim=1
+ memory_resource(inputBuf, r);
+  const unsigned int cycles_write_block = (OFMDim_x * ConvKernelDim_x * ConvKernelDim_y * multiplying_factor);
+  const unsigned int cycles_read_block = Stride_x * IFMDim_x * multiplying_factor;
+  const unsigned int max_cycles = std::max(cycles_write_block,cycles_read_block);
+  const unsigned int baseIter = IFMDim_x * ConvKernelDim_y * multiplying_factor
+                     + OFMDim_y * std::max(cycles_write_block,cycles_read_block);
+  unsigned int counter_internal_block = 0;
+  unsigned int current_block_write = 0;
+  unsigned int current_line = 0;
+  unsigned int read_block = 0;
+  unsigned int inp = 0, ofm_y = 0, ofm_x = 0, k_y = 0, k_x = 0, count_simd =0;
+
+  VITIS_LOOP_1313_1: for (unsigned int count_image = 0; count_image < numReps; count_image++) {
+    VITIS_LOOP_1314_2: for (unsigned int i = 0; i < baseIter; i++) {
+#pragma HLS pipeline style=flp II=1
+ if (inp < IFMDim_x * ConvKernelDim_y *multiplying_factor) {
+        ap_uint<SIMD*Input_precision> inElem;
+        inElem = in.read();
+        inputBuf[current_block_write][current_line] = inElem;
+        current_line++;
+        inp++;
+        if (current_line == Stride_x * IFMDim_x * multiplying_factor ) {
+          current_line = 0;
+          current_block_write++;
+          if (current_block_write == number_blocks) {
+            current_block_write=0;
+          }
+          read_block++;
+          counter_internal_block = 0;
+        }
+      } else {
+        if (counter_internal_block < cycles_write_block-1) {
+          unsigned int current_block_read = (current_block_write + 1 + k_y / Stride_y);
+          if (current_block_read >= number_blocks) {
+            current_block_read-= number_blocks;
+    }
+          unsigned int current_line_in_block = ((k_y%Stride_y) * IFMDim_y + ofm_x*Stride_x + k_x)*multiplying_factor + count_simd;
+          ap_uint<SIMD*Input_precision> outElem = inputBuf[current_block_read][(current_line_in_block)];
+          out.write(outElem);
+          count_simd++;
+          if (count_simd == multiplying_factor) {
+            count_simd=0;
+            k_x++;
+            if (k_x == ConvKernelDim_x) {
+              k_x = 0;
+              k_y++;
+              if (k_y == ConvKernelDim_y) {
+                k_y = 0;
+                ofm_x ++;
+                if (ofm_x == OFMDim_x) {
+                  ofm_x = 0;
+                  ofm_y++;
+                  if (ofm_y == OFMDim_y) {
+                    ofm_y = 0;
+                    inp = 0;
+                  }
+                }
+              }
+            }
+          }
+        }
+        if ((counter_internal_block < cycles_read_block-1) && (read_block<IFMDim_y/Stride_y)) {
+          ap_uint<SIMD*Input_precision> inElem;
+          inElem = in.read();
+          inputBuf[current_block_write][current_line] = inElem;
+#pragma AP dependence variable=inputBuf intra false
+#pragma AP dependence variable=inputBuf inter false
+ current_line++;
+          if (current_line == Stride_x * IFMDim_x * multiplying_factor) {
+
+            current_line = 0;
+            read_block++;
+            current_block_write++;
+            if (current_block_write == number_blocks) {
+              current_block_write=0;
+   }
+#pragma AP dependence variable=current_block_write intra false
+ }
+        }
+        counter_internal_block++;
+        if (counter_internal_block == (max_cycles-1)) {
+          counter_internal_block = 0;
+        }
+      }
+    }
+ read_block = 0;
+  }
+}
+# 1412 "cnnlstm/src/slidingwindow.h"
+template<unsigned int ConvKernelDim_x,
+   unsigned int ConvKernelDim_y,
+   unsigned int IFMChannels,
+   unsigned int Input_precision,
+   unsigned int IFMDim_x,
+   unsigned int IFMDim_y,
+   unsigned int OFMDim_x,
+   unsigned int OFMDim_y,
+   unsigned int SIMD,
+   unsigned int Stride_x,
+   unsigned int Stride_y,
+   typename R>
+void ConvolutionInputGenerator_NonSquare_dws(
+  hls::stream<ap_uint<SIMD*Input_precision> > & in,
+  hls::stream<ap_uint<SIMD*Input_precision> > & out,
+  const unsigned int numReps,
+  R const &r) {
+  static_assert(IFMChannels % SIMD == 0, "");
+  const unsigned int multiplying_factor = IFMChannels/SIMD;
+  const unsigned int number_blocks = ConvKernelDim_y/Stride_y + 1 ;
+  ap_uint<SIMD*Input_precision> inputBuf[number_blocks][Stride_x * IFMDim_x * multiplying_factor];
+
+#pragma HLS ARRAY_PARTITION variable=inputBuf complete dim=1
+ memory_resource(inputBuf, r);
+  const unsigned int cycles_write_block = (OFMDim_x * ConvKernelDim_x * ConvKernelDim_y * multiplying_factor);
+  const unsigned int cycles_read_block = Stride_x * IFMDim_x * multiplying_factor;
+  const unsigned int max_cycles = std::max(cycles_write_block,cycles_read_block);
+  const unsigned int baseIter = IFMDim_x * ConvKernelDim_y * multiplying_factor
+                     + OFMDim_y * std::max(cycles_write_block,cycles_read_block);
+  unsigned int counter_internal_block = 0;
+  unsigned int current_block_write = 0;
+  unsigned int current_line = 0;
+  unsigned int read_block = 0;
+  unsigned int inp = 0, ofm_y = 0, ofm_x = 0, k_y = 0, k_x = 0, count_simd =0;
+
+  VITIS_LOOP_1447_1: for (unsigned int count_image = 0; count_image < numReps; count_image++) {
+    VITIS_LOOP_1448_2: for (unsigned int i = 0; i < baseIter; i++) {
+#pragma HLS pipeline style=flp II=1
+ if (inp < IFMDim_x * ConvKernelDim_y *multiplying_factor) {
+        ap_uint<SIMD*Input_precision> inElem;
+        inElem = in.read();
+        inputBuf[current_block_write][current_line] = inElem;
+        current_line++;
+        inp++;
+        if (current_line == Stride_x * IFMDim_x * multiplying_factor ) {
+          current_line = 0;
+          current_block_write++;
+          if (current_block_write == number_blocks) {
+            current_block_write=0;
+          }
+          read_block++;
+          counter_internal_block = 0;
+        }
+      } else {
+        if (counter_internal_block < cycles_write_block-1) {
+          unsigned int current_block_read = (current_block_write + 1 + k_y / Stride_y);
+          if (current_block_read >= number_blocks) {
+            current_block_read-= number_blocks;
+    }
+          unsigned int current_line_in_block = ((k_y%Stride_y) * IFMDim_y + ofm_x*Stride_x + k_x)*multiplying_factor + count_simd;
+          ap_uint<SIMD*Input_precision> outElem = inputBuf[current_block_read][(current_line_in_block)];
+          out.write(outElem);
+    k_x++;
+    if (k_x == ConvKernelDim_x) {
+      k_x = 0;
+      k_y++;
+      if (k_y == ConvKernelDim_y) {
+     k_y = 0;
+     count_simd++;
+     if (count_simd == multiplying_factor) {
+       count_simd=0;
+       ofm_x ++;
+       if (ofm_x == OFMDim_x) {
+         ofm_x = 0;
+         ofm_y++;
+         if (ofm_y == OFMDim_y) {
+        ofm_y = 0;
+        inp = 0;
+                  }
+                }
+              }
+            }
+          }
+        }
+        if ((counter_internal_block < cycles_read_block-1) && (read_block<IFMDim_y/Stride_y)) {
+          ap_uint<SIMD*Input_precision> inElem;
+          inElem = in.read();
+          inputBuf[current_block_write][current_line] = inElem;
+#pragma AP dependence variable=inputBuf intra false
+#pragma AP dependence variable=inputBuf inter false
+ current_line++;
+          if (current_line == Stride_x * IFMDim_x * multiplying_factor) {
+
+            current_line = 0;
+            read_block++;
+            current_block_write++;
+            if (current_block_write == number_blocks) {
+              current_block_write=0;
+   }
+#pragma AP dependence variable=current_block_write intra false
+ }
+        }
+        counter_internal_block++;
+        if (counter_internal_block == (max_cycles-1)) {
+          counter_internal_block = 0;
+        }
+      }
+    }
+ read_block = 0;
+  }
+}
+# 1549 "cnnlstm/src/slidingwindow.h"
+template<unsigned int ConvKernelDim_x,
+   unsigned int ConvKernelDim_y,
+   unsigned int IFMChannels,
+   unsigned int Input_precision,
+   unsigned int IFMDim_x,
+   unsigned int IFMDim_y,
+   unsigned int OFMDim_x,
+   unsigned int OFMDim_y,
+   unsigned int SIMD,
+   unsigned int Stride_x,
+   unsigned int Stride_y,
+   unsigned int Dilation_x,
+   unsigned int Dilation_y,
+   typename R>
+void ConvolutionInputGenerator_NonSquare_Dilated(
+  hls::stream<ap_uint<SIMD*Input_precision> > & in,
+  hls::stream<ap_uint<SIMD*Input_precision> > & out,
+  const unsigned int numReps,
+  R const &r) {
+  static_assert(IFMChannels % SIMD == 0, "");
+  static_assert(Dilation_y == 1, "");
+
+  const unsigned int multiplying_factor = IFMChannels/SIMD;
+  const unsigned int number_blocks = (ConvKernelDim_y*Dilation_y)/Stride_y + 1 ;
+  ap_uint<SIMD*Input_precision> inputBuf[number_blocks][Stride_x * IFMDim_x * multiplying_factor];
+
+#pragma HLS ARRAY_PARTITION variable=inputBuf complete dim=1
+ memory_resource(inputBuf, r);
+  const unsigned int cycles_write_block = (OFMDim_x * ConvKernelDim_x * ConvKernelDim_y * multiplying_factor);
+  const unsigned int cycles_read_block = Stride_x * IFMDim_x * multiplying_factor;
+  const unsigned int max_cycles = std::max(cycles_write_block,cycles_read_block);
+  const unsigned int baseIter = IFMDim_x * ConvKernelDim_y * Dilation_y * multiplying_factor
+                     + OFMDim_y * std::max(cycles_write_block,cycles_read_block);
+  unsigned int counter_internal_block = 0;
+  unsigned int current_block_write = 0;
+  unsigned int current_line = 0;
+  unsigned int read_block = 0;
+  unsigned int inp = 0, ofm_y = 0, ofm_x = 0, k_y = 0, k_x = 0, count_simd =0;
+
+  VITIS_LOOP_1588_1: for (unsigned int count_image = 0; count_image < numReps; count_image++) {
+    VITIS_LOOP_1589_2: for (unsigned int i = 0; i < baseIter; i++) {
+#pragma HLS pipeline style=flp II=1
+ if (inp < IFMDim_x * ConvKernelDim_y * Dilation_y *multiplying_factor) {
+        ap_uint<SIMD*Input_precision> inElem;
+        inElem = in.read();
+        inputBuf[current_block_write][current_line] = inElem;
+        current_line++;
+        inp++;
+        if (current_line == Stride_x * IFMDim_x * multiplying_factor ) {
+          current_line = 0;
+          current_block_write++;
+          if (current_block_write == number_blocks) {
+            current_block_write=0;
+          }
+          read_block++;
+          counter_internal_block = 0;
+        }
+      } else {
+        if (counter_internal_block < cycles_write_block-1) {
+          unsigned int current_block_read = (current_block_write + 1 + (k_y*Dilation_y) / Stride_y);
+          if (current_block_read >= number_blocks) {
+            current_block_read-= number_blocks;
+    }
+          unsigned int current_line_in_block = ((ofm_x*Stride_x + k_x*Dilation_x)*multiplying_factor + count_simd);
+          ap_uint<SIMD*Input_precision> outElem;
+          outElem = inputBuf[current_block_read][(current_line_in_block)];
+          out.write(outElem);
+          count_simd++;
+          if (count_simd == multiplying_factor) {
+            count_simd=0;
+            k_x++;
+            if (k_x == ConvKernelDim_x) {
+              k_x = 0;
+              k_y++;
+              if (k_y == ConvKernelDim_y) {
+                k_y = 0;
+                ofm_x ++;
+                if (ofm_x == OFMDim_x) {
+                  ofm_x = 0;
+                  ofm_y++;
+                  if (ofm_y == OFMDim_y) {
+                    ofm_y = 0;
+                    inp = 0;
+                  }
+                }
+              }
+            }
+          }
+        }
+        if ((counter_internal_block < cycles_read_block-1) && (read_block<IFMDim_y/Stride_y)) {
+          ap_uint<SIMD*Input_precision> inElem;
+          inElem = in.read();
+          inputBuf[current_block_write][current_line] = inElem;
+#pragma AP dependence variable=inputBuf intra false
+#pragma AP dependence variable=inputBuf inter false
+ current_line++;
+          if (current_line == Stride_x * IFMDim_x * multiplying_factor) {
+
+            current_line = 0;
+            read_block++;
+            current_block_write++;
+            if (current_block_write == number_blocks) {
+              current_block_write=0;
+   }
+#pragma AP dependence variable=current_block_write intra false
+ }
+        }
+        counter_internal_block++;
+        if (counter_internal_block == (max_cycles-1)) {
+          counter_internal_block = 0;
+        }
+      }
+    }
+ read_block = 0;
+  }
+}
+# 1687 "cnnlstm/src/slidingwindow.h"
+template<unsigned int ConvKernelDim,
+   unsigned int IFMChannels,
+   unsigned int Input_precision,
+   unsigned int IFMDim,
+   unsigned int OFMDim,
+   unsigned int Stride,
+   unsigned int SIMD,
+   typename R>
+void ConvolutionInputGenerator_1D_parallel(
+  hls::stream<ap_uint<SIMD*Input_precision> > & in,
+  hls::stream<ap_uint<ConvKernelDim*SIMD*Input_precision> > & out,
+  const unsigned int numReps,
+  __attribute__((unused)) R const &r) {
+
+  static_assert(Stride == 1, "");
+  static_assert(IFMChannels % SIMD == 0, "");
+  constexpr unsigned number_blocks = ConvKernelDim + 1 ;
+  constexpr unsigned cycles_write_block = 1;
+  constexpr unsigned cycles_read_block = 1;
+  constexpr unsigned baseIter = ConvKernelDim
+                     + OFMDim * std::max(cycles_write_block,cycles_read_block);
+
+  ap_uint<SIMD*Input_precision> inputBuf[number_blocks];
+#pragma HLS ARRAY_PARTITION variable=inputBuf complete
+
+
+ unsigned int current_block_write = 0;
+  unsigned int read_block = 0;
+  unsigned int inp = 0, ofm_y = 0;
+  VITIS_LOOP_1716_1: for (unsigned int count_image = 0; count_image < numReps; count_image++) {
+    VITIS_LOOP_1717_2: for (unsigned int i = 0; i < baseIter; i++) {
+#pragma HLS pipeline style=flp II=1
+ if (inp < ConvKernelDim) {
+        ap_uint<SIMD*Input_precision> inElem;
+        inElem = in.read();
+        inputBuf[current_block_write] = inElem;
+
+        inp++;
+
+        current_block_write++;
+        if (current_block_write == number_blocks) {
+          current_block_write=0;
+        }
+        read_block++;
+
+      } else {
+
+
+        ap_uint<ConvKernelDim*SIMD*Input_precision> outElem;
+
+        VITIS_LOOP_1737_3: for(int k_y=0; k_y<ConvKernelDim; k_y++)
+        {
+#pragma HLS UNROLL
+ unsigned int current_block_read = (current_block_write + 1 + k_y);
+          if (current_block_read >= number_blocks) {
+            current_block_read-= number_blocks;
+          }
+          outElem((k_y+1)*SIMD*Input_precision-1, k_y*SIMD*Input_precision) = inputBuf[current_block_read];
+        }
+
+        out.write(outElem);
+
+        ofm_y++;
+        if (ofm_y == OFMDim) {
+          ofm_y = 0;
+          inp = 0;
+        }
+
+        if (read_block<IFMDim) {
+
+          ap_uint<SIMD*Input_precision> inElem;
+          inElem = in.read();
+          inputBuf[current_block_write] = inElem;
+#pragma AP dependence variable=inputBuf intra false
+#pragma AP dependence variable=inputBuf inter false
+
+ read_block++;
+          current_block_write++;
+          if (current_block_write == number_blocks) {
+            current_block_write=0;
+       }
+#pragma AP dependence variable=current_block_write intra false
+
+ }
+      }
+    }
+ read_block = 0;
+  }
+}
+# 1796 "cnnlstm/src/slidingwindow.h"
+template<unsigned int ConvKernelDim_x,
+   unsigned int IFMChannels,
+   unsigned int Input_precision,
+   unsigned int IFMDim_x,
+   unsigned int OFMDim_x,
+   unsigned int Stride_x,
+         unsigned int Dilation_x,
+   unsigned int SIMD,
+   typename R>
+void ConvolutionInputGenerator_1D_dws_naive(
+  hls::stream<ap_uint<SIMD*Input_precision> > & in,
+  hls::stream<ap_uint<SIMD*Input_precision> > & out,
+  const unsigned int numReps,
+  R const &r) {
+  static_assert(IFMChannels % SIMD == 0, "");
+
+  constexpr unsigned multiplying_factor = IFMChannels / SIMD;
+  constexpr unsigned cycles_write_block = OFMDim_x * ConvKernelDim_x * multiplying_factor;
+  constexpr unsigned cycles_read_block = IFMDim_x * multiplying_factor;
+  ap_uint<SIMD*Input_precision> inputBuf[cycles_read_block];
+  memory_resource(inputBuf, r);
+  constexpr unsigned baseIter = cycles_read_block
+                     + cycles_write_block;
+  unsigned int current_line = 0;
+  unsigned int inp = 0, ofm_x = 0, k_x = 0, count_simd =0;
+
+  VITIS_LOOP_1822_1: for (unsigned int count_image = 0; count_image < numReps; count_image++) {
+    VITIS_LOOP_1823_2: for (unsigned int i = 0; i < baseIter; i++) {
+#pragma HLS pipeline style=flp II=1
+ if (inp < cycles_read_block) {
+        ap_uint<SIMD*Input_precision> inElem;
+        inElem = in.read();
+  inputBuf[current_line] = inElem;
+        current_line++;
+        inp++;
+      }
+      else {
+            unsigned int current_line_in_block = (ofm_x * Stride_x + k_x * Dilation_x) * multiplying_factor + count_simd;
+            ap_uint<SIMD*Input_precision> outElem = inputBuf[current_line_in_block];
+            out.write(outElem);
+            k_x++;
+            if (k_x == ConvKernelDim_x) {
+                k_x = 0;
+                count_simd++;
+                if (count_simd == multiplying_factor) {
+                    count_simd=0;
+                    ofm_x++;
+                    if (ofm_x == OFMDim_x) {
+                        ofm_x = 0;
+                        inp = 0;
+                    }
+                }
+            }
+      }
+    }
+  }
+}
+# 1872 "cnnlstm/src/slidingwindow.h"
+template<
+ unsigned ConvKernelDim_x,
+ unsigned IFMChannels,
+ unsigned Input_precision,
+ unsigned IFMDim_x,
+ unsigned OFMDim_x,
+ unsigned Stride_x,
+ unsigned SIMD,
+ typename R
+>
+void ConvolutionInputGenerator_1D(
+ hls::stream<ap_uint<SIMD*Input_precision>> &in,
+ hls::stream<ap_uint<SIMD*Input_precision>> &out,
+ unsigned const numReps,
+ R const &r
+) {
+ static_assert((IFMChannels % SIMD) == 0, "SIMD parallelism must divide the number of IFM channels");
+ static_assert(OFMDim_x == ((IFMDim_x - ConvKernelDim_x) / Stride_x + 1), "Unexpected OFM dimension");
+
+ constexpr unsigned SIMD_COUNT = IFMChannels / SIMD;
+ constexpr unsigned BUFFER_SIZE = (ConvKernelDim_x - 1) * SIMD_COUNT;
+ constexpr unsigned OUTPUT_SIZE = OFMDim_x * ConvKernelDim_x * SIMD_COUNT;
+ constexpr unsigned INPUT_SIZE = IFMDim_x * SIMD_COUNT;
+ constexpr unsigned WINDOW_SIZE = ConvKernelDim_x * SIMD_COUNT;
+ constexpr unsigned OCNT_INITIAL = BUFFER_SIZE + (Stride_x - 1);
+
+ ap_uint<SIMD*Input_precision> buffer[BUFFER_SIZE];
+ memory_resource(buffer, r);
+
+ VITIS_LOOP_1901_1: for(unsigned count_image = 0; count_image < numReps; count_image++) {
+  signed ocnt = OCNT_INITIAL < WINDOW_SIZE ? OCNT_INITIAL : -1;
+  unsigned wp = 0;
+  unsigned rp = 0;
+  unsigned offset = 0;
+  unsigned inp_count = 0;
+  VITIS_LOOP_1907_2: for(unsigned i = 0; i < 1+OUTPUT_SIZE; i++) {
+#pragma HLS pipeline style=flp II=1
+ bool const re = i > 0;
+   bool const we = (i < WINDOW_SIZE) || (ocnt < SIMD_COUNT * Stride_x);
+   if(re) {
+    out.write(buffer[rp]);
+    if(++offset == WINDOW_SIZE){
+     offset = 0;
+     rp += 1 + SIMD_COUNT * (Stride_x - 1);
+     if(rp >= BUFFER_SIZE) rp -= BUFFER_SIZE;
+    }
+    else{
+     if(++rp >= BUFFER_SIZE) rp -= BUFFER_SIZE;
+    }
+    if(++ocnt == WINDOW_SIZE) ocnt = 0;
+   }
+   if(we) {
+    if (++inp_count <= INPUT_SIZE){
+     buffer[wp] = in.read();
+     if(++wp == BUFFER_SIZE) wp = 0;
+    }
+   }
+  }
+ }
+}
+# 1950 "cnnlstm/src/slidingwindow.h"
+template<
+ unsigned ConvKernelDim_x,
+ unsigned IFMChannels,
+ unsigned Input_precision,
+ unsigned IFMDim_x,
+ unsigned OFMDim_x,
+ unsigned SIMD,
+ typename R
+>
+void ConvolutionInputGenerator_1D_dws(
+ hls::stream<ap_uint<SIMD*Input_precision>> &in,
+ hls::stream<ap_uint<SIMD*Input_precision>> &out,
+ unsigned const numReps,
+ R const &r
+) {
+ static_assert((IFMChannels % SIMD) == 0, "SIMD parallelism must divide the number of IFM channels");
+ static_assert(OFMDim_x == (IFMDim_x-ConvKernelDim_x+1), "Unexpected OFM dimension");
+
+ constexpr unsigned SIMD_COUNT = IFMChannels / SIMD;
+ constexpr unsigned BUFFER_SIZE = ConvKernelDim_x * SIMD_COUNT;
+ constexpr unsigned OUTPUT_SIZE = OFMDim_x * ConvKernelDim_x * SIMD_COUNT;
+ constexpr unsigned INPUT_SIZE = IFMDim_x * SIMD_COUNT;
+ constexpr unsigned READ_CYCLES = SIMD_COUNT * (ConvKernelDim_x- 1) - (ConvKernelDim_x - 1);
+
+ ap_uint<SIMD*Input_precision> buffer[BUFFER_SIZE];
+ memory_resource(buffer, r);
+
+ VITIS_LOOP_1977_1: for(unsigned count_image = 0; count_image < numReps; count_image++) {
+  unsigned ocnt = SIMD_COUNT;
+  unsigned wp = 0;
+  unsigned rp = 0;
+  unsigned inp_count = 0;
+  unsigned wcnt = 0;
+  VITIS_LOOP_1983_2: for(unsigned i = 0; i < 1 + READ_CYCLES + OUTPUT_SIZE; i++) {
+#pragma HLS pipeline style=flp II=1
+ bool const re = i > READ_CYCLES;
+   bool const we = (i < BUFFER_SIZE) || (ocnt < SIMD_COUNT);
+   if(re) {
+    out.write(buffer[rp]);
+    if(++wcnt == ConvKernelDim_x){
+     rp += SIMD_COUNT + 1;
+     wcnt = 0;
+    }
+    else{
+     rp += SIMD_COUNT;
+    }
+    if(rp >= BUFFER_SIZE) rp -= BUFFER_SIZE;
+    if(++ocnt == BUFFER_SIZE) ocnt = 0;
+   }
+   if(we) {
+    if(++inp_count <= INPUT_SIZE){
+     buffer[wp] = in.read();
+     if(++wp == BUFFER_SIZE) wp = 0;
+    }
+   }
+  }
+ }
+}
+# 2027 "cnnlstm/src/slidingwindow.h"
+template<
+ unsigned ConvKernelDim_x,
+ unsigned IFMChannels,
+ unsigned Input_precision,
+ unsigned IFMDim_x,
+ unsigned OFMDim_x,
+ unsigned Stride_x,
+ unsigned SIMD,
+ typename R
+>
+void ConvolutionInputGenerator_1D_dws_stride(
+ hls::stream<ap_uint<SIMD*Input_precision>> &in,
+ hls::stream<ap_uint<SIMD*Input_precision>> &out,
+ unsigned const numReps,
+ R const &r
+) {
+ static_assert((IFMChannels % SIMD) == 0, "SIMD parallelism must divide the number of IFM channels");
+ static_assert(OFMDim_x == ((IFMDim_x - ConvKernelDim_x) / Stride_x + 1), "Unexpected OFM dimension");
+
+ constexpr unsigned SIMD_COUNT = IFMChannels / SIMD;
+ constexpr unsigned BUFFER_SIZE = ConvKernelDim_x * SIMD_COUNT;
+ constexpr unsigned OUTPUT_SIZE = OFMDim_x * ConvKernelDim_x * SIMD_COUNT;
+ constexpr unsigned INPUT_SIZE = IFMDim_x * SIMD_COUNT;
+ constexpr unsigned READ_CYCLES = SIMD_COUNT * (ConvKernelDim_x- 1) - (ConvKernelDim_x - 1);
+
+ ap_uint<SIMD*Input_precision> buffer[BUFFER_SIZE];
+ memory_resource(buffer, r);
+
+ VITIS_LOOP_2055_1: for(unsigned count_image = 0; count_image < numReps; count_image++) {
+  unsigned ocnt = SIMD_COUNT;
+  unsigned wp = 0;
+  unsigned rp = 0;
+  unsigned offset = 0;
+  unsigned inp_count = 0;
+  unsigned wcnt = 0;
+  VITIS_LOOP_2062_2: for(unsigned i = 0; i < 1 + READ_CYCLES + OUTPUT_SIZE; i++) {
+#pragma HLS pipeline style=flp II=1
+ bool const re = i > READ_CYCLES;
+   bool const we = (i < BUFFER_SIZE) || (ocnt < SIMD_COUNT * Stride_x);
+   if(re) {
+    out.write(buffer[rp]);
+    if(++wcnt == ConvKernelDim_x){
+     if(++offset == SIMD_COUNT){
+      rp += Stride_x * SIMD_COUNT + 1;
+      offset = 0;
+     }
+     else{
+      rp += SIMD_COUNT + 1;
+     }
+     wcnt = 0;
+    }
+    else{
+     rp += SIMD_COUNT;
+    }
+    if(rp >= BUFFER_SIZE) rp -= BUFFER_SIZE;
+    if(++ocnt == BUFFER_SIZE) ocnt = 0;
+   }
+   if(we) {
+    if(++inp_count <= INPUT_SIZE){
+     buffer[wp] = in.read();
+     if(++wp == BUFFER_SIZE) wp = 0;
+    }
+   }
+  }
+ }
+}
+# 57 "cnnlstm/src/convlayer.h" 2
+
+# 1 "cnnlstm/src/tmrcheck.hpp" 1
+# 70 "cnnlstm/src/tmrcheck.hpp"
+template<unsigned int InW,
+         unsigned int OFMChannels,
+         unsigned int NUM_RED,
+         unsigned int REDF,
+         unsigned int OFMDim,
+         unsigned int MAX_CH_WIDTH>
+void TMRCheck(hls::stream<ap_uint<InW*OFMChannels>> &in,
+              hls::stream<ap_uint<InW*(OFMChannels-NUM_RED*(REDF-1))>> &out,
+              ap_uint<2> &errortype,
+              ap_uint<OFMChannels> channel_mask,
+              ap_uint<MAX_CH_WIDTH> red_ch_index[NUM_RED]) {
+
+#pragma HLS ARRAY_PARTITION variable=red_ch_index complete dim=0
+ ap_uint<InW*OFMChannels> input;
+
+
+    constexpr unsigned int OFMChannelsTMR = (OFMChannels-NUM_RED*(REDF-1));
+    errortype = 0;
+
+
+    VITIS_LOOP_90_1: for(unsigned int pos = 0; pos < (OFMDim * OFMDim); pos++){
+#pragma HLS pipeline style=flp II=1
+
+
+ input = in.read();
+
+        ap_uint<InW*NUM_RED> tmr_out = {0};
+        ap_uint<InW*OFMChannelsTMR> out_aux = {0};
+        ap_uint<2> numerrors[NUM_RED];
+#pragma HLS ARRAY_PARTITION variable=numerrors complete dim=0
+
+
+ VITIS_LOOP_102_2: for(unsigned int i = 0; i < NUM_RED; i++){
+#pragma HLS UNROLL
+
+ numerrors[i] = 0;
+
+
+            unsigned int idx = red_ch_index[i];
+
+            VITIS_LOOP_110_3: for(unsigned int y = 0; y < REDF; y++){
+                VITIS_LOOP_111_4: for(unsigned int x = y+1; x < REDF; x++){
+                    if( (input((idx+y+1)*InW-1, (idx+y)*InW)) == (input((idx+x+1)*InW-1, (idx+x)*InW)) ){
+                        tmr_out((i+1)*InW-1, i*InW) = input((idx+x+1)*InW-1, (idx+x)*InW);
+                    } else {
+                        numerrors[i]++;
+                        if(numerrors[i] == REDF){
+                            errortype |= (ap_uint<2>)0b10;
+                        } else {
+                            errortype |= (ap_uint<2>)0b1;
+                        }
+                        tmr_out((i+1)*InW-1, i*InW) = input((idx+1)*InW-1, idx*InW);
+                    }
+                }
+            }
+        }
+
+        ap_uint<OFMChannels> unitL = 1;
+        ap_uint<1> compute[OFMChannels];
+#pragma HLS ARRAY_PARTITION variable=compute complete dim=0
+
+ VITIS_LOOP_131_5: for(unsigned int k = 0; k < OFMChannels; k++){
+#pragma HLS UNROLL
+ compute[k] = 0;
+
+            VITIS_LOOP_135_6: for(unsigned int i = 0; i < NUM_RED; i++){
+
+                unsigned int idx = red_ch_index[i];
+                if(k == idx){
+                    compute[k] = 1;
+                }
+            }
+
+
+            if(compute[k]){
+                out_aux = out_aux >> InW;
+                out_aux(OFMChannelsTMR*InW-1, (OFMChannelsTMR-1)*InW) = tmr_out(InW-1, 0);
+                tmr_out = tmr_out >> InW;
+
+            } else if((channel_mask & (unitL << k)) != 0){
+                ;
+
+            } else {
+                out_aux = out_aux >> InW;
+                out_aux(OFMChannelsTMR*InW-1, (OFMChannelsTMR-1)*InW) = input((k+1)*InW-1, k*InW);
+            }
+
+        }
+
+        out.write(out_aux);
+    }
+}
+# 186 "cnnlstm/src/tmrcheck.hpp"
+template<unsigned int InW,
+         unsigned int OFMChannels,
+         unsigned int NUM_RED,
+         unsigned int REDF,
+         unsigned int OFMDim,
+         unsigned int MAX_CH_WIDTH>
+void TMRCheck_Batch(hls::stream<ap_uint<InW*OFMChannels>> &in,
+                    hls::stream<ap_uint<InW*(OFMChannels-NUM_RED*(REDF-1))>> &out,
+                    ap_uint<2> &errortype,
+                    ap_uint<OFMChannels> channel_mask,
+                    ap_uint<MAX_CH_WIDTH> red_ch_index[NUM_RED],
+                    unsigned int numReps) {
+
+    VITIS_LOOP_199_1: for (unsigned int rep = 0; rep < numReps; rep++) {
+        TMRCheck<InW, OFMChannels, NUM_RED, REDF, OFMDim, MAX_CH_WIDTH>(in, out, errortype, channel_mask, red_ch_index);
+    }
+}
+# 59 "cnnlstm/src/convlayer.h" 2
+# 90 "cnnlstm/src/convlayer.h"
+template<
+  unsigned int ConvKernelDim,
+  unsigned int IFMChannels,
+  unsigned int IFMDim,
+  unsigned int OFMChannels,
+  unsigned int OFMDim,
+
+  unsigned int SIMD,
+  unsigned int PE,
+
+  typename TSrcI = Identity,
+  typename TDstI = Identity,
+  typename TWeightI = Identity,
+
+  int InStreamW, int OutStreamW,
+  typename TW, typename TA, typename R
+>
+void ConvLayer_Batch(hls::stream<ap_uint<InStreamW>> &in,
+       hls::stream<ap_uint<OutStreamW>> &out,
+       TW const &weights,
+       TA const &activation,
+       unsigned const reps,
+    R const &r) {
+#pragma HLS INLINE
+ unsigned const MatrixW = ConvKernelDim * ConvKernelDim * IFMChannels;
+  unsigned const MatrixH = OFMChannels;
+  unsigned const InpPerImage = IFMDim * IFMDim * IFMChannels * TSrcI::width / InStreamW;
+  hls::stream<ap_uint<SIMD*TSrcI::width> > wa_in("StreamingConvLayer_Batch.wa_in");
+  hls::stream<ap_uint<SIMD*TSrcI::width> > convInp("StreamingConvLayer_Batch.convInp");
+  hls::stream<ap_uint<PE*TDstI::width> > mvOut("StreamingConvLayer_Batch.mvOut");
+  StreamingDataWidthConverter_Batch<InStreamW, SIMD*TSrcI::width, InpPerImage>(in, wa_in, reps);
+  ConvolutionInputGenerator<ConvKernelDim, IFMChannels, TSrcI::width, IFMDim,
+   OFMDim, SIMD,1>(wa_in, convInp, reps, ap_resource_dflt());
+  Matrix_Vector_Activate_Batch<MatrixW, MatrixH, SIMD, PE, 1, TSrcI, TDstI, TWeightI>
+    (static_cast<hls::stream<ap_uint<SIMD*TSrcI::width>>&>(convInp),
+     static_cast<hls::stream<ap_uint<PE*TDstI::width>>&> (mvOut),
+     weights, activation, reps* OFMDim * OFMDim, r);
+  StreamingDataWidthConverter_Batch<PE*TDstI::width, OutStreamW, OFMDim * OFMDim * (OFMChannels / PE)>(mvOut, out, reps);
+
+}
+# 168 "cnnlstm/src/convlayer.h"
+template<
+        unsigned int ConvKernelDim,
+        unsigned int IFMChannels,
+        unsigned int IFMDim,
+        unsigned int OFMChannels,
+        unsigned int OFMDim,
+
+        unsigned int SIMD,
+        unsigned int PE,
+
+        unsigned int NUM_RED,
+        unsigned int REDF,
+        unsigned int MAX_CH_WIDTH,
+
+        typename TSrcI = Identity,
+        typename TDstI = Identity,
+        typename TWeightI = Identity,
+
+        int InStreamW, int OutStreamW,
+        typename TW, typename TA, typename R
+>
+void ConvLayer_Batch_TMR(hls::stream<ap_uint<InStreamW>> &in,
+                         hls::stream<ap_uint<OutStreamW>> &out,
+                         TW const &weights,
+                         TA const &activation,
+                         unsigned const reps,
+                         R const &r,
+                         ap_uint<2> &errortype,
+                         ap_uint<OFMChannels> channel_mask,
+                         ap_uint<MAX_CH_WIDTH> red_cha_index[NUM_RED]) {
+#pragma HLS INLINE
+ unsigned const MatrixW = ConvKernelDim * ConvKernelDim * IFMChannels;
+  unsigned const MatrixH = OFMChannels;
+  unsigned const InpPerImage = IFMDim*IFMDim;
+
+  hls::stream<ap_uint<SIMD*TSrcI::width> > wa_in("StreamingConvLayer_Batch.wa_in");
+  hls::stream<ap_uint<SIMD*TSrcI::width> > convInp("StreamingConvLayer_Batch.convInp");
+  hls::stream<ap_uint<PE*TDstI::width> > mvOut("StreamingConvLayer_Batch.mvOut");
+  hls::stream<ap_uint<OFMChannels*TDstI::width> > tmr_in("StreamingConvLayer_Batch.tmr_in");
+
+  StreamingDataWidthConverter_Batch<InStreamW, SIMD*TSrcI::width, InpPerImage>(in, wa_in, reps);
+
+
+  ConvolutionInputGenerator<ConvKernelDim, IFMChannels, TSrcI::width, IFMDim,
+            OFMDim, SIMD,1>(wa_in, convInp, reps, ap_resource_dflt());
+
+
+  Matrix_Vector_Activate_Batch<MatrixW, MatrixH, SIMD, PE, 1, TSrcI, TDstI, TWeightI>
+    (static_cast<hls::stream<ap_uint<SIMD*TSrcI::width>>&>(convInp),
+     static_cast<hls::stream<ap_uint<PE*TDstI::width>>&> (mvOut),
+     weights, activation, reps* OFMDim * OFMDim, r);
+
+  StreamingDataWidthConverter_Batch<PE*TDstI::width, OFMChannels*TDstI::width, OFMDim * OFMDim * (OFMChannels / PE)>(mvOut, tmr_in, reps);
+
+
+  TMRCheck_Batch<TDstI::width, OFMChannels, NUM_RED, REDF, OFMDim, MAX_CH_WIDTH>(tmr_in, out, errortype, channel_mask, red_cha_index, reps);
+}
+# 259 "cnnlstm/src/convlayer.h"
+template<
+  unsigned int ConvKernelDim,
+  unsigned int IFMChannels,
+  unsigned int IFMDim,
+  unsigned int OFMChannels,
+  unsigned int OFMDim,
+  unsigned int STRIDE,
+
+  unsigned int SIMD,
+  unsigned int PE,
+  unsigned int MMV,
+
+  typename TSrcI = Identity,
+  typename TDstI = Identity,
+  typename TWeightI = Identity,
+
+  int InStreamW, int OutStreamW,
+  typename TW, typename TA, typename R
+>
+void ConvLayer_Batch_MMV(hls::stream<ap_uint<InStreamW>> &in,
+       hls::stream<ap_uint<OutStreamW>> &out,
+       TW const &weights,
+       TA const &activation,
+       unsigned const reps,
+    R const &r) {
+#pragma HLS INLINE
+ unsigned const MatrixW = ConvKernelDim * ConvKernelDim * IFMChannels;
+  unsigned const MatrixH = OFMChannels;
+  unsigned const InpPerImage = IFMDim*IFMDim*IFMChannels * TSrcI::width/InStreamW;
+  const unsigned int mmvReps = (reps * OFMDim * OFMDim) / MMV;
+
+  hls::stream<ap_uint<SIMD * TSrcI::width> > wa_in("StreamingConvLayerMMV_Batch.wa_in");
+  hls::stream<MultiChanData<MMV, SIMD *TSrcI::width> > convInp("StreamingConvLayerMMV_Batch.convInp");
+  hls::stream<MultiChanData<MMV, PE * TDstI::width> > mmv2dwc("StreamingConvLayerMMV_Batch.mmv2dwc");
+  hls::stream<MultiChanData<MMV, OFMChannels * TDstI::width>> dwc2flat("dwc2flat");
+  hls::stream<ap_uint<MMV * OFMChannels * TDstI::width> > mvOut("StreamingConvLayerMMV_Batch.mvOut");
+
+  StreamingDataWidthConverter_Batch<InStreamW, SIMD * TSrcI::width, InpPerImage>(in, wa_in, reps);
+
+  ConvolutionInputGenerator_MMV<ConvKernelDim, IFMChannels, TSrcI::width, IFMDim,
+   OFMDim, SIMD, STRIDE, MMV>(wa_in, convInp, reps, ap_resource_dflt());
+  Matrix_Vector_Activate_Batch<MatrixW, MatrixH, SIMD, PE, MMV, TSrcI, TDstI, TWeightI>
+    (static_cast<hls::stream<MultiChanData<MMV,SIMD*TSrcI::width>>&>(convInp),
+     static_cast<hls::stream<MultiChanData<MMV,PE*TDstI::width>>&>(mmv2dwc),
+     weights, activation, mmvReps, r);
+
+  MultiChanDataWidthConverter_Batch<PE * TDstI::width, OFMChannels * TDstI::width, OFMDim * OFMDim * (OFMChannels / PE), MMV>(mmv2dwc, dwc2flat, reps);
+  FlattenMultiChanData<MMV, OFMChannels * TDstI::width>(dwc2flat, mvOut, mmvReps);
+  StreamingDataWidthConverter_Batch<MMV * OFMChannels * TDstI::width, OutStreamW, OFMDim * OFMDim / MMV>(mvOut, out, reps);
+
+}
+
+
+
+template<
+    unsigned int ConvKernelDim,
+    unsigned int IFMChannels,
+    unsigned int IFMDim,
+    unsigned int OFMChannels,
+    unsigned int OFMDim,
+
+    unsigned int SIMD,
+    unsigned int PE,
+
+    typename TSrcI = Identity,
+    typename TDstI = Identity,
+    typename TWeightI = Identity,
+
+    int InStreamW = 32, int OutStreamW = 32,
+    typename TW = int,
+    typename TA = ThresholdActivation<int>,
+    typename R = int
+>
+class myConvLayer_Batch {
+public:
+
+    myConvLayer_Batch() {
+#pragma HLS inline
+ }
+
+public:
+
+    void forward(hls::stream<ap_uint<InStreamW>>& in,
+                 hls::stream<ap_uint<OutStreamW>>& out,
+                 TW const& weights,
+                 TA const& activation,
+                 unsigned const reps,
+                 R const& r) const {
+#pragma HLS INLINE
+
+ unsigned const MatrixW = ConvKernelDim * ConvKernelDim * IFMChannels;
+        unsigned const MatrixH = OFMChannels;
+        unsigned const InpPerImage = IFMDim * IFMDim * IFMChannels * TSrcI::width / InStreamW;
+
+        hls::stream<ap_uint<SIMD*TSrcI::width>> wa_in("StreamingConvLayer_Batch.wa_in");
+        hls::stream<ap_uint<SIMD*TSrcI::width>> convInp("StreamingConvLayer_Batch.convInp");
+        hls::stream<ap_uint<PE*TDstI::width>> mvOut("StreamingConvLayer_Batch.mvOut");
+
+        StreamingDataWidthConverter_Batch<InStreamW, SIMD*TSrcI::width, InpPerImage>(in, wa_in, reps);
+        ConvolutionInputGenerator<ConvKernelDim, IFMChannels, TSrcI::width, IFMDim, OFMDim, SIMD, 1>
+            (wa_in, convInp, reps, ap_resource_dflt());
+        Matrix_Vector_Activate_Batch<MatrixW, MatrixH, SIMD, PE, 1, TSrcI, TDstI, TWeightI>
+            (static_cast<hls::stream<ap_uint<SIMD*TSrcI::width>>&>(convInp),
+             static_cast<hls::stream<ap_uint<PE*TDstI::width>>&>(mvOut),
+             weights, activation, reps * OFMDim * OFMDim, r);
+        StreamingDataWidthConverter_Batch<PE*TDstI::width, OutStreamW, OFMDim * OFMDim * (OFMChannels / PE)>
+            (mvOut, out, reps);
+    }
+};
+# 19 "cnnlstm/src/g_config.h" 2
 
 constexpr unsigned Inp_N = 10;
 constexpr unsigned Out_N = 20;
@@ -54137,10 +56729,16 @@ using nn_int9_t = ap_int<9>;
 using nn_uint8_t = ap_uint<8>;
 using nn_uint32_t = ap_uint<32>;
 using nn_int32_t = ap_int<32>;
-# 12 "cnnlstm/src/n_cnn.hpp" 2
+# 15 "cnnlstm/src/n_cnn.hpp" 2
 # 1 "cnnlstm/src/n_cnn_weights.hpp" 1
-# 11 "cnnlstm/src/n_cnn_weights.hpp"
-const nn_f32_t MultiThreshold_0_param0[Act_N_255] = {
+
+
+
+
+
+
+
+const nn_f32_t MultiThreshold_0_param0[255] = {
         -0.662519633769989,
         -0.65732342004776,
         -0.6521271467208862,
@@ -54397,7 +56995,11541 @@ const nn_f32_t MultiThreshold_0_param0[Act_N_255] = {
         0.6521272659301758,
         0.6573234796524048
 };
-# 13 "cnnlstm/src/n_cnn.hpp" 2
+
+const nn_f32_t MultiThreshold_3_param0[32][15] = {
+    {
+        85.84707641601562,
+        98.61155700683594,
+        111.37604522705078,
+        124.14051055908203,
+        136.90499877929688,
+        149.6694793701172,
+        162.4339599609375,
+        175.1984405517578,
+        187.9629364013672,
+        200.7274169921875,
+        213.4918975830078,
+        226.2563934326172,
+        239.0208740234375,
+        251.7853546142578,
+        264.5498352050781
+    },
+    {
+        371.53900146484375,
+        397.672607421875,
+        423.8062744140625,
+        449.93988037109375,
+        476.0735168457031,
+        502.2071533203125,
+        528.3408203125,
+        554.474365234375,
+        580.6080322265625,
+        606.74169921875,
+        632.8753051757812,
+        659.0089111328125,
+        685.1425170898438,
+        711.2761840820312,
+        737.4097900390625
+    },
+    {
+        78.37501525878906,
+        89.3084487915039,
+        100.24187469482422,
+        111.17530822753906,
+        122.10875701904297,
+        133.0421905517578,
+        143.9756317138672,
+        154.90907287597656,
+        165.84249877929688,
+        176.77593994140625,
+        187.70938110351562,
+        198.64280700683594,
+        209.57623291015625,
+        220.50967407226562,
+        231.44309997558594
+    },
+    {
+        84.85649871826172,
+        97.95594787597656,
+        111.05541229248047,
+        124.15486907958984,
+        137.25433349609375,
+        150.35379028320312,
+        163.4532470703125,
+        176.55270385742188,
+        189.65216064453125,
+        202.75161743164062,
+        215.85107421875,
+        228.9505157470703,
+        242.04998779296875,
+        255.14944458007812,
+        268.2489013671875
+    },
+    {
+        69.73947143554688,
+        80.75605773925781,
+        91.77265167236328,
+        102.78923034667969,
+        113.8058090209961,
+        124.82240295410156,
+        135.83897399902344,
+        146.85557556152344,
+        157.8721466064453,
+        168.8887481689453,
+        179.9053192138672,
+        190.9219207763672,
+        201.93850708007812,
+        212.95509338378906,
+        223.97166442871094
+    },
+    {
+        614.3330078125,
+        658.8314819335938,
+        703.3298950195312,
+        747.828369140625,
+        792.3267822265625,
+        836.8251953125,
+        881.32373046875,
+        925.8221435546875,
+        970.320556640625,
+        1014.8189697265625,
+        1059.3173828125,
+        1103.8157958984375,
+        1148.314208984375,
+        1192.812744140625,
+        1237.311279296875
+    },
+    {
+        259.62847900390625,
+        277.3558349609375,
+        295.0832214355469,
+        312.81060791015625,
+        330.5379638671875,
+        348.26531982421875,
+        365.99267578125,
+        383.72003173828125,
+        401.44744873046875,
+        419.1748046875,
+        436.90216064453125,
+        454.6295471191406,
+        472.3569030761719,
+        490.0842590332031,
+        507.8116455078125
+    },
+    {
+        381.8020324707031,
+        410.3723449707031,
+        438.9426574707031,
+        467.51300048828125,
+        496.08331298828125,
+        524.6536865234375,
+        553.2239990234375,
+        581.7943115234375,
+        610.3646240234375,
+        638.9349365234375,
+        667.5052490234375,
+        696.0755615234375,
+        724.6458740234375,
+        753.2161865234375,
+        781.7865600585938
+    },
+    {
+        -514.2105712890625,
+        -460.7158203125,
+        -407.2210388183594,
+        -353.72625732421875,
+        -300.23150634765625,
+        -246.73672485351562,
+        -193.241943359375,
+        -139.7471923828125,
+        -86.25241088867188,
+        -32.75762939453125,
+        20.73712158203125,
+        74.23187255859375,
+        127.7266845703125,
+        181.221435546875,
+        234.7161865234375
+    },
+    {
+        -244.09217834472656,
+        -219.081298828125,
+        -194.07041931152344,
+        -169.05953979492188,
+        -144.04864501953125,
+        -119.03775024414062,
+        -94.02687072753906,
+        -69.0159912109375,
+        -44.005096435546875,
+        -18.994216918945312,
+        6.01666259765625,
+        31.027557373046875,
+        56.038421630859375,
+        81.04931640625,
+        106.0601806640625
+    },
+    {
+        980.811767578125,
+        1063.166748046875,
+        1145.521728515625,
+        1227.876708984375,
+        1310.2318115234375,
+        1392.5867919921875,
+        1474.9417724609375,
+        1557.2967529296875,
+        1639.6517333984375,
+        1722.0067138671875,
+        1804.3616943359375,
+        1886.7166748046875,
+        1969.0716552734375,
+        2051.4267578125,
+        2133.78173828125
+    },
+    {
+        102.4383316040039,
+        116.89429473876953,
+        131.35025024414062,
+        145.8061981201172,
+        160.2621612548828,
+        174.71812438964844,
+        189.174072265625,
+        203.63003540039062,
+        218.08599853515625,
+        232.5419464111328,
+        246.99790954589844,
+        261.453857421875,
+        275.9098205566406,
+        290.36578369140625,
+        304.82171630859375
+    },
+    {
+        -61.30729675292969,
+        -44.316497802734375,
+        -27.325698852539062,
+        -10.33489990234375,
+        6.6558990478515625,
+        23.646697998046875,
+        40.63749694824219,
+        57.6282958984375,
+        74.61911010742188,
+        91.60990905761719,
+        108.6007080078125,
+        125.59150695800781,
+        142.58230590820312,
+        159.57308959960938,
+        176.56390380859375
+    },
+    {
+        -283.91741943359375,
+        -242.0975341796875,
+        -200.2776336669922,
+        -158.457763671875,
+        -116.63787841796875,
+        -74.8179931640625,
+        -32.99810791015625,
+        8.82177734375,
+        50.641693115234375,
+        92.46157836914062,
+        134.28143310546875,
+        176.10137939453125,
+        217.92120361328125,
+        259.74114990234375,
+        301.56097412109375
+    },
+    {
+        -227.18174743652344,
+        -201.6639862060547,
+        -176.146240234375,
+        -150.6284637451172,
+        -125.1107177734375,
+        -99.59295654296875,
+        -74.0751953125,
+        -48.55744934082031,
+        -23.0396728515625,
+        2.47808837890625,
+        27.995849609375,
+        53.51361083984375,
+        79.03134155273438,
+        104.54910278320312,
+        130.06686401367188
+    },
+    {
+        -841.0809326171875,
+        -745.1991577148438,
+        -649.3173828125,
+        -553.4356079101562,
+        -457.5537414550781,
+        -361.6719970703125,
+        -265.79022216796875,
+        -169.908447265625,
+        -74.0267333984375,
+        21.8551025390625,
+        117.73681640625,
+        213.6185302734375,
+        309.5003662109375,
+        405.382080078125,
+        501.263916015625
+    },
+    {
+        -275.2254333496094,
+        -248.67759704589844,
+        -222.1297607421875,
+        -195.58193969726562,
+        -169.0341033935547,
+        -142.48626708984375,
+        -115.93844604492188,
+        -89.390625,
+        -62.8427734375,
+        -36.29493713378906,
+        -9.747116088867188,
+        16.80072021484375,
+        43.34857177734375,
+        69.89639282226562,
+        96.4442138671875
+    },
+    {
+        286.22161865234375,
+        316.266845703125,
+        346.31207275390625,
+        376.3572998046875,
+        406.40252685546875,
+        436.44775390625,
+        466.4930114746094,
+        496.5382080078125,
+        526.5834350585938,
+        556.628662109375,
+        586.6738891601562,
+        616.7191162109375,
+        646.7643432617188,
+        676.8095703125,
+        706.854736328125
+    },
+    {
+        571.7745361328125,
+        632.8372192382812,
+        693.8999633789062,
+        754.962646484375,
+        816.025390625,
+        877.0880737304688,
+        938.1507568359375,
+        999.2135009765625,
+        1060.276123046875,
+        1121.3388671875,
+        1182.401611328125,
+        1243.46435546875,
+        1304.5269775390625,
+        1365.589599609375,
+        1426.65234375
+    },
+    {
+        618.9974365234375,
+        683.1995239257812,
+        747.401611328125,
+        811.6036987304688,
+        875.8057861328125,
+        940.0078125,
+        1004.2098999023438,
+        1068.412109375,
+        1132.6141357421875,
+        1196.816162109375,
+        1261.018310546875,
+        1325.220458984375,
+        1389.42236328125,
+        1453.62451171875,
+        1517.82666015625
+    },
+    {
+        285.8845520019531,
+        314.8155517578125,
+        343.7465515136719,
+        372.67755126953125,
+        401.60858154296875,
+        430.53955078125,
+        459.4705810546875,
+        488.4015808105469,
+        517.3325805664062,
+        546.2635498046875,
+        575.194580078125,
+        604.1256103515625,
+        633.056640625,
+        661.987548828125,
+        690.9185791015625
+    },
+    {
+        592.9011840820312,
+        641.0076904296875,
+        689.1141357421875,
+        737.2205810546875,
+        785.3270874023438,
+        833.43359375,
+        881.5400390625,
+        929.6465454101562,
+        977.7529907226562,
+        1025.8594970703125,
+        1073.966064453125,
+        1122.072509765625,
+        1170.178955078125,
+        1218.285400390625,
+        1266.391845703125
+    },
+    {
+        -382.1487121582031,
+        -343.627685546875,
+        -305.1066589355469,
+        -266.58563232421875,
+        -228.06463623046875,
+        -189.54360961914062,
+        -151.02261352539062,
+        -112.5015869140625,
+        -73.98052978515625,
+        -35.45953369140625,
+        3.061492919921875,
+        41.58251953125,
+        80.103515625,
+        118.62454223632812,
+        157.14556884765625
+    },
+    {
+        396.6308288574219,
+        440.1271667480469,
+        483.6235046386719,
+        527.1198120117188,
+        570.6161499023438,
+        614.1124877929688,
+        657.6088256835938,
+        701.1051635742188,
+        744.6015014648438,
+        788.0978393554688,
+        831.5941162109375,
+        875.0904541015625,
+        918.5867919921875,
+        962.0831298828125,
+        1005.5795288085938
+    },
+    {
+        372.1449279785156,
+        402.94500732421875,
+        433.7451171875,
+        464.5452575683594,
+        495.3453369140625,
+        526.1455078125,
+        556.945556640625,
+        587.7456665039062,
+        618.5457763671875,
+        649.3458862304688,
+        680.14599609375,
+        710.946044921875,
+        741.7462158203125,
+        772.5462646484375,
+        803.346435546875
+    },
+    {
+        301.6929626464844,
+        328.9506530761719,
+        356.20831298828125,
+        383.4659729003906,
+        410.7236328125,
+        437.9812927246094,
+        465.23895263671875,
+        492.4966125488281,
+        519.7542724609375,
+        547.011962890625,
+        574.2695922851562,
+        601.5272216796875,
+        628.784912109375,
+        656.0426025390625,
+        683.30029296875
+    },
+    {
+        -226.62168884277344,
+        -201.7802734375,
+        -176.9388427734375,
+        -152.097412109375,
+        -127.2559814453125,
+        -102.41456604003906,
+        -77.57313537597656,
+        -52.731689453125,
+        -27.8902587890625,
+        -3.048828125,
+        21.7926025390625,
+        46.634033203125,
+        71.47543334960938,
+        96.31686401367188,
+        121.15829467773438
+    },
+    {
+        1137.974609375,
+        1271.4266357421875,
+        1404.8787841796875,
+        1538.3309326171875,
+        1671.782958984375,
+        1805.235107421875,
+        1938.687255859375,
+        2072.139404296875,
+        2205.591552734375,
+        2339.04345703125,
+        2472.49560546875,
+        2605.94775390625,
+        2739.39990234375,
+        2872.85205078125,
+        3006.30419921875
+    },
+    {
+        -361.89886474609375,
+        -326.8494873046875,
+        -291.80010986328125,
+        -256.7507019042969,
+        -221.70130920410156,
+        -186.6519317626953,
+        -151.6025390625,
+        -116.55316162109375,
+        -81.50372314453125,
+        -46.454345703125,
+        -11.404937744140625,
+        23.644439697265625,
+        58.69384765625,
+        93.74325561523438,
+        128.7926025390625
+    },
+    {
+        -325.2415771484375,
+        -289.4173889160156,
+        -253.5931854248047,
+        -217.76898193359375,
+        -181.94482421875,
+        -146.12063598632812,
+        -110.29641723632812,
+        -74.47225952148438,
+        -38.6480712890625,
+        -2.823883056640625,
+        33.000335693359375,
+        68.82449340820312,
+        104.64871215820312,
+        140.47283935546875,
+        176.29705810546875
+    },
+    {
+        624.2958374023438,
+        678.858154296875,
+        733.4205322265625,
+        787.9827880859375,
+        842.545166015625,
+        897.1075439453125,
+        951.6698608398438,
+        1006.232177734375,
+        1060.7945556640625,
+        1115.35693359375,
+        1169.919189453125,
+        1224.4814453125,
+        1279.0438232421875,
+        1333.6060791015625,
+        1388.16845703125
+    },
+    {
+        -281.82720947265625,
+        -238.94320678710938,
+        -196.0592041015625,
+        -153.17520141601562,
+        -110.29116821289062,
+        -67.40713500976562,
+        -24.52313232421875,
+        18.360870361328125,
+        61.244964599609375,
+        104.12896728515625,
+        147.012939453125,
+        189.89697265625,
+        232.781005859375,
+        275.6650390625,
+        318.5489501953125
+    }
+};
+
+const nn_f32_t MultiThreshold_4_param0[64][15] = {
+    {
+        3.508705, 19.608925, 35.709148, 51.809364, 67.909584, 84.009811, 100.110039, 116.210243, 132.310471, 148.410690, 164.510910, 180.611130, 196.711349, 212.811584, 228.911789
+    },
+    {
+        128.566010, 134.726593, 140.887177, 147.047775, 153.208359, 159.368942, 165.529526, 171.690094, 177.850693, 184.011261, 190.171860, 196.332443, 202.493011, 208.653610, 214.814178
+    },
+    {
+        4.771485, 22.124851, 39.478218, 56.831581, 74.184952, 91.538315, 108.891685, 126.245049, 143.598419, 160.951782, 178.305145, 195.658508, 213.011887, 230.365250, 247.718613
+    },
+    {
+        3.654888, 10.807464, 17.960039, 25.112614, 32.265190, 39.417763, 46.570339, 53.722912, 60.875488, 68.028069, 75.180634, 82.333214, 89.485794, 96.638367, 103.790939
+    },
+    {
+        140.998779, 148.619736, 156.240707, 163.861664, 171.482635, 179.103592, 186.724564, 194.345520, 201.966461, 209.587448, 217.208389, 224.829361, 232.450317, 240.071274, 247.692245
+    },
+    {
+        413.599426, 429.880127, 446.160828, 462.441528, 478.722229, 495.002930, 511.283600, 527.564331, 543.845032, 560.125732, 576.406433, 592.687073, 608.967834, 625.248535, 641.529236
+    },
+    {
+        5.197925, 12.877139, 20.556355, 28.235565, 35.914783, 43.593990, 51.273209, 58.952423, 66.631638, 74.310852, 81.990059, 89.669281, 97.348495, 105.027710, 112.706917
+    },
+    {
+        5.552088, 14.344483, 23.136881, 31.929276, 40.721672, 49.514065, 58.306465, 67.098854, 75.891251, 84.683647, 93.476036, 102.268440, 111.060837, 119.853233, 128.645630
+    },
+    {
+        32.277111, 41.943455, 51.609798, 61.276142, 70.942490, 80.608826, 90.275169, 99.941513, 109.607864, 119.274208, 128.940536, 138.606888, 148.273239, 157.939575, 167.605911
+    },
+    {
+        110.768806, 123.170578, 135.572342, 147.974121, 160.375885, 172.777664, 185.179443, 197.581192, 209.982986, 222.384735, 234.786514, 247.188293, 259.590057, 271.991852, 284.393585
+    },
+    {
+        49.963932, 55.197773, 60.431610, 65.665451, 70.899292, 76.133133, 81.366982, 86.600807, 91.834663, 97.068497, 102.302338, 107.536179, 112.770020, 118.003860, 123.237694
+    },
+    {
+        1.516357, 17.548332, 33.580307, 49.612282, 65.644257, 81.676231, 97.708206, 113.740181, 129.772156, 145.804138, 161.836105, 177.868088, 193.900055, 209.932037, 225.964005
+    },
+    {
+        -259.345856, -248.334518, -237.323181, -226.311859, -215.300522, -204.289200, -193.277863, -182.266556, -171.255203, -160.243881, -149.232559, -138.221237, -127.209908, -116.198578, -105.187256
+    },
+    {
+        -115.112366, -106.485062, -97.857758, -89.230453, -80.603149, -71.975845, -63.348537, -54.721233, -46.093925, -37.466618, -28.839319, -20.212011, -11.584704, -2.957397, 5.669903
+    },
+    {
+        189.160736, 199.527740, 209.894730, 220.261719, 230.628723, 240.995712, 251.362717, 261.729706, 272.096680, 282.463715, 292.830688, 303.197662, 313.564667, 323.931641, 334.298676
+    },
+    {
+        -183.194626, -172.446335, -161.698029, -150.949722, -140.201431, -129.453125, -118.704826, -107.956535, -97.208229, -86.459930, -75.711639, -64.963333, -54.215034, -43.466732, -32.718441
+    },
+    {
+        191.279251, 200.395233, 209.511200, 218.627167, 227.743149, 236.859116, 245.975082, 255.091034, 264.207031, 273.322968, 282.438965, 291.554932, 300.670868, 309.786865, 318.902832
+    },
+    {
+        75.625381, 89.773247, 103.921127, 118.069000, 132.216873, 146.364746, 160.512619, 174.660477, 188.808350, 202.956238, 217.104111, 231.251984, 245.399857, 259.547729, 273.695587
+    },
+    {
+        149.777130, 157.126282, 164.475418, 171.824570, 179.173721, 186.522858, 193.872009, 201.221146, 208.570297, 215.919434, 223.268600, 230.617722, 237.966858, 245.316025, 252.665161
+    },
+    {
+        110.245316, 117.877563, 125.509819, 133.142075, 140.774338, 148.406586, 156.038849, 163.671097, 171.303345, 178.935608, 186.567856, 194.200104, 201.832367, 209.464615, 217.096878
+    },
+    {
+        -185.897873, -175.340332, -164.782806, -154.225281, -143.667755, -133.110229, -122.552696, -111.995178, -101.437653, -90.880119, -80.322601, -69.765076, -59.207550, -48.650021, -38.092503
+    },
+    {
+        -39.412735, -32.120445, -24.828156, -17.535870, -10.243578, -2.951291, 4.341000, 11.633287, 18.925579, 26.217869, 33.510155, 40.802444, 48.094734, 55.387020, 62.679314
+    },
+    {
+        -351.298248, -336.110718, -320.923187, -305.735687, -290.548157, -275.360626, -260.173096, -244.985565, -229.798065, -214.610519, -199.423004, -184.235474, -169.047943, -153.860428, -138.672913
+    },
+    {
+        52.990341, 57.472210, 61.954071, 66.435936, 70.917801, 75.399673, 79.881538, 84.363396, 88.845268, 93.327126, 97.808990, 102.290863, 106.772728, 111.254593, 115.736450
+    },
+    {
+        -36.145397, -29.776876, -23.408350, -17.039827, -10.671302, -4.302779, 2.065747, 8.434270, 14.802795, 21.171320, 27.539841, 33.908367, 40.276894, 46.645416, 53.013939
+    },
+    {
+        -28.516281, -21.014938, -13.513592, -6.012249, 1.489098, 8.990441, 16.491789, 23.993132, 31.494478, 38.995823, 46.497166, 53.998512, 61.499859, 69.001205, 76.502541
+    },
+    {
+        12.049262, 19.317265, 26.585272, 33.853275, 41.121281, 48.389282, 55.657288, 62.925289, 70.193291, 77.461296, 84.729309, 91.997314, 99.265320, 106.533325, 113.801315
+    },
+    {
+        -20.335289, -13.032757, -5.730223, 1.572308, 8.874843, 16.177374, 23.479910, 30.782440, 38.084976, 45.387508, 52.690037, 59.992573, 67.295105, 74.597641, 81.900169
+    },
+    {
+        72.471268, 85.297371, 98.123474, 110.949585, 123.775696, 136.601791, 149.427902, 162.253998, 175.080109, 187.906219, 200.732315, 213.558426, 226.384537, 239.210648, 252.036728
+    },
+    {
+        -41.201538, -28.885490, -16.569435, -4.253385, 8.062671, 20.378719, 32.694775, 45.010826, 57.326881, 69.642937, 81.958977, 94.275032, 106.591087, 118.907143, 131.223190
+    },
+    {
+        3.078108, 11.069163, 19.060219, 27.051271, 35.042332, 43.033379, 51.024437, 59.015495, 67.006554, 74.997604, 82.988655, 90.979713, 98.970772, 106.961830, 114.952881
+    },
+    {
+        35.603649, 51.513672, 67.423691, 83.333710, 99.243736, 115.153755, 131.063782, 146.973801, 162.883835, 178.793854, 194.703873, 210.613892, 226.523926, 242.433945, 258.343933
+    },
+    {
+        32.284821, 38.226048, 44.167274, 50.108501, 56.049728, 61.990952, 67.932182, 73.873413, 79.814636, 85.755867, 91.697098, 97.638313, 103.579552, 109.520775, 115.462006
+    },
+    {
+        -106.538719, -97.084831, -87.630951, -78.177063, -68.723175, -59.269287, -49.815399, -40.361515, -30.907625, -21.453737, -11.999857, -2.545969, 6.907920, 16.361809, 25.815689
+    },
+    {
+        -95.199257, -86.882210, -78.565178, -70.248131, -61.931084, -53.614040, -45.296993, -36.979950, -28.662905, -20.345860, -12.028820, -3.711774, 4.605272, 12.922318, 21.239357
+    },
+    {
+        -12.152414, -5.554790, 1.042836, 7.640459, 14.238085, 20.835709, 27.433334, 34.030956, 40.628582, 47.226212, 53.823830, 60.421455, 67.019081, 73.616707, 80.214325
+    },
+    {
+        -29.889198, -22.698980, -15.508759, -8.318540, -1.128317, 6.061901, 13.252123, 20.442343, 27.632565, 34.822784, 42.013000, 49.203224, 56.393440, 63.583664, 70.773888
+    },
+    {
+        35.307934, 51.540833, 67.773735, 84.006615, 100.239517, 116.472420, 132.705322, 148.938202, 165.171097, 181.403992, 197.636887, 213.869781, 230.102676, 246.335602, 262.568481
+    },
+    {
+        102.953743, 108.715508, 114.477280, 120.239052, 126.000824, 131.762589, 137.524368, 143.286133, 149.047913, 154.809677, 160.571442, 166.333206, 172.095001, 177.856750, 183.618515
+    },
+    {
+        11.463954, 25.990242, 40.516533, 55.042820, 69.569115, 84.095398, 98.621689, 113.147980, 127.674271, 142.200562, 156.726837, 171.253128, 185.779434, 200.305725, 214.832001
+    },
+    {
+        24.482681, 30.761806, 37.040932, 43.320053, 49.599178, 55.878304, 62.157429, 68.436546, 74.715675, 80.994797, 87.273918, 93.553040, 99.832176, 106.111298, 112.390411
+    },
+    {
+        51.190495, 58.507072, 65.823654, 73.140228, 80.456810, 87.773392, 95.089973, 102.406548, 109.723129, 117.039711, 124.356277, 131.672867, 138.989441, 146.306015, 153.622604
+    },
+    {
+        13.503729, 21.309296, 29.114862, 36.920425, 44.725994, 52.531559, 60.337128, 68.142693, 75.948265, 83.753830, 91.559395, 99.364960, 107.170532, 114.976097, 122.781654
+    },
+    {
+        -42.102833, -35.417427, -28.732014, -22.046606, -15.361195, -8.675786, -1.990375, 4.695034, 11.380445, 18.065857, 24.751263, 31.436674, 38.122086, 44.807495, 51.492901
+    },
+    {
+        -131.779099, -121.396606, -111.014122, -100.631630, -90.249138, -79.866653, -69.484161, -59.101677, -48.719185, -38.336693, -27.954212, -17.571720, -7.189229, 3.193263, 13.575745
+    },
+    {
+        76.705444, 83.994987, 91.284515, 98.574059, 105.863594, 113.153137, 120.442680, 127.732201, 135.021759, 142.311279, 149.600830, 156.890366, 164.179901, 171.469437, 178.758972
+    },
+    {
+        72.421104, 80.164642, 87.908165, 95.651703, 103.395233, 111.138771, 118.882301, 126.625824, 134.369370, 142.112885, 149.856430, 157.599960, 165.343491, 173.087021, 180.830551
+    },
+    {
+        -88.977722, -80.838516, -72.699326, -64.560120, -56.420918, -48.281719, -40.142517, -32.003319, -23.864119, -15.724916, -7.585721, 0.553480, 8.692682, 16.831884, 24.971079
+    },
+    {
+        44.088894, 48.736092, 53.383282, 58.030479, 62.677673, 67.324875, 71.972069, 76.619255, 81.266457, 85.913651, 90.560844, 95.208038, 99.855232, 104.502434, 109.149620
+    },
+    {
+        -125.963776, -117.230827, -108.497879, -99.764931, -91.031982, -82.299026, -73.566078, -64.833138, -56.100185, -47.367233, -38.634289, -29.901339, -21.168388, -12.435437, -3.702494
+    },
+    {
+        94.807037, 104.798828, 114.790604, 124.782394, 134.774185, 144.765976, 154.757751, 164.749542, 174.741318, 184.733124, 194.724899, 204.716675, 214.708466, 224.700256, 234.692047
+    },
+    {
+        327.990753, 341.541351, 355.091949, 368.642578, 382.193176, 395.743774, 409.294373, 422.844971, 436.395599, 449.946167, 463.496735, 477.047363, 490.597992, 504.148590, 517.699158
+    },
+    {
+        97.443008, 103.464958, 109.486908, 115.508858, 121.530807, 127.552757, 133.574707, 139.596664, 145.618591, 151.640564, 157.662491, 163.684448, 169.706390, 175.728348, 181.750290
+    },
+    {
+        84.504913, 93.419044, 102.333168, 111.247299, 120.161430, 129.075562, 137.989700, 146.903809, 155.817963, 164.732071, 173.646210, 182.560333, 191.474472, 200.388611, 209.302719
+    },
+    {
+        116.550461, 123.075203, 129.599945, 136.124695, 142.649429, 149.174179, 155.698929, 162.223663, 168.748398, 175.273163, 181.797897, 188.322632, 194.847382, 201.372131, 207.896866
+    },
+    {
+        6.596074, 18.245480, 29.894888, 41.544292, 53.193699, 64.843102, 76.492516, 88.141914, 99.791321, 111.440735, 123.090134, 134.739532, 146.388947, 158.038361, 169.687759
+    },
+    {
+        322.843262, 336.724518, 350.605774, 364.487030, 378.368286, 392.249542, 406.130798, 420.012054, 433.893311, 447.774567, 461.655823, 475.537048, 489.418335, 503.299591, 517.180847
+    },
+    {
+        68.857819, 77.157288, 85.456757, 93.756218, 102.055687, 110.355148, 118.654617, 126.954086, 135.253555, 143.553024, 151.852478, 160.151962, 168.451401, 176.750885, 185.050339
+    },
+    {
+        -94.177040, -83.879341, -73.581642, -63.283947, -52.986248, -42.688553, -32.390850, -22.093155, -11.795455, -1.497755, 8.799936, 19.097637, 29.395338, 39.693039, 49.990730
+    },
+    {
+        8.474170, 12.165326, 15.856483, 19.547636, 23.238792, 26.929949, 30.621105, 34.312260, 38.003414, 41.694572, 45.385723, 49.076881, 52.768036, 56.459194, 60.150345
+    },
+    {
+        127.220055, 136.009018, 144.797989, 153.586960, 162.375916, 171.164886, 179.953857, 188.742813, 197.531799, 206.320755, 215.109711, 223.898682, 232.687653, 241.476624, 250.265579
+    },
+    {
+        32.510929, 39.780731, 47.050537, 54.320339, 61.590145, 68.859947, 76.129753, 83.399551, 90.669357, 97.939163, 105.208961, 112.478767, 119.748566, 127.018372, 134.288177
+    },
+    {
+        18.616608, 34.237587, 49.858570, 65.479546, 81.100525, 96.721504, 112.342484, 127.963463, 143.584442, 159.205429, 174.826401, 190.447388, 206.068359, 221.689346, 237.310333
+    },
+    {
+        0.632721, 8.085195, 15.537668, 22.990139, 30.442614, 37.895084, 45.347561, 52.800034, 60.252502, 67.704979, 75.157455, 82.609932, 90.062401, 97.514877, 104.967339
+    }
+};
+
+const nn_int4_t Conv_0_param0[32][1][3][1] = {
+    {
+        {
+            {
+                -7.000000
+            },
+            {
+                5.000000
+            },
+            {
+                2.000000
+            }
+        }
+    },
+    {
+        {
+            {
+                -7.000000
+            },
+            {
+                4.000000
+            },
+            {
+                5.000000
+            }
+        }
+    },
+    {
+        {
+            {
+                5.000000
+            },
+            {
+                0.000000
+            },
+            {
+                -5.000000
+            }
+        }
+    },
+    {
+        {
+            {
+                -4.000000
+            },
+            {
+                -3.000000
+            },
+            {
+                7.000000
+            }
+        }
+    },
+    {
+        {
+            {
+                4.000000
+            },
+            {
+                0.000000
+            },
+            {
+                -4.000000
+            }
+        }
+    },
+    {
+        {
+            {
+                7.000000
+            },
+            {
+                4.000000
+            },
+            {
+                -7.000000
+            }
+        }
+    },
+    {
+        {
+            {
+                5.000000
+            },
+            {
+                2.000000
+            },
+            {
+                -6.000000
+            }
+        }
+    },
+    {
+        {
+            {
+                -7.000000
+            },
+            {
+                5.000000
+            },
+            {
+                4.000000
+            }
+        }
+    },
+    {
+        {
+            {
+                -5.000000
+            },
+            {
+                -1.000000
+            },
+            {
+                2.000000
+            }
+        }
+    },
+    {
+        {
+            {
+                0.000000
+            },
+            {
+                -6.000000
+            },
+            {
+                4.000000
+            }
+        }
+    },
+    {
+        {
+            {
+                -3.000000
+            },
+            {
+                3.000000
+            },
+            {
+                6.000000
+            }
+        }
+    },
+    {
+        {
+            {
+                -7.000000
+            },
+            {
+                1.000000
+            },
+            {
+                6.000000
+            }
+        }
+    },
+    {
+        {
+            {
+                1.000000
+            },
+            {
+                5.000000
+            },
+            {
+                -7.000000
+            }
+        }
+    },
+    {
+        {
+            {
+                3.000000
+            },
+            {
+                1.000000
+            },
+            {
+                -7.000000
+            }
+        }
+    },
+    {
+        {
+            {
+                -7.000000
+            },
+            {
+                0.000000
+            },
+            {
+                5.000000
+            }
+        }
+    },
+    {
+        {
+            {
+                -1.000000
+            },
+            {
+                1.000000
+            },
+            {
+                -7.000000
+            }
+        }
+    },
+    {
+        {
+            {
+                1.000000
+            },
+            {
+                -7.000000
+            },
+            {
+                4.000000
+            }
+        }
+    },
+    {
+        {
+            {
+                -1.000000
+            },
+            {
+                6.000000
+            },
+            {
+                -3.000000
+            }
+        }
+    },
+    {
+        {
+            {
+                7.000000
+            },
+            {
+                0.000000
+            },
+            {
+                -3.000000
+            }
+        }
+    },
+    {
+        {
+            {
+                -2.000000
+            },
+            {
+                3.000000
+            },
+            {
+                3.000000
+            }
+        }
+    },
+    {
+        {
+            {
+                7.000000
+            },
+            {
+                -2.000000
+            },
+            {
+                -3.000000
+            }
+        }
+    },
+    {
+        {
+            {
+                4.000000
+            },
+            {
+                7.000000
+            },
+            {
+                -7.000000
+            }
+        }
+    },
+    {
+        {
+            {
+                -5.000000
+            },
+            {
+                7.000000
+            },
+            {
+                -5.000000
+            }
+        }
+    },
+    {
+        {
+            {
+                6.000000
+            },
+            {
+                -6.000000
+            },
+            {
+                3.000000
+            }
+        }
+    },
+    {
+        {
+            {
+                -7.000000
+            },
+            {
+                5.000000
+            },
+            {
+                4.000000
+            }
+        }
+    },
+    {
+        {
+            {
+                6.000000
+            },
+            {
+                2.000000
+            },
+            {
+                -6.000000
+            }
+        }
+    },
+    {
+        {
+            {
+                -2.000000
+            },
+            {
+                7.000000
+            },
+            {
+                -7.000000
+            }
+        }
+    },
+    {
+        {
+            {
+                2.000000
+            },
+            {
+                -1.000000
+            },
+            {
+                7.000000
+            }
+        }
+    },
+    {
+        {
+            {
+                -2.000000
+            },
+            {
+                -7.000000
+            },
+            {
+                6.000000
+            }
+        }
+    },
+    {
+        {
+            {
+                3.000000
+            },
+            {
+                -7.000000
+            },
+            {
+                1.000000
+            }
+        }
+    },
+    {
+        {
+            {
+                -3.000000
+            },
+            {
+                1.000000
+            },
+            {
+                6.000000
+            }
+        }
+    },
+    {
+        {
+            {
+                4.000000
+            },
+            {
+                -1.000000
+            },
+            {
+                -6.000000
+            }
+        }
+    }
+};
+
+const nn_int4_t Conv_1_param0[64][32][3][1] = {
+    {
+        {
+            0.000000,
+            2.000000,
+            -2.000000
+        },
+        {
+            -1.000000,
+            -1.000000,
+            -1.000000
+        },
+        {
+            -2.000000,
+            -2.000000,
+            -3.000000
+        },
+        {
+            4.000000,
+            -1.000000,
+            -2.000000
+        },
+        {
+            0.000000,
+            2.000000,
+            0.000000
+        },
+        {
+            -2.000000,
+            1.000000,
+            5.000000
+        },
+        {
+            -2.000000,
+            -1.000000,
+            -2.000000
+        },
+        {
+            4.000000,
+            0.000000,
+            -1.000000
+        },
+        {
+            -1.000000,
+            -4.000000,
+            -2.000000
+        },
+        {
+            1.000000,
+            2.000000,
+            -2.000000
+        },
+        {
+            2.000000,
+            -1.000000,
+            -2.000000
+        },
+        {
+            1.000000,
+            0.000000,
+            -2.000000
+        },
+        {
+            1.000000,
+            -2.000000,
+            -2.000000
+        },
+        {
+            1.000000,
+            -2.000000,
+            -4.000000
+        },
+        {
+            -4.000000,
+            -1.000000,
+            0.000000
+        },
+        {
+            0.000000,
+            -1.000000,
+            -3.000000
+        },
+        {
+            -3.000000,
+            -4.000000,
+            -2.000000
+        },
+        {
+            3.000000,
+            5.000000,
+            -1.000000
+        },
+        {
+            2.000000,
+            2.000000,
+            5.000000
+        },
+        {
+            3.000000,
+            3.000000,
+            0.000000
+        },
+        {
+            -1.000000,
+            2.000000,
+            6.000000
+        },
+        {
+            0.000000,
+            5.000000,
+            4.000000
+        },
+        {
+            -2.000000,
+            -1.000000,
+            -2.000000
+        },
+        {
+            2.000000,
+            1.000000,
+            2.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            0.000000
+        },
+        {
+            -3.000000,
+            4.000000,
+            5.000000
+        },
+        {
+            -4.000000,
+            -4.000000,
+            0.000000
+        },
+        {
+            4.000000,
+            2.000000,
+            0.000000
+        },
+        {
+            -1.000000,
+            2.000000,
+            1.000000
+        },
+        {
+            3.000000,
+            1.000000,
+            -3.000000
+        },
+        {
+            2.000000,
+            0.000000,
+            -2.000000
+        },
+        {
+            1.000000,
+            0.000000,
+            -1.000000
+        }
+    },
+    {
+        {
+            0.000000,
+            -1.000000,
+            1.000000
+        },
+        {
+            1.000000,
+            4.000000,
+            -3.000000
+        },
+        {
+            -4.000000,
+            3.000000,
+            4.000000
+        },
+        {
+            0.000000,
+            7.000000,
+            -3.000000
+        },
+        {
+            -2.000000,
+            2.000000,
+            3.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            0.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            6.000000
+        },
+        {
+            1.000000,
+            2.000000,
+            -3.000000
+        },
+        {
+            1.000000,
+            1.000000,
+            -1.000000
+        },
+        {
+            1.000000,
+            -1.000000,
+            2.000000
+        },
+        {
+            0.000000,
+            3.000000,
+            1.000000
+        },
+        {
+            0.000000,
+            -2.000000,
+            7.000000
+        },
+        {
+            -2.000000,
+            5.000000,
+            -1.000000
+        },
+        {
+            4.000000,
+            2.000000,
+            -1.000000
+        },
+        {
+            1.000000,
+            0.000000,
+            -1.000000
+        },
+        {
+            1.000000,
+            1.000000,
+            2.000000
+        },
+        {
+            2.000000,
+            0.000000,
+            0.000000
+        },
+        {
+            1.000000,
+            0.000000,
+            0.000000
+        },
+        {
+            -2.000000,
+            1.000000,
+            1.000000
+        },
+        {
+            1.000000,
+            0.000000,
+            1.000000
+        },
+        {
+            -1.000000,
+            -1.000000,
+            1.000000
+        },
+        {
+            2.000000,
+            -1.000000,
+            3.000000
+        },
+        {
+            -1.000000,
+            -1.000000,
+            -1.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            -1.000000
+        },
+        {
+            2.000000,
+            2.000000,
+            -2.000000
+        },
+        {
+            0.000000,
+            -2.000000,
+            -1.000000
+        },
+        {
+            1.000000,
+            1.000000,
+            -1.000000
+        },
+        {
+            1.000000,
+            0.000000,
+            1.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            1.000000
+        },
+        {
+            -1.000000,
+            -1.000000,
+            1.000000
+        },
+        {
+            3.000000,
+            0.000000,
+            1.000000
+        },
+        {
+            3.000000,
+            1.000000,
+            1.000000
+        }
+    },
+    {
+        {
+            2.000000,
+            0.000000,
+            -3.000000
+        },
+        {
+            2.000000,
+            1.000000,
+            0.000000
+        },
+        {
+            -1.000000,
+            4.000000,
+            0.000000
+        },
+        {
+            -1.000000,
+            -1.000000,
+            -2.000000
+        },
+        {
+            1.000000,
+            2.000000,
+            -1.000000
+        },
+        {
+            2.000000,
+            7.000000,
+            4.000000
+        },
+        {
+            -2.000000,
+            -2.000000,
+            1.000000
+        },
+        {
+            2.000000,
+            0.000000,
+            -2.000000
+        },
+        {
+            -5.000000,
+            -5.000000,
+            -3.000000
+        },
+        {
+            -1.000000,
+            -2.000000,
+            0.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            0.000000
+        },
+        {
+            0.000000,
+            1.000000,
+            -2.000000
+        },
+        {
+            0.000000,
+            1.000000,
+            -2.000000
+        },
+        {
+            -2.000000,
+            -2.000000,
+            -3.000000
+        },
+        {
+            2.000000,
+            0.000000,
+            -1.000000
+        },
+        {
+            0.000000,
+            -3.000000,
+            0.000000
+        },
+        {
+            0.000000,
+            -4.000000,
+            -2.000000
+        },
+        {
+            2.000000,
+            1.000000,
+            2.000000
+        },
+        {
+            3.000000,
+            4.000000,
+            4.000000
+        },
+        {
+            0.000000,
+            -1.000000,
+            -1.000000
+        },
+        {
+            3.000000,
+            3.000000,
+            6.000000
+        },
+        {
+            0.000000,
+            6.000000,
+            3.000000
+        },
+        {
+            -5.000000,
+            -5.000000,
+            -3.000000
+        },
+        {
+            2.000000,
+            0.000000,
+            3.000000
+        },
+        {
+            4.000000,
+            1.000000,
+            -2.000000
+        },
+        {
+            -1.000000,
+            -1.000000,
+            3.000000
+        },
+        {
+            -1.000000,
+            2.000000,
+            -4.000000
+        },
+        {
+            4.000000,
+            0.000000,
+            -3.000000
+        },
+        {
+            3.000000,
+            2.000000,
+            -2.000000
+        },
+        {
+            0.000000,
+            -1.000000,
+            0.000000
+        },
+        {
+            -1.000000,
+            -1.000000,
+            1.000000
+        },
+        {
+            2.000000,
+            0.000000,
+            0.000000
+        }
+    },
+    {
+        {
+            -1.000000,
+            1.000000,
+            2.000000
+        },
+        {
+            0.000000,
+            1.000000,
+            7.000000
+        },
+        {
+            -3.000000,
+            -1.000000,
+            7.000000
+        },
+        {
+            -1.000000,
+            1.000000,
+            5.000000
+        },
+        {
+            -1.000000,
+            0.000000,
+            6.000000
+        },
+        {
+            -1.000000,
+            -1.000000,
+            0.000000
+        },
+        {
+            -1.000000,
+            2.000000,
+            6.000000
+        },
+        {
+            -3.000000,
+            1.000000,
+            6.000000
+        },
+        {
+            -1.000000,
+            0.000000,
+            0.000000
+        },
+        {
+            0.000000,
+            -1.000000,
+            0.000000
+        },
+        {
+            -2.000000,
+            -1.000000,
+            2.000000
+        },
+        {
+            -1.000000,
+            0.000000,
+            7.000000
+        },
+        {
+            0.000000,
+            3.000000,
+            0.000000
+        },
+        {
+            -2.000000,
+            0.000000,
+            2.000000
+        },
+        {
+            -1.000000,
+            0.000000,
+            0.000000
+        },
+        {
+            0.000000,
+            -1.000000,
+            -2.000000
+        },
+        {
+            -1.000000,
+            0.000000,
+            1.000000
+        },
+        {
+            -2.000000,
+            -1.000000,
+            -2.000000
+        },
+        {
+            -1.000000,
+            0.000000,
+            1.000000
+        },
+        {
+            -2.000000,
+            -2.000000,
+            -2.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            0.000000
+        },
+        {
+            -1.000000,
+            -1.000000,
+            -1.000000
+        },
+        {
+            1.000000,
+            0.000000,
+            -2.000000
+        },
+        {
+            -1.000000,
+            -1.000000,
+            -1.000000
+        },
+        {
+            -2.000000,
+            -1.000000,
+            2.000000
+        },
+        {
+            0.000000,
+            2.000000,
+            2.000000
+        },
+        {
+            -1.000000,
+            1.000000,
+            5.000000
+        },
+        {
+            -1.000000,
+            -3.000000,
+            -1.000000
+        },
+        {
+            -1.000000,
+            -2.000000,
+            -1.000000
+        },
+        {
+            -2.000000,
+            -1.000000,
+            1.000000
+        },
+        {
+            -3.000000,
+            -2.000000,
+            1.000000
+        },
+        {
+            -2.000000,
+            -1.000000,
+            0.000000
+        }
+    },
+    {
+        {
+            -3.000000,
+            7.000000,
+            0.000000
+        },
+        {
+            2.000000,
+            -1.000000,
+            4.000000
+        },
+        {
+            -3.000000,
+            7.000000,
+            -6.000000
+        },
+        {
+            -1.000000,
+            3.000000,
+            1.000000
+        },
+        {
+            -2.000000,
+            5.000000,
+            4.000000
+        },
+        {
+            3.000000,
+            4.000000,
+            0.000000
+        },
+        {
+            5.000000,
+            -4.000000,
+            3.000000
+        },
+        {
+            0.000000,
+            3.000000,
+            1.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            2.000000
+        },
+        {
+            -3.000000,
+            0.000000,
+            2.000000
+        },
+        {
+            1.000000,
+            -1.000000,
+            0.000000
+        },
+        {
+            1.000000,
+            3.000000,
+            2.000000
+        },
+        {
+            2.000000,
+            -2.000000,
+            0.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            3.000000
+        },
+        {
+            -2.000000,
+            -2.000000,
+            1.000000
+        },
+        {
+            2.000000,
+            2.000000,
+            -1.000000
+        },
+        {
+            2.000000,
+            -2.000000,
+            -1.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            0.000000
+        },
+        {
+            -2.000000,
+            -2.000000,
+            -1.000000
+        },
+        {
+            -1.000000,
+            1.000000,
+            1.000000
+        },
+        {
+            1.000000,
+            0.000000,
+            0.000000
+        },
+        {
+            1.000000,
+            1.000000,
+            0.000000
+        },
+        {
+            1.000000,
+            1.000000,
+            0.000000
+        },
+        {
+            -2.000000,
+            0.000000,
+            1.000000
+        },
+        {
+            0.000000,
+            4.000000,
+            1.000000
+        },
+        {
+            0.000000,
+            3.000000,
+            -1.000000
+        },
+        {
+            2.000000,
+            2.000000,
+            1.000000
+        },
+        {
+            1.000000,
+            1.000000,
+            0.000000
+        },
+        {
+            1.000000,
+            3.000000,
+            -1.000000
+        },
+        {
+            1.000000,
+            0.000000,
+            2.000000
+        },
+        {
+            -1.000000,
+            2.000000,
+            0.000000
+        },
+        {
+            0.000000,
+            2.000000,
+            1.000000
+        }
+    },
+    {
+        {
+            3.000000,
+            1.000000,
+            0.000000
+        },
+        {
+            3.000000,
+            0.000000,
+            2.000000
+        },
+        {
+            7.000000,
+            1.000000,
+            1.000000
+        },
+        {
+            1.000000,
+            0.000000,
+            2.000000
+        },
+        {
+            2.000000,
+            3.000000,
+            2.000000
+        },
+        {
+            2.000000,
+            1.000000,
+            3.000000
+        },
+        {
+            3.000000,
+            4.000000,
+            0.000000
+        },
+        {
+            1.000000,
+            1.000000,
+            5.000000
+        },
+        {
+            3.000000,
+            2.000000,
+            2.000000
+        },
+        {
+            5.000000,
+            2.000000,
+            3.000000
+        },
+        {
+            0.000000,
+            1.000000,
+            2.000000
+        },
+        {
+            5.000000,
+            -2.000000,
+            4.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            1.000000
+        },
+        {
+            2.000000,
+            0.000000,
+            1.000000
+        },
+        {
+            4.000000,
+            2.000000,
+            5.000000
+        },
+        {
+            2.000000,
+            0.000000,
+            -1.000000
+        },
+        {
+            1.000000,
+            2.000000,
+            1.000000
+        },
+        {
+            4.000000,
+            1.000000,
+            3.000000
+        },
+        {
+            3.000000,
+            4.000000,
+            0.000000
+        },
+        {
+            2.000000,
+            3.000000,
+            -1.000000
+        },
+        {
+            3.000000,
+            0.000000,
+            4.000000
+        },
+        {
+            0.000000,
+            3.000000,
+            2.000000
+        },
+        {
+            4.000000,
+            1.000000,
+            0.000000
+        },
+        {
+            2.000000,
+            3.000000,
+            1.000000
+        },
+        {
+            4.000000,
+            -1.000000,
+            4.000000
+        },
+        {
+            1.000000,
+            -1.000000,
+            2.000000
+        },
+        {
+            1.000000,
+            0.000000,
+            0.000000
+        },
+        {
+            2.000000,
+            2.000000,
+            -1.000000
+        },
+        {
+            3.000000,
+            2.000000,
+            4.000000
+        },
+        {
+            1.000000,
+            0.000000,
+            0.000000
+        },
+        {
+            3.000000,
+            -1.000000,
+            0.000000
+        },
+        {
+            1.000000,
+            2.000000,
+            2.000000
+        }
+    },
+    {
+        {
+            0.000000,
+            -1.000000,
+            -1.000000
+        },
+        {
+            1.000000,
+            0.000000,
+            -1.000000
+        },
+        {
+            -1.000000,
+            -1.000000,
+            0.000000
+        },
+        {
+            -2.000000,
+            5.000000,
+            -4.000000
+        },
+        {
+            -2.000000,
+            -1.000000,
+            0.000000
+        },
+        {
+            -1.000000,
+            3.000000,
+            2.000000
+        },
+        {
+            -1.000000,
+            0.000000,
+            0.000000
+        },
+        {
+            2.000000,
+            1.000000,
+            -1.000000
+        },
+        {
+            7.000000,
+            2.000000,
+            -1.000000
+        },
+        {
+            2.000000,
+            6.000000,
+            -5.000000
+        },
+        {
+            -2.000000,
+            -2.000000,
+            -1.000000
+        },
+        {
+            1.000000,
+            2.000000,
+            -2.000000
+        },
+        {
+            1.000000,
+            0.000000,
+            0.000000
+        },
+        {
+            1.000000,
+            -1.000000,
+            1.000000
+        },
+        {
+            4.000000,
+            3.000000,
+            -2.000000
+        },
+        {
+            1.000000,
+            -2.000000,
+            0.000000
+        },
+        {
+            0.000000,
+            4.000000,
+            -5.000000
+        },
+        {
+            0.000000,
+            -2.000000,
+            0.000000
+        },
+        {
+            -2.000000,
+            -3.000000,
+            0.000000
+        },
+        {
+            0.000000,
+            -2.000000,
+            1.000000
+        },
+        {
+            -1.000000,
+            1.000000,
+            2.000000
+        },
+        {
+            2.000000,
+            4.000000,
+            3.000000
+        },
+        {
+            2.000000,
+            1.000000,
+            -1.000000
+        },
+        {
+            -7.000000,
+            -1.000000,
+            -4.000000
+        },
+        {
+            0.000000,
+            -1.000000,
+            0.000000
+        },
+        {
+            -3.000000,
+            -2.000000,
+            -2.000000
+        },
+        {
+            1.000000,
+            0.000000,
+            0.000000
+        },
+        {
+            -4.000000,
+            -2.000000,
+            -1.000000
+        },
+        {
+            6.000000,
+            4.000000,
+            -3.000000
+        },
+        {
+            1.000000,
+            -2.000000,
+            -1.000000
+        },
+        {
+            1.000000,
+            -1.000000,
+            -1.000000
+        },
+        {
+            -1.000000,
+            1.000000,
+            1.000000
+        }
+    },
+    {
+        {
+            0.000000,
+            -3.000000,
+            -3.000000
+        },
+        {
+            -3.000000,
+            -5.000000,
+            -3.000000
+        },
+        {
+            4.000000,
+            -4.000000,
+            -1.000000
+        },
+        {
+            -2.000000,
+            -2.000000,
+            -2.000000
+        },
+        {
+            1.000000,
+            -1.000000,
+            -1.000000
+        },
+        {
+            -5.000000,
+            4.000000,
+            -2.000000
+        },
+        {
+            3.000000,
+            -4.000000,
+            -2.000000
+        },
+        {
+            -1.000000,
+            -3.000000,
+            -4.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            -1.000000
+        },
+        {
+            -1.000000,
+            1.000000,
+            4.000000
+        },
+        {
+            0.000000,
+            2.000000,
+            1.000000
+        },
+        {
+            -1.000000,
+            -1.000000,
+            -2.000000
+        },
+        {
+            0.000000,
+            4.000000,
+            -2.000000
+        },
+        {
+            1.000000,
+            2.000000,
+            -3.000000
+        },
+        {
+            0.000000,
+            1.000000,
+            1.000000
+        },
+        {
+            3.000000,
+            1.000000,
+            0.000000
+        },
+        {
+            2.000000,
+            1.000000,
+            1.000000
+        },
+        {
+            1.000000,
+            -1.000000,
+            0.000000
+        },
+        {
+            1.000000,
+            0.000000,
+            -1.000000
+        },
+        {
+            -1.000000,
+            0.000000,
+            2.000000
+        },
+        {
+            -4.000000,
+            0.000000,
+            0.000000
+        },
+        {
+            -3.000000,
+            3.000000,
+            0.000000
+        },
+        {
+            2.000000,
+            0.000000,
+            -1.000000
+        },
+        {
+            2.000000,
+            -1.000000,
+            -2.000000
+        },
+        {
+            -1.000000,
+            -3.000000,
+            -4.000000
+        },
+        {
+            1.000000,
+            2.000000,
+            -4.000000
+        },
+        {
+            0.000000,
+            4.000000,
+            -1.000000
+        },
+        {
+            0.000000,
+            2.000000,
+            1.000000
+        },
+        {
+            1.000000,
+            1.000000,
+            5.000000
+        },
+        {
+            -2.000000,
+            0.000000,
+            1.000000
+        },
+        {
+            1.000000,
+            3.000000,
+            0.000000
+        },
+        {
+            0.000000,
+            1.000000,
+            0.000000
+        }
+    },
+    {
+        {
+            2.000000,
+            -2.000000,
+            1.000000
+        },
+        {
+            -1.000000,
+            1.000000,
+            6.000000
+        },
+        {
+            -4.000000,
+            1.000000,
+            1.000000
+        },
+        {
+            0.000000,
+            -6.000000,
+            -6.000000
+        },
+        {
+            -3.000000,
+            1.000000,
+            1.000000
+        },
+        {
+            -6.000000,
+            -3.000000,
+            2.000000
+        },
+        {
+            -4.000000,
+            0.000000,
+            2.000000
+        },
+        {
+            1.000000,
+            1.000000,
+            2.000000
+        },
+        {
+            1.000000,
+            1.000000,
+            2.000000
+        },
+        {
+            -1.000000,
+            1.000000,
+            2.000000
+        },
+        {
+            1.000000,
+            1.000000,
+            -1.000000
+        },
+        {
+            3.000000,
+            -4.000000,
+            -6.000000
+        },
+        {
+            -1.000000,
+            1.000000,
+            3.000000
+        },
+        {
+            -1.000000,
+            3.000000,
+            6.000000
+        },
+        {
+            -1.000000,
+            -2.000000,
+            -1.000000
+        },
+        {
+            1.000000,
+            1.000000,
+            3.000000
+        },
+        {
+            -1.000000,
+            0.000000,
+            1.000000
+        },
+        {
+            -2.000000,
+            0.000000,
+            2.000000
+        },
+        {
+            -5.000000,
+            -3.000000,
+            2.000000
+        },
+        {
+            1.000000,
+            2.000000,
+            0.000000
+        },
+        {
+            -5.000000,
+            -3.000000,
+            3.000000
+        },
+        {
+            -6.000000,
+            -1.000000,
+            2.000000
+        },
+        {
+            3.000000,
+            2.000000,
+            1.000000
+        },
+        {
+            -2.000000,
+            1.000000,
+            0.000000
+        },
+        {
+            -1.000000,
+            3.000000,
+            2.000000
+        },
+        {
+            -2.000000,
+            0.000000,
+            2.000000
+        },
+        {
+            3.000000,
+            3.000000,
+            1.000000
+        },
+        {
+            1.000000,
+            0.000000,
+            -1.000000
+        },
+        {
+            0.000000,
+            -1.000000,
+            0.000000
+        },
+        {
+            0.000000,
+            1.000000,
+            2.000000
+        },
+        {
+            -1.000000,
+            1.000000,
+            -1.000000
+        },
+        {
+            0.000000,
+            3.000000,
+            5.000000
+        }
+    },
+    {
+        {
+            3.000000,
+            -1.000000,
+            3.000000
+        },
+        {
+            6.000000,
+            4.000000,
+            3.000000
+        },
+        {
+            -7.000000,
+            -2.000000,
+            2.000000
+        },
+        {
+            4.000000,
+            -4.000000,
+            0.000000
+        },
+        {
+            -2.000000,
+            -3.000000,
+            2.000000
+        },
+        {
+            1.000000,
+            -1.000000,
+            1.000000
+        },
+        {
+            -2.000000,
+            -3.000000,
+            1.000000
+        },
+        {
+            6.000000,
+            1.000000,
+            0.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            -1.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            -1.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            0.000000
+        },
+        {
+            5.000000,
+            -2.000000,
+            7.000000
+        },
+        {
+            -2.000000,
+            1.000000,
+            3.000000
+        },
+        {
+            0.000000,
+            -1.000000,
+            0.000000
+        },
+        {
+            2.000000,
+            1.000000,
+            2.000000
+        },
+        {
+            -1.000000,
+            -1.000000,
+            -2.000000
+        },
+        {
+            -2.000000,
+            3.000000,
+            -1.000000
+        },
+        {
+            1.000000,
+            1.000000,
+            3.000000
+        },
+        {
+            0.000000,
+            1.000000,
+            3.000000
+        },
+        {
+            2.000000,
+            1.000000,
+            3.000000
+        },
+        {
+            -1.000000,
+            1.000000,
+            1.000000
+        },
+        {
+            -1.000000,
+            0.000000,
+            -2.000000
+        },
+        {
+            1.000000,
+            -1.000000,
+            -1.000000
+        },
+        {
+            -1.000000,
+            1.000000,
+            2.000000
+        },
+        {
+            6.000000,
+            4.000000,
+            2.000000
+        },
+        {
+            -1.000000,
+            1.000000,
+            -1.000000
+        },
+        {
+            -4.000000,
+            0.000000,
+            2.000000
+        },
+        {
+            -1.000000,
+            1.000000,
+            3.000000
+        },
+        {
+            -1.000000,
+            1.000000,
+            0.000000
+        },
+        {
+            1.000000,
+            -2.000000,
+            -2.000000
+        },
+        {
+            1.000000,
+            3.000000,
+            3.000000
+        },
+        {
+            1.000000,
+            -2.000000,
+            1.000000
+        }
+    },
+    {
+        {
+            1.000000,
+            1.000000,
+            -4.000000
+        },
+        {
+            1.000000,
+            -1.000000,
+            -1.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            -5.000000
+        },
+        {
+            -4.000000,
+            -1.000000,
+            -1.000000
+        },
+        {
+            -1.000000,
+            1.000000,
+            -1.000000
+        },
+        {
+            0.000000,
+            -2.000000,
+            6.000000
+        },
+        {
+            -2.000000,
+            0.000000,
+            5.000000
+        },
+        {
+            0.000000,
+            -1.000000,
+            0.000000
+        },
+        {
+            2.000000,
+            -2.000000,
+            1.000000
+        },
+        {
+            1.000000,
+            2.000000,
+            -2.000000
+        },
+        {
+            0.000000,
+            3.000000,
+            0.000000
+        },
+        {
+            7.000000,
+            -1.000000,
+            -2.000000
+        },
+        {
+            -2.000000,
+            3.000000,
+            -1.000000
+        },
+        {
+            1.000000,
+            -2.000000,
+            1.000000
+        },
+        {
+            -1.000000,
+            0.000000,
+            1.000000
+        },
+        {
+            -1.000000,
+            -2.000000,
+            2.000000
+        },
+        {
+            2.000000,
+            0.000000,
+            -2.000000
+        },
+        {
+            0.000000,
+            2.000000,
+            2.000000
+        },
+        {
+            -1.000000,
+            1.000000,
+            0.000000
+        },
+        {
+            2.000000,
+            1.000000,
+            2.000000
+        },
+        {
+            -1.000000,
+            1.000000,
+            3.000000
+        },
+        {
+            -1.000000,
+            0.000000,
+            2.000000
+        },
+        {
+            -1.000000,
+            -1.000000,
+            0.000000
+        },
+        {
+            -1.000000,
+            -2.000000,
+            0.000000
+        },
+        {
+            1.000000,
+            0.000000,
+            -2.000000
+        },
+        {
+            -1.000000,
+            0.000000,
+            4.000000
+        },
+        {
+            -2.000000,
+            1.000000,
+            2.000000
+        },
+        {
+            -1.000000,
+            1.000000,
+            0.000000
+        },
+        {
+            -1.000000,
+            3.000000,
+            0.000000
+        },
+        {
+            0.000000,
+            -1.000000,
+            1.000000
+        },
+        {
+            1.000000,
+            4.000000,
+            -1.000000
+        },
+        {
+            -1.000000,
+            -2.000000,
+            3.000000
+        }
+    },
+    {
+        {
+            4.000000,
+            -1.000000,
+            -3.000000
+        },
+        {
+            3.000000,
+            1.000000,
+            0.000000
+        },
+        {
+            -3.000000,
+            0.000000,
+            1.000000
+        },
+        {
+            2.000000,
+            -2.000000,
+            -2.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            0.000000
+        },
+        {
+            4.000000,
+            6.000000,
+            1.000000
+        },
+        {
+            4.000000,
+            1.000000,
+            -1.000000
+        },
+        {
+            0.000000,
+            -2.000000,
+            -2.000000
+        },
+        {
+            -6.000000,
+            -2.000000,
+            0.000000
+        },
+        {
+            -2.000000,
+            -1.000000,
+            -2.000000
+        },
+        {
+            0.000000,
+            -2.000000,
+            -1.000000
+        },
+        {
+            4.000000,
+            -3.000000,
+            -2.000000
+        },
+        {
+            -3.000000,
+            2.000000,
+            -1.000000
+        },
+        {
+            1.000000,
+            -2.000000,
+            -1.000000
+        },
+        {
+            -1.000000,
+            -3.000000,
+            0.000000
+        },
+        {
+            -2.000000,
+            1.000000,
+            -3.000000
+        },
+        {
+            -1.000000,
+            -5.000000,
+            -2.000000
+        },
+        {
+            2.000000,
+            2.000000,
+            1.000000
+        },
+        {
+            2.000000,
+            3.000000,
+            1.000000
+        },
+        {
+            3.000000,
+            0.000000,
+            0.000000
+        },
+        {
+            0.000000,
+            2.000000,
+            1.000000
+        },
+        {
+            1.000000,
+            6.000000,
+            -1.000000
+        },
+        {
+            -6.000000,
+            -2.000000,
+            -4.000000
+        },
+        {
+            4.000000,
+            1.000000,
+            0.000000
+        },
+        {
+            -2.000000,
+            -1.000000,
+            -1.000000
+        },
+        {
+            4.000000,
+            3.000000,
+            2.000000
+        },
+        {
+            -4.000000,
+            3.000000,
+            0.000000
+        },
+        {
+            1.000000,
+            1.000000,
+            1.000000
+        },
+        {
+            -1.000000,
+            3.000000,
+            2.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            0.000000
+        },
+        {
+            2.000000,
+            1.000000,
+            0.000000
+        },
+        {
+            2.000000,
+            1.000000,
+            -2.000000
+        }
+    },
+    {
+        {
+            -3.000000,
+            -1.000000,
+            -2.000000
+        },
+        {
+            -1.000000,
+            -1.000000,
+            -2.000000
+        },
+        {
+            -4.000000,
+            -3.000000,
+            -2.000000
+        },
+        {
+            -5.000000,
+            -1.000000,
+            -2.000000
+        },
+        {
+            1.000000,
+            1.000000,
+            -2.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            -6.000000
+        },
+        {
+            -1.000000,
+            0.000000,
+            -1.000000
+        },
+        {
+            -1.000000,
+            1.000000,
+            -1.000000
+        },
+        {
+            -5.000000,
+            -2.000000,
+            -1.000000
+        },
+        {
+            -3.000000,
+            -3.000000,
+            -3.000000
+        },
+        {
+            -5.000000,
+            0.000000,
+            1.000000
+        },
+        {
+            -1.000000,
+            1.000000,
+            0.000000
+        },
+        {
+            0.000000,
+            2.000000,
+            -3.000000
+        },
+        {
+            0.000000,
+            2.000000,
+            -1.000000
+        },
+        {
+            1.000000,
+            1.000000,
+            0.000000
+        },
+        {
+            -3.000000,
+            0.000000,
+            -1.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            -2.000000
+        },
+        {
+            -5.000000,
+            -3.000000,
+            -2.000000
+        },
+        {
+            1.000000,
+            -4.000000,
+            -4.000000
+        },
+        {
+            -5.000000,
+            -2.000000,
+            0.000000
+        },
+        {
+            1.000000,
+            -2.000000,
+            -1.000000
+        },
+        {
+            -2.000000,
+            -2.000000,
+            -6.000000
+        },
+        {
+            -2.000000,
+            -2.000000,
+            0.000000
+        },
+        {
+            0.000000,
+            -3.000000,
+            2.000000
+        },
+        {
+            -2.000000,
+            1.000000,
+            -1.000000
+        },
+        {
+            1.000000,
+            1.000000,
+            -2.000000
+        },
+        {
+            1.000000,
+            2.000000,
+            -2.000000
+        },
+        {
+            -3.000000,
+            -3.000000,
+            -1.000000
+        },
+        {
+            -3.000000,
+            -4.000000,
+            -6.000000
+        },
+        {
+            -4.000000,
+            -1.000000,
+            2.000000
+        },
+        {
+            -2.000000,
+            1.000000,
+            0.000000
+        },
+        {
+            -2.000000,
+            0.000000,
+            2.000000
+        }
+    },
+    {
+        {
+            4.000000,
+            0.000000,
+            -7.000000
+        },
+        {
+            4.000000,
+            1.000000,
+            -4.000000
+        },
+        {
+            -1.000000,
+            -4.000000,
+            -2.000000
+        },
+        {
+            -1.000000,
+            -4.000000,
+            -7.000000
+        },
+        {
+            0.000000,
+            -4.000000,
+            -3.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            1.000000
+        },
+        {
+            -1.000000,
+            -5.000000,
+            -2.000000
+        },
+        {
+            3.000000,
+            1.000000,
+            -3.000000
+        },
+        {
+            1.000000,
+            2.000000,
+            0.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            -1.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            -1.000000
+        },
+        {
+            -2.000000,
+            -3.000000,
+            -7.000000
+        },
+        {
+            -2.000000,
+            -2.000000,
+            0.000000
+        },
+        {
+            -3.000000,
+            -4.000000,
+            -3.000000
+        },
+        {
+            0.000000,
+            -2.000000,
+            -2.000000
+        },
+        {
+            -2.000000,
+            0.000000,
+            -1.000000
+        },
+        {
+            1.000000,
+            3.000000,
+            -2.000000
+        },
+        {
+            -1.000000,
+            -1.000000,
+            -3.000000
+        },
+        {
+            0.000000,
+            -1.000000,
+            1.000000
+        },
+        {
+            -2.000000,
+            0.000000,
+            2.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            1.000000
+        },
+        {
+            -1.000000,
+            -1.000000,
+            2.000000
+        },
+        {
+            0.000000,
+            2.000000,
+            1.000000
+        },
+        {
+            0.000000,
+            1.000000,
+            -3.000000
+        },
+        {
+            2.000000,
+            1.000000,
+            -4.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            0.000000
+        },
+        {
+            2.000000,
+            -2.000000,
+            -2.000000
+        },
+        {
+            -1.000000,
+            -2.000000,
+            0.000000
+        },
+        {
+            0.000000,
+            -1.000000,
+            -4.000000
+        },
+        {
+            -2.000000,
+            -2.000000,
+            -4.000000
+        },
+        {
+            -1.000000,
+            0.000000,
+            1.000000
+        },
+        {
+            -2.000000,
+            -5.000000,
+            -4.000000
+        }
+    },
+    {
+        {
+            2.000000,
+            0.000000,
+            2.000000
+        },
+        {
+            0.000000,
+            2.000000,
+            1.000000
+        },
+        {
+            4.000000,
+            3.000000,
+            7.000000
+        },
+        {
+            3.000000,
+            0.000000,
+            1.000000
+        },
+        {
+            0.000000,
+            3.000000,
+            -2.000000
+        },
+        {
+            2.000000,
+            4.000000,
+            1.000000
+        },
+        {
+            -3.000000,
+            -2.000000,
+            1.000000
+        },
+        {
+            -1.000000,
+            2.000000,
+            4.000000
+        },
+        {
+            0.000000,
+            -2.000000,
+            -2.000000
+        },
+        {
+            2.000000,
+            -3.000000,
+            1.000000
+        },
+        {
+            2.000000,
+            1.000000,
+            5.000000
+        },
+        {
+            1.000000,
+            3.000000,
+            -3.000000
+        },
+        {
+            1.000000,
+            0.000000,
+            1.000000
+        },
+        {
+            -2.000000,
+            1.000000,
+            3.000000
+        },
+        {
+            4.000000,
+            3.000000,
+            -2.000000
+        },
+        {
+            -4.000000,
+            2.000000,
+            4.000000
+        },
+        {
+            3.000000,
+            -1.000000,
+            -2.000000
+        },
+        {
+            -1.000000,
+            0.000000,
+            4.000000
+        },
+        {
+            1.000000,
+            -1.000000,
+            1.000000
+        },
+        {
+            1.000000,
+            4.000000,
+            3.000000
+        },
+        {
+            1.000000,
+            -1.000000,
+            -1.000000
+        },
+        {
+            1.000000,
+            2.000000,
+            -2.000000
+        },
+        {
+            -3.000000,
+            -1.000000,
+            -2.000000
+        },
+        {
+            -1.000000,
+            1.000000,
+            2.000000
+        },
+        {
+            0.000000,
+            2.000000,
+            2.000000
+        },
+        {
+            0.000000,
+            1.000000,
+            0.000000
+        },
+        {
+            0.000000,
+            2.000000,
+            2.000000
+        },
+        {
+            -3.000000,
+            3.000000,
+            5.000000
+        },
+        {
+            2.000000,
+            -2.000000,
+            2.000000
+        },
+        {
+            0.000000,
+            1.000000,
+            4.000000
+        },
+        {
+            2.000000,
+            3.000000,
+            3.000000
+        },
+        {
+            -3.000000,
+            2.000000,
+            4.000000
+        }
+    },
+    {
+        {
+            -5.000000,
+            4.000000,
+            1.000000
+        },
+        {
+            -2.000000,
+            -1.000000,
+            2.000000
+        },
+        {
+            -2.000000,
+            -1.000000,
+            -1.000000
+        },
+        {
+            2.000000,
+            4.000000,
+            -1.000000
+        },
+        {
+            -2.000000,
+            -2.000000,
+            -1.000000
+        },
+        {
+            -1.000000,
+            -2.000000,
+            0.000000
+        },
+        {
+            -2.000000,
+            -3.000000,
+            -1.000000
+        },
+        {
+            -1.000000,
+            1.000000,
+            -1.000000
+        },
+        {
+            1.000000,
+            0.000000,
+            -1.000000
+        },
+        {
+            -1.000000,
+            2.000000,
+            -2.000000
+        },
+        {
+            -2.000000,
+            0.000000,
+            -2.000000
+        },
+        {
+            -2.000000,
+            5.000000,
+            0.000000
+        },
+        {
+            -1.000000,
+            -2.000000,
+            1.000000
+        },
+        {
+            -4.000000,
+            -3.000000,
+            -2.000000
+        },
+        {
+            1.000000,
+            1.000000,
+            1.000000
+        },
+        {
+            -2.000000,
+            -4.000000,
+            -2.000000
+        },
+        {
+            -1.000000,
+            -2.000000,
+            -5.000000
+        },
+        {
+            -4.000000,
+            -1.000000,
+            -1.000000
+        },
+        {
+            -2.000000,
+            -2.000000,
+            0.000000
+        },
+        {
+            -3.000000,
+            0.000000,
+            1.000000
+        },
+        {
+            -2.000000,
+            -2.000000,
+            0.000000
+        },
+        {
+            0.000000,
+            -1.000000,
+            2.000000
+        },
+        {
+            2.000000,
+            -2.000000,
+            -2.000000
+        },
+        {
+            -3.000000,
+            -2.000000,
+            -3.000000
+        },
+        {
+            -3.000000,
+            3.000000,
+            1.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            1.000000
+        },
+        {
+            1.000000,
+            -2.000000,
+            0.000000
+        },
+        {
+            -2.000000,
+            -1.000000,
+            0.000000
+        },
+        {
+            1.000000,
+            0.000000,
+            -3.000000
+        },
+        {
+            -6.000000,
+            -3.000000,
+            -3.000000
+        },
+        {
+            -2.000000,
+            0.000000,
+            -2.000000
+        },
+        {
+            -5.000000,
+            -3.000000,
+            -2.000000
+        }
+    },
+    {
+        {
+            -1.000000,
+            3.000000,
+            3.000000
+        },
+        {
+            6.000000,
+            1.000000,
+            2.000000
+        },
+        {
+            -7.000000,
+            0.000000,
+            0.000000
+        },
+        {
+            -2.000000,
+            5.000000,
+            1.000000
+        },
+        {
+            -3.000000,
+            3.000000,
+            2.000000
+        },
+        {
+            2.000000,
+            5.000000,
+            1.000000
+        },
+        {
+            -4.000000,
+            0.000000,
+            4.000000
+        },
+        {
+            4.000000,
+            2.000000,
+            3.000000
+        },
+        {
+            1.000000,
+            3.000000,
+            0.000000
+        },
+        {
+            2.000000,
+            1.000000,
+            0.000000
+        },
+        {
+            -1.000000,
+            2.000000,
+            3.000000
+        },
+        {
+            -2.000000,
+            5.000000,
+            1.000000
+        },
+        {
+            -2.000000,
+            0.000000,
+            3.000000
+        },
+        {
+            1.000000,
+            -2.000000,
+            0.000000
+        },
+        {
+            3.000000,
+            2.000000,
+            6.000000
+        },
+        {
+            0.000000,
+            1.000000,
+            -1.000000
+        },
+        {
+            3.000000,
+            1.000000,
+            1.000000
+        },
+        {
+            -2.000000,
+            -3.000000,
+            2.000000
+        },
+        {
+            -1.000000,
+            -2.000000,
+            1.000000
+        },
+        {
+            0.000000,
+            4.000000,
+            0.000000
+        },
+        {
+            2.000000,
+            0.000000,
+            -1.000000
+        },
+        {
+            1.000000,
+            2.000000,
+            0.000000
+        },
+        {
+            2.000000,
+            1.000000,
+            0.000000
+        },
+        {
+            -2.000000,
+            1.000000,
+            0.000000
+        },
+        {
+            2.000000,
+            3.000000,
+            1.000000
+        },
+        {
+            2.000000,
+            1.000000,
+            3.000000
+        },
+        {
+            1.000000,
+            -2.000000,
+            0.000000
+        },
+        {
+            -1.000000,
+            0.000000,
+            3.000000
+        },
+        {
+            3.000000,
+            2.000000,
+            1.000000
+        },
+        {
+            2.000000,
+            2.000000,
+            -2.000000
+        },
+        {
+            -1.000000,
+            2.000000,
+            2.000000
+        },
+        {
+            -1.000000,
+            0.000000,
+            -1.000000
+        }
+    },
+    {
+        {
+            2.000000,
+            1.000000,
+            -1.000000
+        },
+        {
+            1.000000,
+            3.000000,
+            3.000000
+        },
+        {
+            1.000000,
+            0.000000,
+            -2.000000
+        },
+        {
+            3.000000,
+            -1.000000,
+            -6.000000
+        },
+        {
+            2.000000,
+            -2.000000,
+            -2.000000
+        },
+        {
+            2.000000,
+            1.000000,
+            -1.000000
+        },
+        {
+            2.000000,
+            -2.000000,
+            -1.000000
+        },
+        {
+            0.000000,
+            2.000000,
+            3.000000
+        },
+        {
+            -1.000000,
+            -1.000000,
+            1.000000
+        },
+        {
+            1.000000,
+            0.000000,
+            2.000000
+        },
+        {
+            2.000000,
+            5.000000,
+            6.000000
+        },
+        {
+            2.000000,
+            -1.000000,
+            5.000000
+        },
+        {
+            1.000000,
+            -1.000000,
+            -2.000000
+        },
+        {
+            -2.000000,
+            2.000000,
+            0.000000
+        },
+        {
+            0.000000,
+            -1.000000,
+            0.000000
+        },
+        {
+            -3.000000,
+            1.000000,
+            -1.000000
+        },
+        {
+            1.000000,
+            -2.000000,
+            -1.000000
+        },
+        {
+            2.000000,
+            0.000000,
+            1.000000
+        },
+        {
+            1.000000,
+            1.000000,
+            2.000000
+        },
+        {
+            1.000000,
+            4.000000,
+            6.000000
+        },
+        {
+            2.000000,
+            -1.000000,
+            0.000000
+        },
+        {
+            1.000000,
+            0.000000,
+            1.000000
+        },
+        {
+            -3.000000,
+            -3.000000,
+            -3.000000
+        },
+        {
+            -1.000000,
+            0.000000,
+            3.000000
+        },
+        {
+            -1.000000,
+            2.000000,
+            4.000000
+        },
+        {
+            0.000000,
+            -1.000000,
+            -1.000000
+        },
+        {
+            0.000000,
+            -5.000000,
+            -1.000000
+        },
+        {
+            -1.000000,
+            3.000000,
+            5.000000
+        },
+        {
+            0.000000,
+            -2.000000,
+            4.000000
+        },
+        {
+            -2.000000,
+            1.000000,
+            0.000000
+        },
+        {
+            0.000000,
+            5.000000,
+            6.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            -1.000000
+        }
+    },
+    {
+        {
+            3.000000,
+            0.000000,
+            -4.000000
+        },
+        {
+            -2.000000,
+            -1.000000,
+            1.000000
+        },
+        {
+            -6.000000,
+            6.000000,
+            1.000000
+        },
+        {
+            6.000000,
+            6.000000,
+            0.000000
+        },
+        {
+            6.000000,
+            -2.000000,
+            2.000000
+        },
+        {
+            1.000000,
+            4.000000,
+            0.000000
+        },
+        {
+            -1.000000,
+            4.000000,
+            4.000000
+        },
+        {
+            0.000000,
+            -1.000000,
+            -3.000000
+        },
+        {
+            -1.000000,
+            0.000000,
+            1.000000
+        },
+        {
+            0.000000,
+            1.000000,
+            1.000000
+        },
+        {
+            2.000000,
+            1.000000,
+            -1.000000
+        },
+        {
+            7.000000,
+            0.000000,
+            1.000000
+        },
+        {
+            0.000000,
+            1.000000,
+            1.000000
+        },
+        {
+            2.000000,
+            1.000000,
+            0.000000
+        },
+        {
+            -1.000000,
+            0.000000,
+            2.000000
+        },
+        {
+            -2.000000,
+            -1.000000,
+            0.000000
+        },
+        {
+            1.000000,
+            -2.000000,
+            1.000000
+        },
+        {
+            1.000000,
+            0.000000,
+            0.000000
+        },
+        {
+            5.000000,
+            -1.000000,
+            0.000000
+        },
+        {
+            1.000000,
+            1.000000,
+            -1.000000
+        },
+        {
+            5.000000,
+            0.000000,
+            1.000000
+        },
+        {
+            3.000000,
+            1.000000,
+            3.000000
+        },
+        {
+            0.000000,
+            1.000000,
+            1.000000
+        },
+        {
+            2.000000,
+            0.000000,
+            2.000000
+        },
+        {
+            -2.000000,
+            -2.000000,
+            -1.000000
+        },
+        {
+            1.000000,
+            2.000000,
+            1.000000
+        },
+        {
+            -3.000000,
+            0.000000,
+            5.000000
+        },
+        {
+            0.000000,
+            1.000000,
+            -1.000000
+        },
+        {
+            0.000000,
+            4.000000,
+            -1.000000
+        },
+        {
+            -1.000000,
+            1.000000,
+            0.000000
+        },
+        {
+            1.000000,
+            0.000000,
+            -1.000000
+        },
+        {
+            1.000000,
+            0.000000,
+            4.000000
+        }
+    },
+    {
+        {
+            -5.000000,
+            -1.000000,
+            3.000000
+        },
+        {
+            -6.000000,
+            -2.000000,
+            6.000000
+        },
+        {
+            6.000000,
+            -3.000000,
+            -2.000000
+        },
+        {
+            -6.000000,
+            -2.000000,
+            4.000000
+        },
+        {
+            -1.000000,
+            1.000000,
+            -5.000000
+        },
+        {
+            1.000000,
+            0.000000,
+            0.000000
+        },
+        {
+            4.000000,
+            -3.000000,
+            -6.000000
+        },
+        {
+            -4.000000,
+            -1.000000,
+            2.000000
+        },
+        {
+            -3.000000,
+            2.000000,
+            1.000000
+        },
+        {
+            0.000000,
+            1.000000,
+            4.000000
+        },
+        {
+            1.000000,
+            2.000000,
+            4.000000
+        },
+        {
+            -6.000000,
+            -1.000000,
+            5.000000
+        },
+        {
+            -1.000000,
+            2.000000,
+            -4.000000
+        },
+        {
+            1.000000,
+            4.000000,
+            2.000000
+        },
+        {
+            -1.000000,
+            2.000000,
+            3.000000
+        },
+        {
+            1.000000,
+            0.000000,
+            -2.000000
+        },
+        {
+            -2.000000,
+            1.000000,
+            2.000000
+        },
+        {
+            2.000000,
+            1.000000,
+            2.000000
+        },
+        {
+            0.000000,
+            1.000000,
+            0.000000
+        },
+        {
+            1.000000,
+            1.000000,
+            3.000000
+        },
+        {
+            2.000000,
+            1.000000,
+            -2.000000
+        },
+        {
+            2.000000,
+            0.000000,
+            -2.000000
+        },
+        {
+            1.000000,
+            -2.000000,
+            1.000000
+        },
+        {
+            2.000000,
+            1.000000,
+            0.000000
+        },
+        {
+            -4.000000,
+            -1.000000,
+            4.000000
+        },
+        {
+            4.000000,
+            -1.000000,
+            -1.000000
+        },
+        {
+            3.000000,
+            1.000000,
+            -3.000000
+        },
+        {
+            0.000000,
+            1.000000,
+            2.000000
+        },
+        {
+            0.000000,
+            1.000000,
+            1.000000
+        },
+        {
+            2.000000,
+            2.000000,
+            1.000000
+        },
+        {
+            1.000000,
+            1.000000,
+            4.000000
+        },
+        {
+            2.000000,
+            0.000000,
+            -1.000000
+        }
+    },
+    {
+        {
+            -2.000000,
+            -1.000000,
+            -2.000000
+        },
+        {
+            -1.000000,
+            0.000000,
+            -4.000000
+        },
+        {
+            -2.000000,
+            0.000000,
+            -4.000000
+        },
+        {
+            0.000000,
+            -1.000000,
+            -7.000000
+        },
+        {
+            -2.000000,
+            -1.000000,
+            -3.000000
+        },
+        {
+            1.000000,
+            0.000000,
+            0.000000
+        },
+        {
+            -4.000000,
+            -4.000000,
+            -4.000000
+        },
+        {
+            -1.000000,
+            -1.000000,
+            -4.000000
+        },
+        {
+            -2.000000,
+            -3.000000,
+            -3.000000
+        },
+        {
+            1.000000,
+            0.000000,
+            -3.000000
+        },
+        {
+            -1.000000,
+            -1.000000,
+            -4.000000
+        },
+        {
+            1.000000,
+            0.000000,
+            -5.000000
+        },
+        {
+            -1.000000,
+            0.000000,
+            0.000000
+        },
+        {
+            -2.000000,
+            0.000000,
+            -2.000000
+        },
+        {
+            0.000000,
+            -1.000000,
+            -1.000000
+        },
+        {
+            1.000000,
+            -4.000000,
+            -3.000000
+        },
+        {
+            -2.000000,
+            0.000000,
+            -6.000000
+        },
+        {
+            3.000000,
+            1.000000,
+            -2.000000
+        },
+        {
+            1.000000,
+            1.000000,
+            1.000000
+        },
+        {
+            -1.000000,
+            -1.000000,
+            -4.000000
+        },
+        {
+            -2.000000,
+            1.000000,
+            1.000000
+        },
+        {
+            1.000000,
+            -1.000000,
+            0.000000
+        },
+        {
+            0.000000,
+            -3.000000,
+            1.000000
+        },
+        {
+            1.000000,
+            1.000000,
+            -1.000000
+        },
+        {
+            -2.000000,
+            -1.000000,
+            -3.000000
+        },
+        {
+            0.000000,
+            -1.000000,
+            -1.000000
+        },
+        {
+            1.000000,
+            -2.000000,
+            0.000000
+        },
+        {
+            2.000000,
+            -2.000000,
+            -4.000000
+        },
+        {
+            -1.000000,
+            1.000000,
+            -4.000000
+        },
+        {
+            -3.000000,
+            -1.000000,
+            -2.000000
+        },
+        {
+            -3.000000,
+            -3.000000,
+            -4.000000
+        },
+        {
+            -2.000000,
+            0.000000,
+            -1.000000
+        }
+    },
+    {
+        {
+            0.000000,
+            0.000000,
+            2.000000
+        },
+        {
+            4.000000,
+            3.000000,
+            0.000000
+        },
+        {
+            2.000000,
+            1.000000,
+            3.000000
+        },
+        {
+            3.000000,
+            5.000000,
+            -2.000000
+        },
+        {
+            -1.000000,
+            3.000000,
+            4.000000
+        },
+        {
+            -3.000000,
+            -2.000000,
+            -4.000000
+        },
+        {
+            3.000000,
+            6.000000,
+            -2.000000
+        },
+        {
+            2.000000,
+            -1.000000,
+            -1.000000
+        },
+        {
+            -2.000000,
+            -2.000000,
+            -1.000000
+        },
+        {
+            -3.000000,
+            0.000000,
+            -3.000000
+        },
+        {
+            -2.000000,
+            2.000000,
+            1.000000
+        },
+        {
+            6.000000,
+            1.000000,
+            -1.000000
+        },
+        {
+            1.000000,
+            0.000000,
+            0.000000
+        },
+        {
+            1.000000,
+            4.000000,
+            3.000000
+        },
+        {
+            -2.000000,
+            -3.000000,
+            -3.000000
+        },
+        {
+            -2.000000,
+            1.000000,
+            3.000000
+        },
+        {
+            -3.000000,
+            1.000000,
+            0.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            0.000000
+        },
+        {
+            -2.000000,
+            -1.000000,
+            0.000000
+        },
+        {
+            -2.000000,
+            -3.000000,
+            0.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            -1.000000
+        },
+        {
+            -2.000000,
+            -1.000000,
+            -1.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            2.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            1.000000
+        },
+        {
+            2.000000,
+            1.000000,
+            1.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            -2.000000
+        },
+        {
+            3.000000,
+            2.000000,
+            1.000000
+        },
+        {
+            0.000000,
+            -2.000000,
+            -3.000000
+        },
+        {
+            -2.000000,
+            -2.000000,
+            -4.000000
+        },
+        {
+            -3.000000,
+            -1.000000,
+            1.000000
+        },
+        {
+            -1.000000,
+            0.000000,
+            2.000000
+        },
+        {
+            2.000000,
+            2.000000,
+            5.000000
+        }
+    },
+    {
+        {
+            -5.000000,
+            0.000000,
+            -1.000000
+        },
+        {
+            -3.000000,
+            0.000000,
+            -2.000000
+        },
+        {
+            -1.000000,
+            0.000000,
+            0.000000
+        },
+        {
+            -2.000000,
+            -1.000000,
+            0.000000
+        },
+        {
+            -3.000000,
+            -1.000000,
+            0.000000
+        },
+        {
+            -4.000000,
+            -3.000000,
+            -3.000000
+        },
+        {
+            -3.000000,
+            -1.000000,
+            0.000000
+        },
+        {
+            -3.000000,
+            -1.000000,
+            -2.000000
+        },
+        {
+            -4.000000,
+            -1.000000,
+            -1.000000
+        },
+        {
+            -3.000000,
+            -2.000000,
+            -1.000000
+        },
+        {
+            -3.000000,
+            -3.000000,
+            -1.000000
+        },
+        {
+            -3.000000,
+            -1.000000,
+            -2.000000
+        },
+        {
+            -4.000000,
+            0.000000,
+            -2.000000
+        },
+        {
+            0.000000,
+            -1.000000,
+            -1.000000
+        },
+        {
+            -1.000000,
+            0.000000,
+            -1.000000
+        },
+        {
+            0.000000,
+            -1.000000,
+            0.000000
+        },
+        {
+            0.000000,
+            -1.000000,
+            0.000000
+        },
+        {
+            -4.000000,
+            -4.000000,
+            -2.000000
+        },
+        {
+            -3.000000,
+            -4.000000,
+            -2.000000
+        },
+        {
+            -3.000000,
+            -2.000000,
+            0.000000
+        },
+        {
+            -3.000000,
+            -2.000000,
+            -1.000000
+        },
+        {
+            -3.000000,
+            0.000000,
+            -2.000000
+        },
+        {
+            -2.000000,
+            -1.000000,
+            -1.000000
+        },
+        {
+            -1.000000,
+            -3.000000,
+            -2.000000
+        },
+        {
+            -4.000000,
+            -2.000000,
+            -2.000000
+        },
+        {
+            -1.000000,
+            -1.000000,
+            -1.000000
+        },
+        {
+            -3.000000,
+            -1.000000,
+            -4.000000
+        },
+        {
+            -2.000000,
+            -3.000000,
+            -1.000000
+        },
+        {
+            -3.000000,
+            -2.000000,
+            -2.000000
+        },
+        {
+            -2.000000,
+            -3.000000,
+            -2.000000
+        },
+        {
+            -2.000000,
+            -2.000000,
+            -2.000000
+        },
+        {
+            -3.000000,
+            -2.000000,
+            -1.000000
+        }
+    },
+    {
+        {
+            -2.000000,
+            4.000000,
+            4.000000
+        },
+        {
+            0.000000,
+            2.000000,
+            -1.000000
+        },
+        {
+            7.000000,
+            1.000000,
+            7.000000
+        },
+        {
+            4.000000,
+            5.000000,
+            2.000000
+        },
+        {
+            -3.000000,
+            -2.000000,
+            0.000000
+        },
+        {
+            -1.000000,
+            0.000000,
+            -1.000000
+        },
+        {
+            -3.000000,
+            4.000000,
+            -5.000000
+        },
+        {
+            -2.000000,
+            0.000000,
+            3.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            0.000000
+        },
+        {
+            2.000000,
+            1.000000,
+            2.000000
+        },
+        {
+            2.000000,
+            0.000000,
+            -1.000000
+        },
+        {
+            2.000000,
+            4.000000,
+            6.000000
+        },
+        {
+            2.000000,
+            -3.000000,
+            -2.000000
+        },
+        {
+            1.000000,
+            -1.000000,
+            0.000000
+        },
+        {
+            -3.000000,
+            0.000000,
+            1.000000
+        },
+        {
+            1.000000,
+            -1.000000,
+            -1.000000
+        },
+        {
+            1.000000,
+            0.000000,
+            1.000000
+        },
+        {
+            0.000000,
+            1.000000,
+            0.000000
+        },
+        {
+            -1.000000,
+            0.000000,
+            1.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            -1.000000
+        },
+        {
+            1.000000,
+            -1.000000,
+            -1.000000
+        },
+        {
+            1.000000,
+            1.000000,
+            -1.000000
+        },
+        {
+            1.000000,
+            1.000000,
+            0.000000
+        },
+        {
+            1.000000,
+            -1.000000,
+            -1.000000
+        },
+        {
+            0.000000,
+            1.000000,
+            -2.000000
+        },
+        {
+            -1.000000,
+            1.000000,
+            1.000000
+        },
+        {
+            0.000000,
+            -1.000000,
+            0.000000
+        },
+        {
+            1.000000,
+            -1.000000,
+            0.000000
+        },
+        {
+            -1.000000,
+            1.000000,
+            -1.000000
+        },
+        {
+            -1.000000,
+            1.000000,
+            0.000000
+        },
+        {
+            1.000000,
+            1.000000,
+            -1.000000
+        },
+        {
+            -1.000000,
+            -2.000000,
+            0.000000
+        }
+    },
+    {
+        {
+            5.000000,
+            2.000000,
+            -6.000000
+        },
+        {
+            5.000000,
+            -1.000000,
+            -2.000000
+        },
+        {
+            -3.000000,
+            -1.000000,
+            7.000000
+        },
+        {
+            7.000000,
+            -4.000000,
+            -2.000000
+        },
+        {
+            -2.000000,
+            3.000000,
+            5.000000
+        },
+        {
+            -1.000000,
+            1.000000,
+            0.000000
+        },
+        {
+            -3.000000,
+            4.000000,
+            4.000000
+        },
+        {
+            2.000000,
+            1.000000,
+            -3.000000
+        },
+        {
+            3.000000,
+            1.000000,
+            -1.000000
+        },
+        {
+            1.000000,
+            0.000000,
+            -1.000000
+        },
+        {
+            0.000000,
+            -3.000000,
+            -3.000000
+        },
+        {
+            7.000000,
+            -1.000000,
+            -3.000000
+        },
+        {
+            -1.000000,
+            -1.000000,
+            7.000000
+        },
+        {
+            -1.000000,
+            -2.000000,
+            1.000000
+        },
+        {
+            7.000000,
+            1.000000,
+            -2.000000
+        },
+        {
+            -2.000000,
+            -2.000000,
+            -1.000000
+        },
+        {
+            2.000000,
+            -1.000000,
+            -1.000000
+        },
+        {
+            -1.000000,
+            -1.000000,
+            -1.000000
+        },
+        {
+            -1.000000,
+            0.000000,
+            0.000000
+        },
+        {
+            -1.000000,
+            -2.000000,
+            -3.000000
+        },
+        {
+            -1.000000,
+            0.000000,
+            2.000000
+        },
+        {
+            0.000000,
+            2.000000,
+            1.000000
+        },
+        {
+            0.000000,
+            -1.000000,
+            -1.000000
+        },
+        {
+            -2.000000,
+            -2.000000,
+            0.000000
+        },
+        {
+            1.000000,
+            0.000000,
+            -3.000000
+        },
+        {
+            -1.000000,
+            2.000000,
+            3.000000
+        },
+        {
+            -3.000000,
+            -2.000000,
+            0.000000
+        },
+        {
+            -1.000000,
+            -1.000000,
+            -1.000000
+        },
+        {
+            1.000000,
+            -1.000000,
+            -2.000000
+        },
+        {
+            -2.000000,
+            -1.000000,
+            -2.000000
+        },
+        {
+            -1.000000,
+            -2.000000,
+            -2.000000
+        },
+        {
+            -3.000000,
+            -2.000000,
+            0.000000
+        }
+    },
+    {
+        {
+            3.000000,
+            2.000000,
+            0.000000
+        },
+        {
+            5.000000,
+            1.000000,
+            2.000000
+        },
+        {
+            -1.000000,
+            1.000000,
+            0.000000
+        },
+        {
+            -1.000000,
+            2.000000,
+            4.000000
+        },
+        {
+            -3.000000,
+            -2.000000,
+            5.000000
+        },
+        {
+            -4.000000,
+            -2.000000,
+            1.000000
+        },
+        {
+            -3.000000,
+            -3.000000,
+            6.000000
+        },
+        {
+            2.000000,
+            1.000000,
+            4.000000
+        },
+        {
+            1.000000,
+            1.000000,
+            0.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            -3.000000
+        },
+        {
+            -2.000000,
+            0.000000,
+            1.000000
+        },
+        {
+            2.000000,
+            3.000000,
+            -2.000000
+        },
+        {
+            -3.000000,
+            -3.000000,
+            4.000000
+        },
+        {
+            0.000000,
+            -1.000000,
+            1.000000
+        },
+        {
+            0.000000,
+            -4.000000,
+            -4.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            1.000000
+        },
+        {
+            1.000000,
+            -1.000000,
+            -3.000000
+        },
+        {
+            -2.000000,
+            1.000000,
+            0.000000
+        },
+        {
+            -4.000000,
+            -1.000000,
+            2.000000
+        },
+        {
+            0.000000,
+            -1.000000,
+            2.000000
+        },
+        {
+            -5.000000,
+            0.000000,
+            2.000000
+        },
+        {
+            -4.000000,
+            0.000000,
+            -1.000000
+        },
+        {
+            1.000000,
+            0.000000,
+            1.000000
+        },
+        {
+            -3.000000,
+            -1.000000,
+            2.000000
+        },
+        {
+            1.000000,
+            2.000000,
+            1.000000
+        },
+        {
+            -4.000000,
+            -3.000000,
+            1.000000
+        },
+        {
+            -1.000000,
+            -2.000000,
+            4.000000
+        },
+        {
+            0.000000,
+            2.000000,
+            1.000000
+        },
+        {
+            0.000000,
+            -1.000000,
+            -3.000000
+        },
+        {
+            0.000000,
+            -1.000000,
+            0.000000
+        },
+        {
+            -2.000000,
+            3.000000,
+            0.000000
+        },
+        {
+            -1.000000,
+            -1.000000,
+            1.000000
+        }
+    },
+    {
+        {
+            1.000000,
+            -3.000000,
+            -2.000000
+        },
+        {
+            1.000000,
+            -2.000000,
+            -1.000000
+        },
+        {
+            -3.000000,
+            -1.000000,
+            2.000000
+        },
+        {
+            3.000000,
+            -1.000000,
+            -4.000000
+        },
+        {
+            -2.000000,
+            1.000000,
+            -1.000000
+        },
+        {
+            -4.000000,
+            1.000000,
+            4.000000
+        },
+        {
+            -2.000000,
+            2.000000,
+            -3.000000
+        },
+        {
+            -1.000000,
+            0.000000,
+            -1.000000
+        },
+        {
+            2.000000,
+            -2.000000,
+            0.000000
+        },
+        {
+            1.000000,
+            2.000000,
+            0.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            0.000000
+        },
+        {
+            7.000000,
+            -3.000000,
+            -4.000000
+        },
+        {
+            -4.000000,
+            -3.000000,
+            3.000000
+        },
+        {
+            2.000000,
+            -3.000000,
+            2.000000
+        },
+        {
+            1.000000,
+            -3.000000,
+            0.000000
+        },
+        {
+            -1.000000,
+            -3.000000,
+            0.000000
+        },
+        {
+            -3.000000,
+            0.000000,
+            -3.000000
+        },
+        {
+            0.000000,
+            3.000000,
+            1.000000
+        },
+        {
+            -2.000000,
+            0.000000,
+            5.000000
+        },
+        {
+            2.000000,
+            2.000000,
+            0.000000
+        },
+        {
+            -1.000000,
+            -2.000000,
+            3.000000
+        },
+        {
+            -1.000000,
+            3.000000,
+            3.000000
+        },
+        {
+            0.000000,
+            -6.000000,
+            2.000000
+        },
+        {
+            -1.000000,
+            1.000000,
+            1.000000
+        },
+        {
+            0.000000,
+            -2.000000,
+            -1.000000
+        },
+        {
+            -1.000000,
+            -1.000000,
+            4.000000
+        },
+        {
+            -5.000000,
+            0.000000,
+            0.000000
+        },
+        {
+            5.000000,
+            0.000000,
+            0.000000
+        },
+        {
+            -1.000000,
+            4.000000,
+            -1.000000
+        },
+        {
+            0.000000,
+            2.000000,
+            -1.000000
+        },
+        {
+            3.000000,
+            1.000000,
+            -1.000000
+        },
+        {
+            3.000000,
+            -1.000000,
+            3.000000
+        }
+    },
+    {
+        {
+            -1.000000,
+            1.000000,
+            -5.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            -5.000000
+        },
+        {
+            -7.000000,
+            -2.000000,
+            0.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            -7.000000
+        },
+        {
+            -7.000000,
+            -3.000000,
+            1.000000
+        },
+        {
+            -7.000000,
+            0.000000,
+            5.000000
+        },
+        {
+            -7.000000,
+            -2.000000,
+            0.000000
+        },
+        {
+            0.000000,
+            1.000000,
+            -5.000000
+        },
+        {
+            2.000000,
+            0.000000,
+            0.000000
+        },
+        {
+            1.000000,
+            -2.000000,
+            0.000000
+        },
+        {
+            1.000000,
+            2.000000,
+            0.000000
+        },
+        {
+            0.000000,
+            1.000000,
+            -7.000000
+        },
+        {
+            -7.000000,
+            0.000000,
+            0.000000
+        },
+        {
+            -1.000000,
+            0.000000,
+            0.000000
+        },
+        {
+            -1.000000,
+            1.000000,
+            -4.000000
+        },
+        {
+            0.000000,
+            2.000000,
+            1.000000
+        },
+        {
+            2.000000,
+            -2.000000,
+            -2.000000
+        },
+        {
+            1.000000,
+            1.000000,
+            1.000000
+        },
+        {
+            -2.000000,
+            1.000000,
+            2.000000
+        },
+        {
+            1.000000,
+            2.000000,
+            -1.000000
+        },
+        {
+            -5.000000,
+            -2.000000,
+            4.000000
+        },
+        {
+            -6.000000,
+            1.000000,
+            3.000000
+        },
+        {
+            1.000000,
+            3.000000,
+            0.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            1.000000
+        },
+        {
+            1.000000,
+            1.000000,
+            -5.000000
+        },
+        {
+            -7.000000,
+            0.000000,
+            3.000000
+        },
+        {
+            0.000000,
+            2.000000,
+            -1.000000
+        },
+        {
+            0.000000,
+            1.000000,
+            -1.000000
+        },
+        {
+            1.000000,
+            0.000000,
+            -1.000000
+        },
+        {
+            0.000000,
+            1.000000,
+            1.000000
+        },
+        {
+            2.000000,
+            0.000000,
+            -2.000000
+        },
+        {
+            -1.000000,
+            1.000000,
+            1.000000
+        }
+    },
+    {
+        {
+            0.000000,
+            1.000000,
+            0.000000
+        },
+        {
+            0.000000,
+            1.000000,
+            -3.000000
+        },
+        {
+            1.000000,
+            0.000000,
+            -5.000000
+        },
+        {
+            2.000000,
+            1.000000,
+            -2.000000
+        },
+        {
+            1.000000,
+            1.000000,
+            -2.000000
+        },
+        {
+            1.000000,
+            -1.000000,
+            2.000000
+        },
+        {
+            6.000000,
+            -7.000000,
+            0.000000
+        },
+        {
+            -3.000000,
+            0.000000,
+            1.000000
+        },
+        {
+            0.000000,
+            2.000000,
+            0.000000
+        },
+        {
+            0.000000,
+            -2.000000,
+            0.000000
+        },
+        {
+            -2.000000,
+            -1.000000,
+            -1.000000
+        },
+        {
+            2.000000,
+            0.000000,
+            1.000000
+        },
+        {
+            -1.000000,
+            2.000000,
+            -3.000000
+        },
+        {
+            2.000000,
+            4.000000,
+            3.000000
+        },
+        {
+            1.000000,
+            -1.000000,
+            -1.000000
+        },
+        {
+            0.000000,
+            5.000000,
+            4.000000
+        },
+        {
+            1.000000,
+            -1.000000,
+            2.000000
+        },
+        {
+            -2.000000,
+            1.000000,
+            2.000000
+        },
+        {
+            2.000000,
+            -2.000000,
+            -2.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            0.000000
+        },
+        {
+            4.000000,
+            -3.000000,
+            0.000000
+        },
+        {
+            -2.000000,
+            2.000000,
+            2.000000
+        },
+        {
+            0.000000,
+            5.000000,
+            2.000000
+        },
+        {
+            1.000000,
+            -3.000000,
+            -3.000000
+        },
+        {
+            0.000000,
+            -1.000000,
+            -1.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            -3.000000
+        },
+        {
+            -1.000000,
+            5.000000,
+            -2.000000
+        },
+        {
+            -3.000000,
+            -1.000000,
+            0.000000
+        },
+        {
+            -1.000000,
+            1.000000,
+            3.000000
+        },
+        {
+            2.000000,
+            3.000000,
+            5.000000
+        },
+        {
+            -2.000000,
+            2.000000,
+            0.000000
+        },
+        {
+            4.000000,
+            2.000000,
+            3.000000
+        }
+    },
+    {
+        {
+            3.000000,
+            -1.000000,
+            0.000000
+        },
+        {
+            3.000000,
+            1.000000,
+            1.000000
+        },
+        {
+            3.000000,
+            -2.000000,
+            3.000000
+        },
+        {
+            2.000000,
+            1.000000,
+            2.000000
+        },
+        {
+            1.000000,
+            1.000000,
+            3.000000
+        },
+        {
+            1.000000,
+            2.000000,
+            3.000000
+        },
+        {
+            0.000000,
+            2.000000,
+            1.000000
+        },
+        {
+            1.000000,
+            0.000000,
+            2.000000
+        },
+        {
+            3.000000,
+            0.000000,
+            -2.000000
+        },
+        {
+            1.000000,
+            0.000000,
+            -1.000000
+        },
+        {
+            -2.000000,
+            -5.000000,
+            -4.000000
+        },
+        {
+            6.000000,
+            -2.000000,
+            1.000000
+        },
+        {
+            1.000000,
+            0.000000,
+            2.000000
+        },
+        {
+            -1.000000,
+            -1.000000,
+            -1.000000
+        },
+        {
+            1.000000,
+            -1.000000,
+            0.000000
+        },
+        {
+            -3.000000,
+            -4.000000,
+            -6.000000
+        },
+        {
+            0.000000,
+            -1.000000,
+            1.000000
+        },
+        {
+            0.000000,
+            -4.000000,
+            -5.000000
+        },
+        {
+            1.000000,
+            -1.000000,
+            -2.000000
+        },
+        {
+            -3.000000,
+            -5.000000,
+            -4.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            -1.000000
+        },
+        {
+            1.000000,
+            1.000000,
+            1.000000
+        },
+        {
+            -2.000000,
+            0.000000,
+            -6.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            -2.000000
+        },
+        {
+            2.000000,
+            2.000000,
+            4.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            0.000000
+        },
+        {
+            -6.000000,
+            2.000000,
+            4.000000
+        },
+        {
+            -4.000000,
+            -4.000000,
+            -5.000000
+        },
+        {
+            2.000000,
+            0.000000,
+            0.000000
+        },
+        {
+            -3.000000,
+            -6.000000,
+            -4.000000
+        },
+        {
+            -5.000000,
+            -4.000000,
+            -3.000000
+        },
+        {
+            -2.000000,
+            0.000000,
+            1.000000
+        }
+    },
+    {
+        {
+            -2.000000,
+            -2.000000,
+            -1.000000
+        },
+        {
+            -6.000000,
+            -5.000000,
+            -2.000000
+        },
+        {
+            0.000000,
+            7.000000,
+            -2.000000
+        },
+        {
+            1.000000,
+            0.000000,
+            4.000000
+        },
+        {
+            -1.000000,
+            6.000000,
+            0.000000
+        },
+        {
+            0.000000,
+            2.000000,
+            0.000000
+        },
+        {
+            1.000000,
+            5.000000,
+            -3.000000
+        },
+        {
+            -5.000000,
+            -5.000000,
+            -3.000000
+        },
+        {
+            -1.000000,
+            0.000000,
+            -2.000000
+        },
+        {
+            -2.000000,
+            0.000000,
+            1.000000
+        },
+        {
+            0.000000,
+            -1.000000,
+            0.000000
+        },
+        {
+            2.000000,
+            0.000000,
+            1.000000
+        },
+        {
+            4.000000,
+            2.000000,
+            -4.000000
+        },
+        {
+            2.000000,
+            0.000000,
+            -1.000000
+        },
+        {
+            -1.000000,
+            0.000000,
+            0.000000
+        },
+        {
+            1.000000,
+            0.000000,
+            -1.000000
+        },
+        {
+            -2.000000,
+            -3.000000,
+            3.000000
+        },
+        {
+            2.000000,
+            1.000000,
+            0.000000
+        },
+        {
+            1.000000,
+            -1.000000,
+            0.000000
+        },
+        {
+            0.000000,
+            1.000000,
+            0.000000
+        },
+        {
+            2.000000,
+            3.000000,
+            1.000000
+        },
+        {
+            1.000000,
+            1.000000,
+            0.000000
+        },
+        {
+            1.000000,
+            0.000000,
+            0.000000
+        },
+        {
+            0.000000,
+            -1.000000,
+            1.000000
+        },
+        {
+            -3.000000,
+            -3.000000,
+            0.000000
+        },
+        {
+            2.000000,
+            3.000000,
+            -1.000000
+        },
+        {
+            -1.000000,
+            3.000000,
+            -2.000000
+        },
+        {
+            -1.000000,
+            -1.000000,
+            -2.000000
+        },
+        {
+            -1.000000,
+            -2.000000,
+            -1.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            1.000000
+        },
+        {
+            -2.000000,
+            -2.000000,
+            0.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            1.000000
+        }
+    },
+    {
+        {
+            2.000000,
+            -1.000000,
+            3.000000
+        },
+        {
+            1.000000,
+            -1.000000,
+            -2.000000
+        },
+        {
+            -1.000000,
+            -2.000000,
+            -4.000000
+        },
+        {
+            3.000000,
+            1.000000,
+            -1.000000
+        },
+        {
+            -1.000000,
+            -2.000000,
+            -2.000000
+        },
+        {
+            0.000000,
+            1.000000,
+            0.000000
+        },
+        {
+            0.000000,
+            -4.000000,
+            -2.000000
+        },
+        {
+            -1.000000,
+            0.000000,
+            2.000000
+        },
+        {
+            -1.000000,
+            -1.000000,
+            0.000000
+        },
+        {
+            0.000000,
+            -1.000000,
+            -2.000000
+        },
+        {
+            3.000000,
+            4.000000,
+            6.000000
+        },
+        {
+            0.000000,
+            3.000000,
+            -7.000000
+        },
+        {
+            1.000000,
+            -2.000000,
+            1.000000
+        },
+        {
+            1.000000,
+            -1.000000,
+            -2.000000
+        },
+        {
+            -1.000000,
+            -3.000000,
+            0.000000
+        },
+        {
+            1.000000,
+            1.000000,
+            -2.000000
+        },
+        {
+            -2.000000,
+            0.000000,
+            -1.000000
+        },
+        {
+            1.000000,
+            1.000000,
+            4.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            3.000000
+        },
+        {
+            1.000000,
+            6.000000,
+            6.000000
+        },
+        {
+            0.000000,
+            2.000000,
+            2.000000
+        },
+        {
+            1.000000,
+            -2.000000,
+            3.000000
+        },
+        {
+            1.000000,
+            -1.000000,
+            -3.000000
+        },
+        {
+            1.000000,
+            4.000000,
+            1.000000
+        },
+        {
+            1.000000,
+            -2.000000,
+            2.000000
+        },
+        {
+            2.000000,
+            1.000000,
+            -2.000000
+        },
+        {
+            -3.000000,
+            -5.000000,
+            -4.000000
+        },
+        {
+            1.000000,
+            1.000000,
+            4.000000
+        },
+        {
+            -1.000000,
+            0.000000,
+            -1.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            -1.000000
+        },
+        {
+            3.000000,
+            7.000000,
+            5.000000
+        },
+        {
+            1.000000,
+            1.000000,
+            1.000000
+        }
+    },
+    {
+        {
+            6.000000,
+            -2.000000,
+            -3.000000
+        },
+        {
+            5.000000,
+            0.000000,
+            -2.000000
+        },
+        {
+            6.000000,
+            -3.000000,
+            0.000000
+        },
+        {
+            4.000000,
+            -2.000000,
+            -3.000000
+        },
+        {
+            3.000000,
+            -2.000000,
+            0.000000
+        },
+        {
+            3.000000,
+            2.000000,
+            -1.000000
+        },
+        {
+            5.000000,
+            -2.000000,
+            0.000000
+        },
+        {
+            4.000000,
+            0.000000,
+            -2.000000
+        },
+        {
+            1.000000,
+            0.000000,
+            -2.000000
+        },
+        {
+            5.000000,
+            0.000000,
+            -2.000000
+        },
+        {
+            1.000000,
+            1.000000,
+            0.000000
+        },
+        {
+            2.000000,
+            -2.000000,
+            -3.000000
+        },
+        {
+            1.000000,
+            -1.000000,
+            1.000000
+        },
+        {
+            -1.000000,
+            -1.000000,
+            0.000000
+        },
+        {
+            3.000000,
+            1.000000,
+            -3.000000
+        },
+        {
+            -3.000000,
+            -2.000000,
+            -2.000000
+        },
+        {
+            4.000000,
+            -2.000000,
+            -1.000000
+        },
+        {
+            3.000000,
+            -1.000000,
+            -1.000000
+        },
+        {
+            4.000000,
+            1.000000,
+            -2.000000
+        },
+        {
+            -2.000000,
+            1.000000,
+            -3.000000
+        },
+        {
+            2.000000,
+            1.000000,
+            0.000000
+        },
+        {
+            1.000000,
+            1.000000,
+            3.000000
+        },
+        {
+            -3.000000,
+            0.000000,
+            -1.000000
+        },
+        {
+            2.000000,
+            -1.000000,
+            -2.000000
+        },
+        {
+            4.000000,
+            0.000000,
+            -2.000000
+        },
+        {
+            3.000000,
+            -1.000000,
+            1.000000
+        },
+        {
+            -3.000000,
+            0.000000,
+            2.000000
+        },
+        {
+            0.000000,
+            -2.000000,
+            -2.000000
+        },
+        {
+            4.000000,
+            2.000000,
+            -1.000000
+        },
+        {
+            0.000000,
+            -2.000000,
+            -2.000000
+        },
+        {
+            2.000000,
+            -3.000000,
+            -2.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            0.000000
+        }
+    },
+    {
+        {
+            -1.000000,
+            2.000000,
+            -4.000000
+        },
+        {
+            1.000000,
+            -1.000000,
+            -6.000000
+        },
+        {
+            -3.000000,
+            2.000000,
+            -2.000000
+        },
+        {
+            1.000000,
+            -7.000000,
+            1.000000
+        },
+        {
+            0.000000,
+            4.000000,
+            -2.000000
+        },
+        {
+            -2.000000,
+            0.000000,
+            -1.000000
+        },
+        {
+            1.000000,
+            -2.000000,
+            4.000000
+        },
+        {
+            0.000000,
+            -1.000000,
+            -6.000000
+        },
+        {
+            -2.000000,
+            -3.000000,
+            -2.000000
+        },
+        {
+            -1.000000,
+            -6.000000,
+            -1.000000
+        },
+        {
+            1.000000,
+            0.000000,
+            -1.000000
+        },
+        {
+            0.000000,
+            -3.000000,
+            -4.000000
+        },
+        {
+            0.000000,
+            -1.000000,
+            0.000000
+        },
+        {
+            -1.000000,
+            -3.000000,
+            4.000000
+        },
+        {
+            1.000000,
+            -2.000000,
+            -4.000000
+        },
+        {
+            -2.000000,
+            0.000000,
+            2.000000
+        },
+        {
+            0.000000,
+            -6.000000,
+            3.000000
+        },
+        {
+            -1.000000,
+            0.000000,
+            -3.000000
+        },
+        {
+            0.000000,
+            1.000000,
+            -1.000000
+        },
+        {
+            -3.000000,
+            -2.000000,
+            -1.000000
+        },
+        {
+            0.000000,
+            -1.000000,
+            1.000000
+        },
+        {
+            -1.000000,
+            2.000000,
+            -2.000000
+        },
+        {
+            -3.000000,
+            1.000000,
+            1.000000
+        },
+        {
+            0.000000,
+            1.000000,
+            2.000000
+        },
+        {
+            0.000000,
+            -1.000000,
+            -6.000000
+        },
+        {
+            0.000000,
+            2.000000,
+            1.000000
+        },
+        {
+            -1.000000,
+            4.000000,
+            2.000000
+        },
+        {
+            0.000000,
+            -3.000000,
+            -2.000000
+        },
+        {
+            1.000000,
+            -5.000000,
+            0.000000
+        },
+        {
+            1.000000,
+            0.000000,
+            1.000000
+        },
+        {
+            1.000000,
+            -3.000000,
+            -3.000000
+        },
+        {
+            0.000000,
+            -2.000000,
+            0.000000
+        }
+    },
+    {
+        {
+            -1.000000,
+            -1.000000,
+            0.000000
+        },
+        {
+            -4.000000,
+            0.000000,
+            -2.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            -6.000000
+        },
+        {
+            4.000000,
+            6.000000,
+            -2.000000
+        },
+        {
+            1.000000,
+            -1.000000,
+            -6.000000
+        },
+        {
+            3.000000,
+            0.000000,
+            -4.000000
+        },
+        {
+            1.000000,
+            -3.000000,
+            -5.000000
+        },
+        {
+            -5.000000,
+            -3.000000,
+            -1.000000
+        },
+        {
+            3.000000,
+            -1.000000,
+            1.000000
+        },
+        {
+            0.000000,
+            -1.000000,
+            0.000000
+        },
+        {
+            1.000000,
+            -1.000000,
+            -1.000000
+        },
+        {
+            2.000000,
+            1.000000,
+            1.000000
+        },
+        {
+            1.000000,
+            -4.000000,
+            -1.000000
+        },
+        {
+            -2.000000,
+            -5.000000,
+            -4.000000
+        },
+        {
+            5.000000,
+            -1.000000,
+            3.000000
+        },
+        {
+            -2.000000,
+            -3.000000,
+            -2.000000
+        },
+        {
+            3.000000,
+            2.000000,
+            0.000000
+        },
+        {
+            0.000000,
+            1.000000,
+            -1.000000
+        },
+        {
+            0.000000,
+            1.000000,
+            -2.000000
+        },
+        {
+            1.000000,
+            -1.000000,
+            2.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            -3.000000
+        },
+        {
+            2.000000,
+            -1.000000,
+            -3.000000
+        },
+        {
+            1.000000,
+            1.000000,
+            -2.000000
+        },
+        {
+            -2.000000,
+            -1.000000,
+            0.000000
+        },
+        {
+            -4.000000,
+            0.000000,
+            0.000000
+        },
+        {
+            1.000000,
+            -1.000000,
+            -3.000000
+        },
+        {
+            -3.000000,
+            -5.000000,
+            -2.000000
+        },
+        {
+            0.000000,
+            -2.000000,
+            0.000000
+        },
+        {
+            3.000000,
+            1.000000,
+            -1.000000
+        },
+        {
+            -2.000000,
+            0.000000,
+            -3.000000
+        },
+        {
+            0.000000,
+            -1.000000,
+            3.000000
+        },
+        {
+            -1.000000,
+            -5.000000,
+            -5.000000
+        }
+    },
+    {
+        {
+            1.000000,
+            2.000000,
+            -7.000000
+        },
+        {
+            3.000000,
+            3.000000,
+            -6.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            -5.000000
+        },
+        {
+            1.000000,
+            -2.000000,
+            -4.000000
+        },
+        {
+            2.000000,
+            1.000000,
+            -6.000000
+        },
+        {
+            2.000000,
+            0.000000,
+            -5.000000
+        },
+        {
+            2.000000,
+            1.000000,
+            -5.000000
+        },
+        {
+            2.000000,
+            3.000000,
+            -6.000000
+        },
+        {
+            0.000000,
+            2.000000,
+            1.000000
+        },
+        {
+            1.000000,
+            -2.000000,
+            0.000000
+        },
+        {
+            2.000000,
+            3.000000,
+            0.000000
+        },
+        {
+            1.000000,
+            -1.000000,
+            -7.000000
+        },
+        {
+            2.000000,
+            -3.000000,
+            -3.000000
+        },
+        {
+            4.000000,
+            3.000000,
+            1.000000
+        },
+        {
+            1.000000,
+            -1.000000,
+            -5.000000
+        },
+        {
+            -2.000000,
+            0.000000,
+            1.000000
+        },
+        {
+            0.000000,
+            -1.000000,
+            0.000000
+        },
+        {
+            0.000000,
+            -1.000000,
+            0.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            -3.000000
+        },
+        {
+            1.000000,
+            1.000000,
+            0.000000
+        },
+        {
+            1.000000,
+            0.000000,
+            -7.000000
+        },
+        {
+            1.000000,
+            -2.000000,
+            -4.000000
+        },
+        {
+            0.000000,
+            1.000000,
+            1.000000
+        },
+        {
+            0.000000,
+            1.000000,
+            1.000000
+        },
+        {
+            1.000000,
+            2.000000,
+            -6.000000
+        },
+        {
+            1.000000,
+            -2.000000,
+            -7.000000
+        },
+        {
+            1.000000,
+            -1.000000,
+            1.000000
+        },
+        {
+            3.000000,
+            1.000000,
+            0.000000
+        },
+        {
+            0.000000,
+            -2.000000,
+            0.000000
+        },
+        {
+            1.000000,
+            2.000000,
+            2.000000
+        },
+        {
+            4.000000,
+            2.000000,
+            -2.000000
+        },
+        {
+            1.000000,
+            3.000000,
+            0.000000
+        }
+    },
+    {
+        {
+            4.000000,
+            2.000000,
+            4.000000
+        },
+        {
+            0.000000,
+            1.000000,
+            2.000000
+        },
+        {
+            3.000000,
+            0.000000,
+            -7.000000
+        },
+        {
+            6.000000,
+            4.000000,
+            -2.000000
+        },
+        {
+            2.000000,
+            -1.000000,
+            -6.000000
+        },
+        {
+            0.000000,
+            -2.000000,
+            -4.000000
+        },
+        {
+            1.000000,
+            -1.000000,
+            -6.000000
+        },
+        {
+            0.000000,
+            1.000000,
+            0.000000
+        },
+        {
+            1.000000,
+            2.000000,
+            1.000000
+        },
+        {
+            -1.000000,
+            -1.000000,
+            1.000000
+        },
+        {
+            2.000000,
+            0.000000,
+            4.000000
+        },
+        {
+            6.000000,
+            1.000000,
+            3.000000
+        },
+        {
+            1.000000,
+            -1.000000,
+            -5.000000
+        },
+        {
+            1.000000,
+            0.000000,
+            -2.000000
+        },
+        {
+            2.000000,
+            -4.000000,
+            1.000000
+        },
+        {
+            0.000000,
+            -2.000000,
+            -1.000000
+        },
+        {
+            -2.000000,
+            3.000000,
+            5.000000
+        },
+        {
+            -1.000000,
+            0.000000,
+            -1.000000
+        },
+        {
+            1.000000,
+            -1.000000,
+            -1.000000
+        },
+        {
+            -1.000000,
+            0.000000,
+            1.000000
+        },
+        {
+            1.000000,
+            -1.000000,
+            -5.000000
+        },
+        {
+            0.000000,
+            -2.000000,
+            -4.000000
+        },
+        {
+            -1.000000,
+            -2.000000,
+            0.000000
+        },
+        {
+            1.000000,
+            0.000000,
+            1.000000
+        },
+        {
+            1.000000,
+            -1.000000,
+            0.000000
+        },
+        {
+            0.000000,
+            -1.000000,
+            -5.000000
+        },
+        {
+            -1.000000,
+            -3.000000,
+            -3.000000
+        },
+        {
+            -1.000000,
+            2.000000,
+            3.000000
+        },
+        {
+            0.000000,
+            -3.000000,
+            2.000000
+        },
+        {
+            1.000000,
+            1.000000,
+            -1.000000
+        },
+        {
+            0.000000,
+            1.000000,
+            0.000000
+        },
+        {
+            -1.000000,
+            0.000000,
+            -2.000000
+        }
+    },
+    {
+        {
+            -3.000000,
+            -1.000000,
+            0.000000
+        },
+        {
+            -1.000000,
+            1.000000,
+            0.000000
+        },
+        {
+            2.000000,
+            1.000000,
+            -3.000000
+        },
+        {
+            1.000000,
+            0.000000,
+            0.000000
+        },
+        {
+            5.000000,
+            -2.000000,
+            -4.000000
+        },
+        {
+            0.000000,
+            1.000000,
+            0.000000
+        },
+        {
+            4.000000,
+            -3.000000,
+            -3.000000
+        },
+        {
+            1.000000,
+            -2.000000,
+            0.000000
+        },
+        {
+            2.000000,
+            4.000000,
+            2.000000
+        },
+        {
+            2.000000,
+            3.000000,
+            2.000000
+        },
+        {
+            3.000000,
+            1.000000,
+            0.000000
+        },
+        {
+            1.000000,
+            1.000000,
+            -1.000000
+        },
+        {
+            2.000000,
+            -1.000000,
+            -2.000000
+        },
+        {
+            0.000000,
+            -1.000000,
+            -1.000000
+        },
+        {
+            0.000000,
+            1.000000,
+            6.000000
+        },
+        {
+            2.000000,
+            0.000000,
+            0.000000
+        },
+        {
+            2.000000,
+            4.000000,
+            2.000000
+        },
+        {
+            -1.000000,
+            -2.000000,
+            -3.000000
+        },
+        {
+            -2.000000,
+            -3.000000,
+            -1.000000
+        },
+        {
+            1.000000,
+            -1.000000,
+            0.000000
+        },
+        {
+            0.000000,
+            -2.000000,
+            2.000000
+        },
+        {
+            0.000000,
+            -1.000000,
+            1.000000
+        },
+        {
+            2.000000,
+            0.000000,
+            1.000000
+        },
+        {
+            -6.000000,
+            -5.000000,
+            -5.000000
+        },
+        {
+            0.000000,
+            -2.000000,
+            0.000000
+        },
+        {
+            -4.000000,
+            -3.000000,
+            0.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            0.000000
+        },
+        {
+            1.000000,
+            -1.000000,
+            -3.000000
+        },
+        {
+            5.000000,
+            7.000000,
+            3.000000
+        },
+        {
+            0.000000,
+            2.000000,
+            0.000000
+        },
+        {
+            1.000000,
+            -2.000000,
+            -3.000000
+        },
+        {
+            2.000000,
+            -1.000000,
+            -2.000000
+        }
+    },
+    {
+        {
+            1.000000,
+            0.000000,
+            1.000000
+        },
+        {
+            2.000000,
+            2.000000,
+            2.000000
+        },
+        {
+            2.000000,
+            7.000000,
+            7.000000
+        },
+        {
+            2.000000,
+            -3.000000,
+            4.000000
+        },
+        {
+            3.000000,
+            -3.000000,
+            -3.000000
+        },
+        {
+            -1.000000,
+            -1.000000,
+            0.000000
+        },
+        {
+            -4.000000,
+            1.000000,
+            2.000000
+        },
+        {
+            1.000000,
+            4.000000,
+            0.000000
+        },
+        {
+            -1.000000,
+            -1.000000,
+            1.000000
+        },
+        {
+            -1.000000,
+            1.000000,
+            -2.000000
+        },
+        {
+            2.000000,
+            0.000000,
+            2.000000
+        },
+        {
+            0.000000,
+            -2.000000,
+            4.000000
+        },
+        {
+            -1.000000,
+            -4.000000,
+            2.000000
+        },
+        {
+            -2.000000,
+            -1.000000,
+            -1.000000
+        },
+        {
+            1.000000,
+            4.000000,
+            -4.000000
+        },
+        {
+            -2.000000,
+            -1.000000,
+            3.000000
+        },
+        {
+            0.000000,
+            1.000000,
+            -1.000000
+        },
+        {
+            -1.000000,
+            1.000000,
+            -2.000000
+        },
+        {
+            1.000000,
+            0.000000,
+            -2.000000
+        },
+        {
+            -1.000000,
+            -1.000000,
+            2.000000
+        },
+        {
+            1.000000,
+            1.000000,
+            -1.000000
+        },
+        {
+            1.000000,
+            -1.000000,
+            0.000000
+        },
+        {
+            1.000000,
+            2.000000,
+            3.000000
+        },
+        {
+            2.000000,
+            0.000000,
+            0.000000
+        },
+        {
+            3.000000,
+            2.000000,
+            1.000000
+        },
+        {
+            3.000000,
+            -1.000000,
+            -1.000000
+        },
+        {
+            1.000000,
+            -1.000000,
+            -2.000000
+        },
+        {
+            0.000000,
+            1.000000,
+            1.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            1.000000
+        },
+        {
+            3.000000,
+            2.000000,
+            0.000000
+        },
+        {
+            1.000000,
+            2.000000,
+            3.000000
+        },
+        {
+            2.000000,
+            1.000000,
+            0.000000
+        }
+    },
+    {
+        {
+            3.000000,
+            0.000000,
+            -3.000000
+        },
+        {
+            -2.000000,
+            -2.000000,
+            -6.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            5.000000
+        },
+        {
+            0.000000,
+            -2.000000,
+            0.000000
+        },
+        {
+            -1.000000,
+            6.000000,
+            -2.000000
+        },
+        {
+            0.000000,
+            -2.000000,
+            1.000000
+        },
+        {
+            1.000000,
+            -1.000000,
+            3.000000
+        },
+        {
+            -1.000000,
+            -2.000000,
+            -4.000000
+        },
+        {
+            1.000000,
+            -1.000000,
+            3.000000
+        },
+        {
+            -1.000000,
+            -1.000000,
+            3.000000
+        },
+        {
+            1.000000,
+            0.000000,
+            1.000000
+        },
+        {
+            1.000000,
+            -1.000000,
+            -2.000000
+        },
+        {
+            1.000000,
+            -1.000000,
+            3.000000
+        },
+        {
+            1.000000,
+            4.000000,
+            5.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            -1.000000
+        },
+        {
+            2.000000,
+            0.000000,
+            5.000000
+        },
+        {
+            -2.000000,
+            -2.000000,
+            1.000000
+        },
+        {
+            1.000000,
+            -1.000000,
+            0.000000
+        },
+        {
+            -3.000000,
+            1.000000,
+            -1.000000
+        },
+        {
+            -2.000000,
+            -2.000000,
+            2.000000
+        },
+        {
+            -2.000000,
+            0.000000,
+            -2.000000
+        },
+        {
+            -1.000000,
+            -2.000000,
+            -1.000000
+        },
+        {
+            4.000000,
+            0.000000,
+            3.000000
+        },
+        {
+            -5.000000,
+            -2.000000,
+            -3.000000
+        },
+        {
+            -1.000000,
+            -3.000000,
+            -3.000000
+        },
+        {
+            -1.000000,
+            -2.000000,
+            -1.000000
+        },
+        {
+            5.000000,
+            3.000000,
+            3.000000
+        },
+        {
+            -2.000000,
+            1.000000,
+            2.000000
+        },
+        {
+            0.000000,
+            -1.000000,
+            1.000000
+        },
+        {
+            -1.000000,
+            2.000000,
+            5.000000
+        },
+        {
+            1.000000,
+            2.000000,
+            0.000000
+        },
+        {
+            -1.000000,
+            5.000000,
+            3.000000
+        }
+    },
+    {
+        {
+            -3.000000,
+            3.000000,
+            1.000000
+        },
+        {
+            -2.000000,
+            0.000000,
+            0.000000
+        },
+        {
+            1.000000,
+            -7.000000,
+            1.000000
+        },
+        {
+            -2.000000,
+            -6.000000,
+            2.000000
+        },
+        {
+            4.000000,
+            1.000000,
+            -2.000000
+        },
+        {
+            1.000000,
+            0.000000,
+            1.000000
+        },
+        {
+            2.000000,
+            4.000000,
+            -5.000000
+        },
+        {
+            -2.000000,
+            1.000000,
+            -1.000000
+        },
+        {
+            2.000000,
+            2.000000,
+            1.000000
+        },
+        {
+            3.000000,
+            1.000000,
+            1.000000
+        },
+        {
+            -2.000000,
+            0.000000,
+            2.000000
+        },
+        {
+            2.000000,
+            -2.000000,
+            1.000000
+        },
+        {
+            -1.000000,
+            2.000000,
+            -2.000000
+        },
+        {
+            0.000000,
+            -1.000000,
+            0.000000
+        },
+        {
+            0.000000,
+            2.000000,
+            -2.000000
+        },
+        {
+            -1.000000,
+            1.000000,
+            4.000000
+        },
+        {
+            2.000000,
+            -2.000000,
+            -1.000000
+        },
+        {
+            1.000000,
+            -3.000000,
+            2.000000
+        },
+        {
+            1.000000,
+            -1.000000,
+            1.000000
+        },
+        {
+            0.000000,
+            -1.000000,
+            1.000000
+        },
+        {
+            1.000000,
+            -3.000000,
+            -1.000000
+        },
+        {
+            2.000000,
+            1.000000,
+            -2.000000
+        },
+        {
+            -3.000000,
+            7.000000,
+            -1.000000
+        },
+        {
+            -2.000000,
+            -5.000000,
+            -4.000000
+        },
+        {
+            -2.000000,
+            0.000000,
+            3.000000
+        },
+        {
+            1.000000,
+            1.000000,
+            -2.000000
+        },
+        {
+            -2.000000,
+            1.000000,
+            -3.000000
+        },
+        {
+            -1.000000,
+            0.000000,
+            1.000000
+        },
+        {
+            -1.000000,
+            4.000000,
+            1.000000
+        },
+        {
+            4.000000,
+            -3.000000,
+            5.000000
+        },
+        {
+            1.000000,
+            2.000000,
+            1.000000
+        },
+        {
+            1.000000,
+            1.000000,
+            -3.000000
+        }
+    },
+    {
+        {
+            0.000000,
+            -1.000000,
+            0.000000
+        },
+        {
+            2.000000,
+            -1.000000,
+            -1.000000
+        },
+        {
+            1.000000,
+            2.000000,
+            -4.000000
+        },
+        {
+            -3.000000,
+            2.000000,
+            -2.000000
+        },
+        {
+            3.000000,
+            -2.000000,
+            -5.000000
+        },
+        {
+            1.000000,
+            -1.000000,
+            -5.000000
+        },
+        {
+            2.000000,
+            -1.000000,
+            -5.000000
+        },
+        {
+            1.000000,
+            -1.000000,
+            0.000000
+        },
+        {
+            0.000000,
+            1.000000,
+            1.000000
+        },
+        {
+            2.000000,
+            1.000000,
+            2.000000
+        },
+        {
+            0.000000,
+            2.000000,
+            1.000000
+        },
+        {
+            1.000000,
+            7.000000,
+            -1.000000
+        },
+        {
+            2.000000,
+            0.000000,
+            -5.000000
+        },
+        {
+            2.000000,
+            1.000000,
+            -2.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            1.000000
+        },
+        {
+            4.000000,
+            -2.000000,
+            0.000000
+        },
+        {
+            -1.000000,
+            0.000000,
+            3.000000
+        },
+        {
+            1.000000,
+            0.000000,
+            -1.000000
+        },
+        {
+            5.000000,
+            2.000000,
+            -3.000000
+        },
+        {
+            -1.000000,
+            0.000000,
+            1.000000
+        },
+        {
+            5.000000,
+            -1.000000,
+            -3.000000
+        },
+        {
+            3.000000,
+            -2.000000,
+            -4.000000
+        },
+        {
+            -1.000000,
+            -2.000000,
+            2.000000
+        },
+        {
+            5.000000,
+            0.000000,
+            -2.000000
+        },
+        {
+            -1.000000,
+            2.000000,
+            -2.000000
+        },
+        {
+            2.000000,
+            1.000000,
+            -7.000000
+        },
+        {
+            1.000000,
+            -1.000000,
+            -3.000000
+        },
+        {
+            -2.000000,
+            0.000000,
+            1.000000
+        },
+        {
+            -2.000000,
+            0.000000,
+            5.000000
+        },
+        {
+            4.000000,
+            4.000000,
+            0.000000
+        },
+        {
+            1.000000,
+            -1.000000,
+            0.000000
+        },
+        {
+            2.000000,
+            0.000000,
+            -2.000000
+        }
+    },
+    {
+        {
+            -2.000000,
+            1.000000,
+            2.000000
+        },
+        {
+            0.000000,
+            1.000000,
+            0.000000
+        },
+        {
+            -2.000000,
+            -2.000000,
+            -1.000000
+        },
+        {
+            5.000000,
+            2.000000,
+            -2.000000
+        },
+        {
+            -2.000000,
+            -1.000000,
+            -3.000000
+        },
+        {
+            2.000000,
+            0.000000,
+            1.000000
+        },
+        {
+            -2.000000,
+            -3.000000,
+            -1.000000
+        },
+        {
+            0.000000,
+            -2.000000,
+            -2.000000
+        },
+        {
+            2.000000,
+            -1.000000,
+            3.000000
+        },
+        {
+            4.000000,
+            4.000000,
+            -2.000000
+        },
+        {
+            2.000000,
+            0.000000,
+            -3.000000
+        },
+        {
+            0.000000,
+            1.000000,
+            -2.000000
+        },
+        {
+            0.000000,
+            -4.000000,
+            -1.000000
+        },
+        {
+            -2.000000,
+            -1.000000,
+            0.000000
+        },
+        {
+            4.000000,
+            1.000000,
+            -1.000000
+        },
+        {
+            2.000000,
+            0.000000,
+            -2.000000
+        },
+        {
+            3.000000,
+            6.000000,
+            -1.000000
+        },
+        {
+            1.000000,
+            -1.000000,
+            1.000000
+        },
+        {
+            -1.000000,
+            0.000000,
+            0.000000
+        },
+        {
+            0.000000,
+            -2.000000,
+            1.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            3.000000
+        },
+        {
+            0.000000,
+            1.000000,
+            3.000000
+        },
+        {
+            0.000000,
+            1.000000,
+            2.000000
+        },
+        {
+            -4.000000,
+            -3.000000,
+            -3.000000
+        },
+        {
+            1.000000,
+            1.000000,
+            -1.000000
+        },
+        {
+            -1.000000,
+            1.000000,
+            -2.000000
+        },
+        {
+            1.000000,
+            -3.000000,
+            -2.000000
+        },
+        {
+            -1.000000,
+            0.000000,
+            0.000000
+        },
+        {
+            2.000000,
+            2.000000,
+            -2.000000
+        },
+        {
+            -2.000000,
+            -1.000000,
+            -3.000000
+        },
+        {
+            -2.000000,
+            -1.000000,
+            0.000000
+        },
+        {
+            1.000000,
+            -3.000000,
+            -2.000000
+        }
+    },
+    {
+        {
+            -1.000000,
+            0.000000,
+            3.000000
+        },
+        {
+            0.000000,
+            1.000000,
+            4.000000
+        },
+        {
+            0.000000,
+            -1.000000,
+            6.000000
+        },
+        {
+            1.000000,
+            2.000000,
+            3.000000
+        },
+        {
+            -1.000000,
+            -2.000000,
+            7.000000
+        },
+        {
+            -2.000000,
+            -2.000000,
+            0.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            4.000000
+        },
+        {
+            -1.000000,
+            1.000000,
+            6.000000
+        },
+        {
+            -1.000000,
+            -2.000000,
+            -1.000000
+        },
+        {
+            -3.000000,
+            -2.000000,
+            -1.000000
+        },
+        {
+            0.000000,
+            1.000000,
+            1.000000
+        },
+        {
+            -1.000000,
+            -2.000000,
+            1.000000
+        },
+        {
+            -5.000000,
+            0.000000,
+            5.000000
+        },
+        {
+            1.000000,
+            1.000000,
+            2.000000
+        },
+        {
+            -2.000000,
+            -2.000000,
+            -3.000000
+        },
+        {
+            -1.000000,
+            0.000000,
+            4.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            -2.000000
+        },
+        {
+            -2.000000,
+            -2.000000,
+            1.000000
+        },
+        {
+            -1.000000,
+            -3.000000,
+            -1.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            3.000000
+        },
+        {
+            -1.000000,
+            -3.000000,
+            -1.000000
+        },
+        {
+            -2.000000,
+            -2.000000,
+            0.000000
+        },
+        {
+            0.000000,
+            1.000000,
+            3.000000
+        },
+        {
+            0.000000,
+            -1.000000,
+            -1.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            4.000000
+        },
+        {
+            -1.000000,
+            -3.000000,
+            -1.000000
+        },
+        {
+            -3.000000,
+            -1.000000,
+            5.000000
+        },
+        {
+            -2.000000,
+            0.000000,
+            2.000000
+        },
+        {
+            -4.000000,
+            -3.000000,
+            -2.000000
+        },
+        {
+            0.000000,
+            1.000000,
+            4.000000
+        },
+        {
+            1.000000,
+            -1.000000,
+            1.000000
+        },
+        {
+            -3.000000,
+            3.000000,
+            1.000000
+        }
+    },
+    {
+        {
+            -1.000000,
+            -2.000000,
+            2.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            2.000000
+        },
+        {
+            -4.000000,
+            -1.000000,
+            0.000000
+        },
+        {
+            3.000000,
+            -3.000000,
+            2.000000
+        },
+        {
+            -4.000000,
+            -2.000000,
+            1.000000
+        },
+        {
+            -4.000000,
+            -1.000000,
+            2.000000
+        },
+        {
+            -5.000000,
+            -1.000000,
+            1.000000
+        },
+        {
+            -1.000000,
+            2.000000,
+            1.000000
+        },
+        {
+            1.000000,
+            0.000000,
+            -2.000000
+        },
+        {
+            -2.000000,
+            -1.000000,
+            -4.000000
+        },
+        {
+            -2.000000,
+            2.000000,
+            2.000000
+        },
+        {
+            1.000000,
+            1.000000,
+            1.000000
+        },
+        {
+            -4.000000,
+            0.000000,
+            1.000000
+        },
+        {
+            -4.000000,
+            -2.000000,
+            0.000000
+        },
+        {
+            -1.000000,
+            0.000000,
+            1.000000
+        },
+        {
+            -3.000000,
+            -2.000000,
+            -3.000000
+        },
+        {
+            4.000000,
+            2.000000,
+            -2.000000
+        },
+        {
+            -4.000000,
+            -3.000000,
+            1.000000
+        },
+        {
+            -2.000000,
+            0.000000,
+            0.000000
+        },
+        {
+            0.000000,
+            2.000000,
+            1.000000
+        },
+        {
+            -3.000000,
+            -1.000000,
+            3.000000
+        },
+        {
+            -4.000000,
+            -1.000000,
+            1.000000
+        },
+        {
+            4.000000,
+            -3.000000,
+            -3.000000
+        },
+        {
+            -1.000000,
+            -3.000000,
+            1.000000
+        },
+        {
+            1.000000,
+            -1.000000,
+            2.000000
+        },
+        {
+            -4.000000,
+            -2.000000,
+            2.000000
+        },
+        {
+            0.000000,
+            -1.000000,
+            0.000000
+        },
+        {
+            -3.000000,
+            -2.000000,
+            0.000000
+        },
+        {
+            0.000000,
+            -1.000000,
+            -4.000000
+        },
+        {
+            -4.000000,
+            -3.000000,
+            -3.000000
+        },
+        {
+            -2.000000,
+            2.000000,
+            0.000000
+        },
+        {
+            -5.000000,
+            -3.000000,
+            1.000000
+        }
+    },
+    {
+        {
+            -2.000000,
+            2.000000,
+            -1.000000
+        },
+        {
+            -1.000000,
+            1.000000,
+            0.000000
+        },
+        {
+            2.000000,
+            -4.000000,
+            2.000000
+        },
+        {
+            1.000000,
+            1.000000,
+            0.000000
+        },
+        {
+            -2.000000,
+            4.000000,
+            0.000000
+        },
+        {
+            2.000000,
+            5.000000,
+            4.000000
+        },
+        {
+            3.000000,
+            -2.000000,
+            3.000000
+        },
+        {
+            2.000000,
+            1.000000,
+            0.000000
+        },
+        {
+            -3.000000,
+            -4.000000,
+            -2.000000
+        },
+        {
+            1.000000,
+            2.000000,
+            0.000000
+        },
+        {
+            2.000000,
+            0.000000,
+            0.000000
+        },
+        {
+            6.000000,
+            -7.000000,
+            -1.000000
+        },
+        {
+            1.000000,
+            -2.000000,
+            1.000000
+        },
+        {
+            1.000000,
+            2.000000,
+            2.000000
+        },
+        {
+            3.000000,
+            1.000000,
+            1.000000
+        },
+        {
+            -2.000000,
+            2.000000,
+            -2.000000
+        },
+        {
+            0.000000,
+            3.000000,
+            -2.000000
+        },
+        {
+            0.000000,
+            1.000000,
+            1.000000
+        },
+        {
+            -2.000000,
+            1.000000,
+            3.000000
+        },
+        {
+            0.000000,
+            -1.000000,
+            0.000000
+        },
+        {
+            -2.000000,
+            0.000000,
+            3.000000
+        },
+        {
+            -2.000000,
+            5.000000,
+            3.000000
+        },
+        {
+            -3.000000,
+            -5.000000,
+            -1.000000
+        },
+        {
+            -2.000000,
+            1.000000,
+            1.000000
+        },
+        {
+            0.000000,
+            2.000000,
+            1.000000
+        },
+        {
+            1.000000,
+            3.000000,
+            -1.000000
+        },
+        {
+            1.000000,
+            -1.000000,
+            1.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            -1.000000
+        },
+        {
+            2.000000,
+            2.000000,
+            -1.000000
+        },
+        {
+            0.000000,
+            1.000000,
+            0.000000
+        },
+        {
+            -1.000000,
+            2.000000,
+            -1.000000
+        },
+        {
+            0.000000,
+            1.000000,
+            2.000000
+        }
+    },
+    {
+        {
+            -1.000000,
+            2.000000,
+            3.000000
+        },
+        {
+            -2.000000,
+            -1.000000,
+            -1.000000
+        },
+        {
+            4.000000,
+            4.000000,
+            0.000000
+        },
+        {
+            4.000000,
+            7.000000,
+            6.000000
+        },
+        {
+            2.000000,
+            3.000000,
+            3.000000
+        },
+        {
+            3.000000,
+            2.000000,
+            -2.000000
+        },
+        {
+            1.000000,
+            5.000000,
+            2.000000
+        },
+        {
+            -3.000000,
+            -2.000000,
+            1.000000
+        },
+        {
+            0.000000,
+            2.000000,
+            -1.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            -4.000000
+        },
+        {
+            -1.000000,
+            0.000000,
+            -3.000000
+        },
+        {
+            6.000000,
+            5.000000,
+            6.000000
+        },
+        {
+            2.000000,
+            2.000000,
+            1.000000
+        },
+        {
+            -1.000000,
+            -2.000000,
+            -1.000000
+        },
+        {
+            3.000000,
+            5.000000,
+            0.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            -1.000000
+        },
+        {
+            2.000000,
+            0.000000,
+            0.000000
+        },
+        {
+            0.000000,
+            -2.000000,
+            -2.000000
+        },
+        {
+            1.000000,
+            -1.000000,
+            -1.000000
+        },
+        {
+            -1.000000,
+            -2.000000,
+            -1.000000
+        },
+        {
+            4.000000,
+            2.000000,
+            -2.000000
+        },
+        {
+            3.000000,
+            2.000000,
+            0.000000
+        },
+        {
+            2.000000,
+            1.000000,
+            -1.000000
+        },
+        {
+            2.000000,
+            -2.000000,
+            -1.000000
+        },
+        {
+            -1.000000,
+            -2.000000,
+            -1.000000
+        },
+        {
+            2.000000,
+            3.000000,
+            2.000000
+        },
+        {
+            -1.000000,
+            0.000000,
+            0.000000
+        },
+        {
+            -1.000000,
+            -1.000000,
+            -2.000000
+        },
+        {
+            1.000000,
+            2.000000,
+            0.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            -2.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            -2.000000
+        },
+        {
+            1.000000,
+            -3.000000,
+            -1.000000
+        }
+    },
+    {
+        {
+            0.000000,
+            2.000000,
+            2.000000
+        },
+        {
+            2.000000,
+            2.000000,
+            1.000000
+        },
+        {
+            0.000000,
+            5.000000,
+            6.000000
+        },
+        {
+            -3.000000,
+            4.000000,
+            -2.000000
+        },
+        {
+            -1.000000,
+            1.000000,
+            -1.000000
+        },
+        {
+            -2.000000,
+            -2.000000,
+            -1.000000
+        },
+        {
+            -3.000000,
+            2.000000,
+            -2.000000
+        },
+        {
+            3.000000,
+            3.000000,
+            -1.000000
+        },
+        {
+            -2.000000,
+            -2.000000,
+            -2.000000
+        },
+        {
+            -2.000000,
+            -2.000000,
+            -5.000000
+        },
+        {
+            0.000000,
+            -1.000000,
+            1.000000
+        },
+        {
+            -1.000000,
+            -1.000000,
+            -2.000000
+        },
+        {
+            -4.000000,
+            4.000000,
+            -1.000000
+        },
+        {
+            0.000000,
+            2.000000,
+            1.000000
+        },
+        {
+            2.000000,
+            1.000000,
+            0.000000
+        },
+        {
+            -3.000000,
+            -3.000000,
+            -1.000000
+        },
+        {
+            -1.000000,
+            1.000000,
+            -2.000000
+        },
+        {
+            -3.000000,
+            1.000000,
+            -3.000000
+        },
+        {
+            -1.000000,
+            -1.000000,
+            0.000000
+        },
+        {
+            -2.000000,
+            -2.000000,
+            1.000000
+        },
+        {
+            -2.000000,
+            -2.000000,
+            0.000000
+        },
+        {
+            -2.000000,
+            -1.000000,
+            -4.000000
+        },
+        {
+            -1.000000,
+            -2.000000,
+            1.000000
+        },
+        {
+            0.000000,
+            -2.000000,
+            2.000000
+        },
+        {
+            3.000000,
+            3.000000,
+            0.000000
+        },
+        {
+            -2.000000,
+            -1.000000,
+            2.000000
+        },
+        {
+            1.000000,
+            5.000000,
+            -2.000000
+        },
+        {
+            -3.000000,
+            -2.000000,
+            2.000000
+        },
+        {
+            -1.000000,
+            -2.000000,
+            -6.000000
+        },
+        {
+            -2.000000,
+            -1.000000,
+            0.000000
+        },
+        {
+            -2.000000,
+            3.000000,
+            4.000000
+        },
+        {
+            -1.000000,
+            0.000000,
+            2.000000
+        }
+    },
+    {
+        {
+            -3.000000,
+            -1.000000,
+            0.000000
+        },
+        {
+            -2.000000,
+            -2.000000,
+            1.000000
+        },
+        {
+            -5.000000,
+            -4.000000,
+            7.000000
+        },
+        {
+            -2.000000,
+            -1.000000,
+            7.000000
+        },
+        {
+            -6.000000,
+            -2.000000,
+            3.000000
+        },
+        {
+            -2.000000,
+            -1.000000,
+            2.000000
+        },
+        {
+            -4.000000,
+            -4.000000,
+            5.000000
+        },
+        {
+            -4.000000,
+            -2.000000,
+            4.000000
+        },
+        {
+            1.000000,
+            1.000000,
+            1.000000
+        },
+        {
+            -1.000000,
+            1.000000,
+            -1.000000
+        },
+        {
+            2.000000,
+            1.000000,
+            2.000000
+        },
+        {
+            -2.000000,
+            -1.000000,
+            -1.000000
+        },
+        {
+            -2.000000,
+            0.000000,
+            1.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            1.000000
+        },
+        {
+            -1.000000,
+            0.000000,
+            1.000000
+        },
+        {
+            1.000000,
+            0.000000,
+            0.000000
+        },
+        {
+            0.000000,
+            -1.000000,
+            0.000000
+        },
+        {
+            -1.000000,
+            2.000000,
+            0.000000
+        },
+        {
+            -2.000000,
+            1.000000,
+            2.000000
+        },
+        {
+            3.000000,
+            2.000000,
+            -2.000000
+        },
+        {
+            -1.000000,
+            0.000000,
+            2.000000
+        },
+        {
+            -3.000000,
+            1.000000,
+            5.000000
+        },
+        {
+            1.000000,
+            1.000000,
+            1.000000
+        },
+        {
+            0.000000,
+            -1.000000,
+            0.000000
+        },
+        {
+            -2.000000,
+            -2.000000,
+            2.000000
+        },
+        {
+            -2.000000,
+            -1.000000,
+            2.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            1.000000
+        },
+        {
+            2.000000,
+            -2.000000,
+            -1.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            2.000000
+        },
+        {
+            -1.000000,
+            1.000000,
+            -1.000000
+        },
+        {
+            2.000000,
+            -1.000000,
+            2.000000
+        },
+        {
+            3.000000,
+            0.000000,
+            2.000000
+        }
+    },
+    {
+        {
+            -1.000000,
+            1.000000,
+            1.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            2.000000
+        },
+        {
+            -3.000000,
+            2.000000,
+            4.000000
+        },
+        {
+            6.000000,
+            2.000000,
+            6.000000
+        },
+        {
+            -4.000000,
+            2.000000,
+            5.000000
+        },
+        {
+            -3.000000,
+            -1.000000,
+            -1.000000
+        },
+        {
+            -5.000000,
+            2.000000,
+            3.000000
+        },
+        {
+            -2.000000,
+            -1.000000,
+            0.000000
+        },
+        {
+            -1.000000,
+            -1.000000,
+            0.000000
+        },
+        {
+            -1.000000,
+            -2.000000,
+            -1.000000
+        },
+        {
+            2.000000,
+            -2.000000,
+            1.000000
+        },
+        {
+            4.000000,
+            4.000000,
+            1.000000
+        },
+        {
+            -4.000000,
+            1.000000,
+            4.000000
+        },
+        {
+            -3.000000,
+            -1.000000,
+            3.000000
+        },
+        {
+            -2.000000,
+            -4.000000,
+            -4.000000
+        },
+        {
+            -1.000000,
+            -2.000000,
+            1.000000
+        },
+        {
+            -2.000000,
+            -2.000000,
+            0.000000
+        },
+        {
+            -3.000000,
+            -1.000000,
+            -1.000000
+        },
+        {
+            -3.000000,
+            -2.000000,
+            1.000000
+        },
+        {
+            -1.000000,
+            2.000000,
+            -1.000000
+        },
+        {
+            -3.000000,
+            -1.000000,
+            0.000000
+        },
+        {
+            -3.000000,
+            0.000000,
+            0.000000
+        },
+        {
+            -1.000000,
+            -1.000000,
+            0.000000
+        },
+        {
+            -2.000000,
+            -2.000000,
+            -1.000000
+        },
+        {
+            -2.000000,
+            3.000000,
+            0.000000
+        },
+        {
+            -3.000000,
+            0.000000,
+            2.000000
+        },
+        {
+            -3.000000,
+            0.000000,
+            2.000000
+        },
+        {
+            -2.000000,
+            -1.000000,
+            -2.000000
+        },
+        {
+            -1.000000,
+            -2.000000,
+            -2.000000
+        },
+        {
+            -1.000000,
+            -1.000000,
+            0.000000
+        },
+        {
+            0.000000,
+            2.000000,
+            2.000000
+        },
+        {
+            -2.000000,
+            1.000000,
+            3.000000
+        }
+    },
+    {
+        {
+            -2.000000,
+            1.000000,
+            0.000000
+        },
+        {
+            0.000000,
+            -2.000000,
+            1.000000
+        },
+        {
+            -3.000000,
+            -2.000000,
+            3.000000
+        },
+        {
+            0.000000,
+            2.000000,
+            1.000000
+        },
+        {
+            7.000000,
+            -4.000000,
+            -2.000000
+        },
+        {
+            6.000000,
+            0.000000,
+            -2.000000
+        },
+        {
+            -2.000000,
+            3.000000,
+            1.000000
+        },
+        {
+            -3.000000,
+            2.000000,
+            2.000000
+        },
+        {
+            1.000000,
+            -1.000000,
+            2.000000
+        },
+        {
+            -1.000000,
+            4.000000,
+            3.000000
+        },
+        {
+            0.000000,
+            -2.000000,
+            -4.000000
+        },
+        {
+            1.000000,
+            0.000000,
+            2.000000
+        },
+        {
+            4.000000,
+            3.000000,
+            -3.000000
+        },
+        {
+            -1.000000,
+            1.000000,
+            1.000000
+        },
+        {
+            2.000000,
+            2.000000,
+            2.000000
+        },
+        {
+            1.000000,
+            2.000000,
+            -1.000000
+        },
+        {
+            2.000000,
+            0.000000,
+            2.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            -2.000000
+        },
+        {
+            3.000000,
+            2.000000,
+            -2.000000
+        },
+        {
+            2.000000,
+            -3.000000,
+            -3.000000
+        },
+        {
+            0.000000,
+            2.000000,
+            -1.000000
+        },
+        {
+            0.000000,
+            4.000000,
+            0.000000
+        },
+        {
+            1.000000,
+            1.000000,
+            -1.000000
+        },
+        {
+            2.000000,
+            -2.000000,
+            -1.000000
+        },
+        {
+            -2.000000,
+            0.000000,
+            0.000000
+        },
+        {
+            1.000000,
+            -1.000000,
+            0.000000
+        },
+        {
+            0.000000,
+            -1.000000,
+            1.000000
+        },
+        {
+            0.000000,
+            -2.000000,
+            -3.000000
+        },
+        {
+            2.000000,
+            3.000000,
+            1.000000
+        },
+        {
+            4.000000,
+            0.000000,
+            -3.000000
+        },
+        {
+            0.000000,
+            -5.000000,
+            -2.000000
+        },
+        {
+            2.000000,
+            3.000000,
+            1.000000
+        }
+    },
+    {
+        {
+            4.000000,
+            -2.000000,
+            3.000000
+        },
+        {
+            5.000000,
+            0.000000,
+            0.000000
+        },
+        {
+            3.000000,
+            7.000000,
+            -1.000000
+        },
+        {
+            3.000000,
+            5.000000,
+            3.000000
+        },
+        {
+            5.000000,
+            0.000000,
+            7.000000
+        },
+        {
+            -1.000000,
+            1.000000,
+            2.000000
+        },
+        {
+            2.000000,
+            2.000000,
+            2.000000
+        },
+        {
+            4.000000,
+            -1.000000,
+            2.000000
+        },
+        {
+            3.000000,
+            2.000000,
+            3.000000
+        },
+        {
+            -1.000000,
+            3.000000,
+            3.000000
+        },
+        {
+            2.000000,
+            1.000000,
+            1.000000
+        },
+        {
+            6.000000,
+            1.000000,
+            6.000000
+        },
+        {
+            -1.000000,
+            3.000000,
+            1.000000
+        },
+        {
+            2.000000,
+            1.000000,
+            1.000000
+        },
+        {
+            1.000000,
+            3.000000,
+            0.000000
+        },
+        {
+            3.000000,
+            3.000000,
+            -2.000000
+        },
+        {
+            -1.000000,
+            0.000000,
+            1.000000
+        },
+        {
+            1.000000,
+            4.000000,
+            1.000000
+        },
+        {
+            2.000000,
+            1.000000,
+            3.000000
+        },
+        {
+            1.000000,
+            3.000000,
+            -1.000000
+        },
+        {
+            2.000000,
+            0.000000,
+            0.000000
+        },
+        {
+            2.000000,
+            1.000000,
+            3.000000
+        },
+        {
+            3.000000,
+            4.000000,
+            2.000000
+        },
+        {
+            -1.000000,
+            3.000000,
+            1.000000
+        },
+        {
+            0.000000,
+            -1.000000,
+            3.000000
+        },
+        {
+            1.000000,
+            1.000000,
+            0.000000
+        },
+        {
+            1.000000,
+            -2.000000,
+            4.000000
+        },
+        {
+            1.000000,
+            2.000000,
+            3.000000
+        },
+        {
+            -1.000000,
+            -1.000000,
+            1.000000
+        },
+        {
+            1.000000,
+            1.000000,
+            2.000000
+        },
+        {
+            -1.000000,
+            1.000000,
+            0.000000
+        },
+        {
+            2.000000,
+            1.000000,
+            2.000000
+        }
+    },
+    {
+        {
+            -4.000000,
+            -1.000000,
+            3.000000
+        },
+        {
+            -3.000000,
+            0.000000,
+            -1.000000
+        },
+        {
+            7.000000,
+            -5.000000,
+            5.000000
+        },
+        {
+            7.000000,
+            -1.000000,
+            3.000000
+        },
+        {
+            1.000000,
+            4.000000,
+            -2.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            0.000000
+        },
+        {
+            1.000000,
+            2.000000,
+            -2.000000
+        },
+        {
+            0.000000,
+            -3.000000,
+            1.000000
+        },
+        {
+            -1.000000,
+            -1.000000,
+            1.000000
+        },
+        {
+            -1.000000,
+            0.000000,
+            -1.000000
+        },
+        {
+            1.000000,
+            1.000000,
+            2.000000
+        },
+        {
+            7.000000,
+            4.000000,
+            -3.000000
+        },
+        {
+            0.000000,
+            3.000000,
+            0.000000
+        },
+        {
+            3.000000,
+            2.000000,
+            4.000000
+        },
+        {
+            -1.000000,
+            0.000000,
+            1.000000
+        },
+        {
+            1.000000,
+            0.000000,
+            3.000000
+        },
+        {
+            -1.000000,
+            2.000000,
+            0.000000
+        },
+        {
+            1.000000,
+            2.000000,
+            1.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            0.000000
+        },
+        {
+            1.000000,
+            1.000000,
+            -1.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            0.000000
+        },
+        {
+            -1.000000,
+            0.000000,
+            0.000000
+        },
+        {
+            -2.000000,
+            1.000000,
+            2.000000
+        },
+        {
+            1.000000,
+            1.000000,
+            0.000000
+        },
+        {
+            -2.000000,
+            -1.000000,
+            0.000000
+        },
+        {
+            -1.000000,
+            -1.000000,
+            -1.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            1.000000
+        },
+        {
+            -1.000000,
+            0.000000,
+            1.000000
+        },
+        {
+            -2.000000,
+            -1.000000,
+            1.000000
+        },
+        {
+            3.000000,
+            0.000000,
+            3.000000
+        },
+        {
+            1.000000,
+            -1.000000,
+            2.000000
+        },
+        {
+            2.000000,
+            1.000000,
+            4.000000
+        }
+    },
+    {
+        {
+            -2.000000,
+            2.000000,
+            1.000000
+        },
+        {
+            -4.000000,
+            4.000000,
+            1.000000
+        },
+        {
+            -1.000000,
+            -2.000000,
+            -1.000000
+        },
+        {
+            1.000000,
+            5.000000,
+            2.000000
+        },
+        {
+            1.000000,
+            -2.000000,
+            1.000000
+        },
+        {
+            -2.000000,
+            3.000000,
+            1.000000
+        },
+        {
+            2.000000,
+            0.000000,
+            0.000000
+        },
+        {
+            -2.000000,
+            1.000000,
+            2.000000
+        },
+        {
+            -2.000000,
+            1.000000,
+            5.000000
+        },
+        {
+            1.000000,
+            1.000000,
+            5.000000
+        },
+        {
+            -1.000000,
+            -2.000000,
+            3.000000
+        },
+        {
+            -1.000000,
+            -2.000000,
+            -3.000000
+        },
+        {
+            6.000000,
+            -1.000000,
+            -4.000000
+        },
+        {
+            3.000000,
+            1.000000,
+            -1.000000
+        },
+        {
+            -1.000000,
+            -2.000000,
+            0.000000
+        },
+        {
+            0.000000,
+            1.000000,
+            1.000000
+        },
+        {
+            -2.000000,
+            0.000000,
+            4.000000
+        },
+        {
+            -1.000000,
+            -3.000000,
+            -1.000000
+        },
+        {
+            3.000000,
+            2.000000,
+            -1.000000
+        },
+        {
+            1.000000,
+            0.000000,
+            1.000000
+        },
+        {
+            0.000000,
+            -2.000000,
+            1.000000
+        },
+        {
+            0.000000,
+            3.000000,
+            1.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            2.000000
+        },
+        {
+            -2.000000,
+            -3.000000,
+            -2.000000
+        },
+        {
+            -2.000000,
+            -3.000000,
+            0.000000
+        },
+        {
+            2.000000,
+            -4.000000,
+            -2.000000
+        },
+        {
+            1.000000,
+            -2.000000,
+            1.000000
+        },
+        {
+            -1.000000,
+            -2.000000,
+            0.000000
+        },
+        {
+            0.000000,
+            3.000000,
+            3.000000
+        },
+        {
+            1.000000,
+            2.000000,
+            5.000000
+        },
+        {
+            1.000000,
+            0.000000,
+            6.000000
+        },
+        {
+            4.000000,
+            3.000000,
+            0.000000
+        }
+    },
+    {
+        {
+            2.000000,
+            -3.000000,
+            0.000000
+        },
+        {
+            -2.000000,
+            2.000000,
+            2.000000
+        },
+        {
+            5.000000,
+            7.000000,
+            -2.000000
+        },
+        {
+            7.000000,
+            -1.000000,
+            -1.000000
+        },
+        {
+            6.000000,
+            4.000000,
+            1.000000
+        },
+        {
+            1.000000,
+            4.000000,
+            3.000000
+        },
+        {
+            2.000000,
+            -1.000000,
+            -2.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            0.000000
+        },
+        {
+            -1.000000,
+            0.000000,
+            3.000000
+        },
+        {
+            2.000000,
+            3.000000,
+            -2.000000
+        },
+        {
+            1.000000,
+            0.000000,
+            2.000000
+        },
+        {
+            -3.000000,
+            4.000000,
+            1.000000
+        },
+        {
+            -3.000000,
+            3.000000,
+            1.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            0.000000
+        },
+        {
+            5.000000,
+            -1.000000,
+            5.000000
+        },
+        {
+            1.000000,
+            1.000000,
+            1.000000
+        },
+        {
+            2.000000,
+            1.000000,
+            -2.000000
+        },
+        {
+            0.000000,
+            1.000000,
+            0.000000
+        },
+        {
+            1.000000,
+            -1.000000,
+            -1.000000
+        },
+        {
+            -1.000000,
+            1.000000,
+            1.000000
+        },
+        {
+            1.000000,
+            -3.000000,
+            2.000000
+        },
+        {
+            1.000000,
+            0.000000,
+            2.000000
+        },
+        {
+            0.000000,
+            -1.000000,
+            1.000000
+        },
+        {
+            -2.000000,
+            -1.000000,
+            0.000000
+        },
+        {
+            0.000000,
+            -4.000000,
+            2.000000
+        },
+        {
+            -1.000000,
+            3.000000,
+            -1.000000
+        },
+        {
+            -2.000000,
+            -3.000000,
+            -2.000000
+        },
+        {
+            0.000000,
+            2.000000,
+            1.000000
+        },
+        {
+            1.000000,
+            4.000000,
+            1.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            -2.000000
+        },
+        {
+            -2.000000,
+            0.000000,
+            1.000000
+        },
+        {
+            0.000000,
+            -2.000000,
+            -1.000000
+        }
+    },
+    {
+        {
+            -3.000000,
+            2.000000,
+            2.000000
+        },
+        {
+            -2.000000,
+            4.000000,
+            5.000000
+        },
+        {
+            1.000000,
+            -2.000000,
+            -5.000000
+        },
+        {
+            0.000000,
+            -1.000000,
+            4.000000
+        },
+        {
+            -2.000000,
+            -4.000000,
+            0.000000
+        },
+        {
+            1.000000,
+            0.000000,
+            0.000000
+        },
+        {
+            -1.000000,
+            -4.000000,
+            3.000000
+        },
+        {
+            -4.000000,
+            4.000000,
+            2.000000
+        },
+        {
+            -2.000000,
+            -4.000000,
+            -4.000000
+        },
+        {
+            -1.000000,
+            -4.000000,
+            3.000000
+        },
+        {
+            -2.000000,
+            2.000000,
+            5.000000
+        },
+        {
+            -1.000000,
+            -1.000000,
+            1.000000
+        },
+        {
+            -1.000000,
+            -3.000000,
+            -2.000000
+        },
+        {
+            -1.000000,
+            1.000000,
+            2.000000
+        },
+        {
+            -1.000000,
+            0.000000,
+            0.000000
+        },
+        {
+            -3.000000,
+            -2.000000,
+            3.000000
+        },
+        {
+            0.000000,
+            -3.000000,
+            4.000000
+        },
+        {
+            -1.000000,
+            -1.000000,
+            2.000000
+        },
+        {
+            0.000000,
+            -1.000000,
+            2.000000
+        },
+        {
+            -2.000000,
+            0.000000,
+            5.000000
+        },
+        {
+            2.000000,
+            0.000000,
+            0.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            1.000000
+        },
+        {
+            -5.000000,
+            -4.000000,
+            -3.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            3.000000
+        },
+        {
+            -3.000000,
+            6.000000,
+            5.000000
+        },
+        {
+            0.000000,
+            -1.000000,
+            -1.000000
+        },
+        {
+            -2.000000,
+            2.000000,
+            1.000000
+        },
+        {
+            2.000000,
+            0.000000,
+            3.000000
+        },
+        {
+            0.000000,
+            -2.000000,
+            1.000000
+        },
+        {
+            -2.000000,
+            -2.000000,
+            3.000000
+        },
+        {
+            -1.000000,
+            1.000000,
+            6.000000
+        },
+        {
+            -2.000000,
+            1.000000,
+            5.000000
+        }
+    },
+    {
+        {
+            1.000000,
+            1.000000,
+            4.000000
+        },
+        {
+            5.000000,
+            1.000000,
+            4.000000
+        },
+        {
+            6.000000,
+            -4.000000,
+            4.000000
+        },
+        {
+            -7.000000,
+            6.000000,
+            3.000000
+        },
+        {
+            1.000000,
+            3.000000,
+            5.000000
+        },
+        {
+            3.000000,
+            0.000000,
+            -2.000000
+        },
+        {
+            0.000000,
+            3.000000,
+            5.000000
+        },
+        {
+            4.000000,
+            -1.000000,
+            2.000000
+        },
+        {
+            1.000000,
+            2.000000,
+            1.000000
+        },
+        {
+            1.000000,
+            3.000000,
+            0.000000
+        },
+        {
+            1.000000,
+            0.000000,
+            0.000000
+        },
+        {
+            -5.000000,
+            3.000000,
+            2.000000
+        },
+        {
+            1.000000,
+            3.000000,
+            0.000000
+        },
+        {
+            2.000000,
+            3.000000,
+            1.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            0.000000
+        },
+        {
+            1.000000,
+            2.000000,
+            4.000000
+        },
+        {
+            1.000000,
+            2.000000,
+            2.000000
+        },
+        {
+            3.000000,
+            2.000000,
+            3.000000
+        },
+        {
+            1.000000,
+            2.000000,
+            2.000000
+        },
+        {
+            2.000000,
+            1.000000,
+            1.000000
+        },
+        {
+            -1.000000,
+            2.000000,
+            2.000000
+        },
+        {
+            1.000000,
+            -1.000000,
+            -2.000000
+        },
+        {
+            1.000000,
+            0.000000,
+            3.000000
+        },
+        {
+            2.000000,
+            2.000000,
+            2.000000
+        },
+        {
+            4.000000,
+            3.000000,
+            0.000000
+        },
+        {
+            2.000000,
+            3.000000,
+            -1.000000
+        },
+        {
+            -1.000000,
+            0.000000,
+            2.000000
+        },
+        {
+            2.000000,
+            3.000000,
+            0.000000
+        },
+        {
+            1.000000,
+            0.000000,
+            3.000000
+        },
+        {
+            4.000000,
+            2.000000,
+            3.000000
+        },
+        {
+            -1.000000,
+            3.000000,
+            1.000000
+        },
+        {
+            1.000000,
+            1.000000,
+            1.000000
+        }
+    },
+    {
+        {
+            -2.000000,
+            5.000000,
+            -4.000000
+        },
+        {
+            2.000000,
+            1.000000,
+            -2.000000
+        },
+        {
+            -1.000000,
+            1.000000,
+            0.000000
+        },
+        {
+            7.000000,
+            -4.000000,
+            -3.000000
+        },
+        {
+            0.000000,
+            2.000000,
+            1.000000
+        },
+        {
+            -2.000000,
+            3.000000,
+            3.000000
+        },
+        {
+            1.000000,
+            1.000000,
+            2.000000
+        },
+        {
+            -2.000000,
+            4.000000,
+            -1.000000
+        },
+        {
+            3.000000,
+            1.000000,
+            -3.000000
+        },
+        {
+            3.000000,
+            -2.000000,
+            1.000000
+        },
+        {
+            2.000000,
+            0.000000,
+            -2.000000
+        },
+        {
+            -1.000000,
+            4.000000,
+            -2.000000
+        },
+        {
+            1.000000,
+            2.000000,
+            -1.000000
+        },
+        {
+            -1.000000,
+            -1.000000,
+            -2.000000
+        },
+        {
+            0.000000,
+            1.000000,
+            -2.000000
+        },
+        {
+            -2.000000,
+            0.000000,
+            -4.000000
+        },
+        {
+            3.000000,
+            -3.000000,
+            2.000000
+        },
+        {
+            4.000000,
+            4.000000,
+            1.000000
+        },
+        {
+            0.000000,
+            3.000000,
+            1.000000
+        },
+        {
+            1.000000,
+            0.000000,
+            0.000000
+        },
+        {
+            0.000000,
+            -1.000000,
+            4.000000
+        },
+        {
+            0.000000,
+            3.000000,
+            -1.000000
+        },
+        {
+            -1.000000,
+            1.000000,
+            -3.000000
+        },
+        {
+            2.000000,
+            1.000000,
+            5.000000
+        },
+        {
+            0.000000,
+            1.000000,
+            -2.000000
+        },
+        {
+            -1.000000,
+            -1.000000,
+            2.000000
+        },
+        {
+            -1.000000,
+            5.000000,
+            0.000000
+        },
+        {
+            0.000000,
+            -2.000000,
+            1.000000
+        },
+        {
+            3.000000,
+            -1.000000,
+            0.000000
+        },
+        {
+            0.000000,
+            -3.000000,
+            -3.000000
+        },
+        {
+            1.000000,
+            0.000000,
+            -1.000000
+        },
+        {
+            -2.000000,
+            0.000000,
+            1.000000
+        }
+    },
+    {
+        {
+            -2.000000,
+            2.000000,
+            1.000000
+        },
+        {
+            -1.000000,
+            3.000000,
+            -1.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            -6.000000
+        },
+        {
+            -1.000000,
+            -5.000000,
+            -3.000000
+        },
+        {
+            2.000000,
+            -1.000000,
+            -5.000000
+        },
+        {
+            1.000000,
+            -1.000000,
+            -6.000000
+        },
+        {
+            1.000000,
+            -1.000000,
+            -6.000000
+        },
+        {
+            -3.000000,
+            2.000000,
+            2.000000
+        },
+        {
+            -1.000000,
+            0.000000,
+            -2.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            -2.000000
+        },
+        {
+            -2.000000,
+            -1.000000,
+            0.000000
+        },
+        {
+            -1.000000,
+            -1.000000,
+            -3.000000
+        },
+        {
+            1.000000,
+            0.000000,
+            -4.000000
+        },
+        {
+            1.000000,
+            -2.000000,
+            -4.000000
+        },
+        {
+            -1.000000,
+            2.000000,
+            1.000000
+        },
+        {
+            -2.000000,
+            -3.000000,
+            -5.000000
+        },
+        {
+            1.000000,
+            1.000000,
+            0.000000
+        },
+        {
+            -1.000000,
+            -1.000000,
+            -2.000000
+        },
+        {
+            2.000000,
+            -1.000000,
+            -3.000000
+        },
+        {
+            0.000000,
+            -2.000000,
+            -2.000000
+        },
+        {
+            1.000000,
+            0.000000,
+            -4.000000
+        },
+        {
+            1.000000,
+            0.000000,
+            -6.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            0.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            3.000000
+        },
+        {
+            -2.000000,
+            3.000000,
+            -1.000000
+        },
+        {
+            2.000000,
+            0.000000,
+            -4.000000
+        },
+        {
+            0.000000,
+            -4.000000,
+            -2.000000
+        },
+        {
+            -1.000000,
+            -1.000000,
+            1.000000
+        },
+        {
+            2.000000,
+            2.000000,
+            -1.000000
+        },
+        {
+            -1.000000,
+            -2.000000,
+            -4.000000
+        },
+        {
+            -1.000000,
+            1.000000,
+            0.000000
+        },
+        {
+            0.000000,
+            -1.000000,
+            -4.000000
+        }
+    },
+    {
+        {
+            2.000000,
+            1.000000,
+            0.000000
+        },
+        {
+            3.000000,
+            -2.000000,
+            3.000000
+        },
+        {
+            3.000000,
+            3.000000,
+            2.000000
+        },
+        {
+            1.000000,
+            -7.000000,
+            0.000000
+        },
+        {
+            3.000000,
+            6.000000,
+            2.000000
+        },
+        {
+            -2.000000,
+            -1.000000,
+            2.000000
+        },
+        {
+            3.000000,
+            2.000000,
+            2.000000
+        },
+        {
+            -1.000000,
+            1.000000,
+            0.000000
+        },
+        {
+            0.000000,
+            -1.000000,
+            -1.000000
+        },
+        {
+            -1.000000,
+            2.000000,
+            0.000000
+        },
+        {
+            -3.000000,
+            0.000000,
+            0.000000
+        },
+        {
+            -5.000000,
+            7.000000,
+            -2.000000
+        },
+        {
+            2.000000,
+            2.000000,
+            -1.000000
+        },
+        {
+            -4.000000,
+            1.000000,
+            -1.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            2.000000
+        },
+        {
+            -1.000000,
+            2.000000,
+            -1.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            0.000000
+        },
+        {
+            0.000000,
+            -2.000000,
+            -1.000000
+        },
+        {
+            -2.000000,
+            -1.000000,
+            -1.000000
+        },
+        {
+            1.000000,
+            0.000000,
+            1.000000
+        },
+        {
+            1.000000,
+            1.000000,
+            0.000000
+        },
+        {
+            -2.000000,
+            -2.000000,
+            1.000000
+        },
+        {
+            0.000000,
+            -2.000000,
+            -2.000000
+        },
+        {
+            -2.000000,
+            1.000000,
+            0.000000
+        },
+        {
+            1.000000,
+            1.000000,
+            -1.000000
+        },
+        {
+            1.000000,
+            1.000000,
+            2.000000
+        },
+        {
+            -1.000000,
+            1.000000,
+            0.000000
+        },
+        {
+            -1.000000,
+            -2.000000,
+            -1.000000
+        },
+        {
+            0.000000,
+            2.000000,
+            3.000000
+        },
+        {
+            -1.000000,
+            -1.000000,
+            1.000000
+        },
+        {
+            0.000000,
+            2.000000,
+            0.000000
+        },
+        {
+            0.000000,
+            -2.000000,
+            1.000000
+        }
+    },
+    {
+        {
+            1.000000,
+            -1.000000,
+            0.000000
+        },
+        {
+            0.000000,
+            -4.000000,
+            -3.000000
+        },
+        {
+            2.000000,
+            2.000000,
+            5.000000
+        },
+        {
+            -1.000000,
+            4.000000,
+            7.000000
+        },
+        {
+            3.000000,
+            0.000000,
+            2.000000
+        },
+        {
+            3.000000,
+            3.000000,
+            -1.000000
+        },
+        {
+            2.000000,
+            5.000000,
+            3.000000
+        },
+        {
+            -1.000000,
+            -3.000000,
+            -2.000000
+        },
+        {
+            2.000000,
+            1.000000,
+            -1.000000
+        },
+        {
+            2.000000,
+            2.000000,
+            2.000000
+        },
+        {
+            1.000000,
+            -3.000000,
+            -2.000000
+        },
+        {
+            6.000000,
+            7.000000,
+            4.000000
+        },
+        {
+            1.000000,
+            3.000000,
+            1.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            1.000000
+        },
+        {
+            1.000000,
+            3.000000,
+            -1.000000
+        },
+        {
+            2.000000,
+            3.000000,
+            1.000000
+        },
+        {
+            1.000000,
+            -1.000000,
+            -1.000000
+        },
+        {
+            0.000000,
+            3.000000,
+            1.000000
+        },
+        {
+            3.000000,
+            0.000000,
+            0.000000
+        },
+        {
+            1.000000,
+            1.000000,
+            0.000000
+        },
+        {
+            3.000000,
+            1.000000,
+            1.000000
+        },
+        {
+            1.000000,
+            2.000000,
+            0.000000
+        },
+        {
+            -2.000000,
+            0.000000,
+            -2.000000
+        },
+        {
+            1.000000,
+            1.000000,
+            -1.000000
+        },
+        {
+            -1.000000,
+            -1.000000,
+            -2.000000
+        },
+        {
+            4.000000,
+            0.000000,
+            -1.000000
+        },
+        {
+            -2.000000,
+            0.000000,
+            -1.000000
+        },
+        {
+            1.000000,
+            0.000000,
+            0.000000
+        },
+        {
+            1.000000,
+            2.000000,
+            0.000000
+        },
+        {
+            4.000000,
+            -2.000000,
+            -2.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            -1.000000
+        },
+        {
+            -1.000000,
+            -2.000000,
+            -3.000000
+        }
+    },
+    {
+        {
+            -1.000000,
+            -1.000000,
+            5.000000
+        },
+        {
+            0.000000,
+            2.000000,
+            0.000000
+        },
+        {
+            -1.000000,
+            -2.000000,
+            6.000000
+        },
+        {
+            -3.000000,
+            5.000000,
+            0.000000
+        },
+        {
+            1.000000,
+            0.000000,
+            4.000000
+        },
+        {
+            1.000000,
+            0.000000,
+            0.000000
+        },
+        {
+            0.000000,
+            -5.000000,
+            6.000000
+        },
+        {
+            2.000000,
+            0.000000,
+            0.000000
+        },
+        {
+            0.000000,
+            -2.000000,
+            -1.000000
+        },
+        {
+            -2.000000,
+            0.000000,
+            -3.000000
+        },
+        {
+            -3.000000,
+            -3.000000,
+            1.000000
+        },
+        {
+            -3.000000,
+            7.000000,
+            0.000000
+        },
+        {
+            0.000000,
+            -1.000000,
+            5.000000
+        },
+        {
+            -2.000000,
+            -2.000000,
+            4.000000
+        },
+        {
+            2.000000,
+            2.000000,
+            2.000000
+        },
+        {
+            -3.000000,
+            -2.000000,
+            -1.000000
+        },
+        {
+            0.000000,
+            3.000000,
+            -3.000000
+        },
+        {
+            -1.000000,
+            -2.000000,
+            -1.000000
+        },
+        {
+            -1.000000,
+            -1.000000,
+            -1.000000
+        },
+        {
+            -2.000000,
+            0.000000,
+            1.000000
+        },
+        {
+            1.000000,
+            0.000000,
+            0.000000
+        },
+        {
+            0.000000,
+            -1.000000,
+            1.000000
+        },
+        {
+            0.000000,
+            -2.000000,
+            0.000000
+        },
+        {
+            -1.000000,
+            0.000000,
+            -1.000000
+        },
+        {
+            0.000000,
+            -1.000000,
+            4.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            2.000000
+        },
+        {
+            -1.000000,
+            -2.000000,
+            6.000000
+        },
+        {
+            -2.000000,
+            1.000000,
+            -1.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            -3.000000
+        },
+        {
+            -1.000000,
+            0.000000,
+            0.000000
+        },
+        {
+            -2.000000,
+            -1.000000,
+            2.000000
+        },
+        {
+            -2.000000,
+            0.000000,
+            2.000000
+        }
+    },
+    {
+        {
+            0.000000,
+            0.000000,
+            0.000000
+        },
+        {
+            2.000000,
+            -2.000000,
+            1.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            -1.000000
+        },
+        {
+            0.000000,
+            3.000000,
+            -2.000000
+        },
+        {
+            2.000000,
+            2.000000,
+            -2.000000
+        },
+        {
+            1.000000,
+            1.000000,
+            3.000000
+        },
+        {
+            0.000000,
+            2.000000,
+            0.000000
+        },
+        {
+            0.000000,
+            1.000000,
+            -1.000000
+        },
+        {
+            5.000000,
+            4.000000,
+            0.000000
+        },
+        {
+            4.000000,
+            4.000000,
+            0.000000
+        },
+        {
+            0.000000,
+            -2.000000,
+            0.000000
+        },
+        {
+            2.000000,
+            0.000000,
+            -1.000000
+        },
+        {
+            3.000000,
+            0.000000,
+            -1.000000
+        },
+        {
+            3.000000,
+            -1.000000,
+            -2.000000
+        },
+        {
+            -1.000000,
+            5.000000,
+            3.000000
+        },
+        {
+            0.000000,
+            1.000000,
+            -2.000000
+        },
+        {
+            2.000000,
+            5.000000,
+            -4.000000
+        },
+        {
+            -4.000000,
+            -4.000000,
+            2.000000
+        },
+        {
+            1.000000,
+            -2.000000,
+            -1.000000
+        },
+        {
+            0.000000,
+            -1.000000,
+            -1.000000
+        },
+        {
+            -3.000000,
+            -1.000000,
+            -2.000000
+        },
+        {
+            0.000000,
+            -1.000000,
+            0.000000
+        },
+        {
+            3.000000,
+            1.000000,
+            1.000000
+        },
+        {
+            -6.000000,
+            -5.000000,
+            -4.000000
+        },
+        {
+            2.000000,
+            0.000000,
+            -1.000000
+        },
+        {
+            -2.000000,
+            -2.000000,
+            -3.000000
+        },
+        {
+            5.000000,
+            0.000000,
+            0.000000
+        },
+        {
+            -2.000000,
+            -1.000000,
+            -3.000000
+        },
+        {
+            3.000000,
+            7.000000,
+            2.000000
+        },
+        {
+            -2.000000,
+            1.000000,
+            0.000000
+        },
+        {
+            -3.000000,
+            1.000000,
+            -2.000000
+        },
+        {
+            -2.000000,
+            0.000000,
+            -1.000000
+        }
+    },
+    {
+        {
+            -4.000000,
+            7.000000,
+            -4.000000
+        },
+        {
+            -3.000000,
+            7.000000,
+            1.000000
+        },
+        {
+            -1.000000,
+            -4.000000,
+            -3.000000
+        },
+        {
+            0.000000,
+            7.000000,
+            1.000000
+        },
+        {
+            -3.000000,
+            -2.000000,
+            -1.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            -1.000000
+        },
+        {
+            -1.000000,
+            -4.000000,
+            -4.000000
+        },
+        {
+            -3.000000,
+            6.000000,
+            -1.000000
+        },
+        {
+            0.000000,
+            -1.000000,
+            -1.000000
+        },
+        {
+            1.000000,
+            0.000000,
+            0.000000
+        },
+        {
+            0.000000,
+            1.000000,
+            0.000000
+        },
+        {
+            2.000000,
+            2.000000,
+            -4.000000
+        },
+        {
+            -3.000000,
+            -3.000000,
+            1.000000
+        },
+        {
+            -1.000000,
+            2.000000,
+            2.000000
+        },
+        {
+            0.000000,
+            1.000000,
+            -2.000000
+        },
+        {
+            1.000000,
+            0.000000,
+            -2.000000
+        },
+        {
+            3.000000,
+            -2.000000,
+            -1.000000
+        },
+        {
+            -2.000000,
+            2.000000,
+            1.000000
+        },
+        {
+            -1.000000,
+            0.000000,
+            0.000000
+        },
+        {
+            2.000000,
+            2.000000,
+            2.000000
+        },
+        {
+            -1.000000,
+            1.000000,
+            1.000000
+        },
+        {
+            -1.000000,
+            -1.000000,
+            1.000000
+        },
+        {
+            -1.000000,
+            1.000000,
+            -3.000000
+        },
+        {
+            0.000000,
+            -1.000000,
+            0.000000
+        },
+        {
+            0.000000,
+            6.000000,
+            0.000000
+        },
+        {
+            -1.000000,
+            0.000000,
+            0.000000
+        },
+        {
+            -5.000000,
+            3.000000,
+            0.000000
+        },
+        {
+            -2.000000,
+            2.000000,
+            1.000000
+        },
+        {
+            1.000000,
+            -1.000000,
+            -1.000000
+        },
+        {
+            -1.000000,
+            -4.000000,
+            -2.000000
+        },
+        {
+            2.000000,
+            0.000000,
+            1.000000
+        },
+        {
+            0.000000,
+            0.000000,
+            2.000000
+        }
+    }
+};
+# 16 "cnnlstm/src/n_cnn.hpp" 2
+
+
 
 
 void n_cnn_layer_module(
@@ -54431,11 +68563,88 @@ void n_cnn_layer_module(
 #pragma HLS STREAM variable=MaxPool_0_out0 depth=128
 #pragma HLS STREAM variable=Transpose_0_out0 depth=128
 #pragma HLS STREAM variable=Reshape_0_out0 depth=128
+
+
+
+
+
+
+ ThresholdsActivation<
+  1,
+   1,
+    Act_N_255,
+     nn_f32_t,
+     nn_int8_t,
+  -128
+ > MultiThreshold_0;
+
+ ThresholdsActivation<
+  32,
+   1,
+    Act_N_255,
+     nn_int32_t,
+     nn_uint4_t,
+  0
+ > MultiThreshold_3;
+
+ ThresholdsActivation<
+  64,
+  1,
+  Act_N_255,
+  nn_int32_t,
+  nn_uint4_t,
+  0
+ > MultiThreshold_4;
+
+
+
+ myConvLayer_Batch<
+  3,
+  1,
+  32,
+  32,
+  30,
+  1,
+  1,
+  nn_int8_t,
+  nn_int32_t,
+  nn_int4_t,
+  8,
+  8,
+  nn_int4_t,
+  PassThroughActivation<nn_int4_t>,
+  ap_resource_dsp()
+ > Conv_0;
+
+ myConvLayer_Batch<
+  3,
+  32,
+  30,
+  64,
+  28,
+  1,
+  1,
+  nn_uint4_t,
+  nn_int32_t,
+  nn_int4_t,
+  8,
+  8,
+  nn_int4_t,
+  PassThroughActivation<nn_int4_t>,
+  ap_resource_dsp()
+ > Conv_1;
+
+
+
 }
 # 15 "cnnlstm/src/top.cpp" 2
 
 __attribute__((sdx_kernel("main", 0))) int main(){
-#line 19 "/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/csynth.tcl"
+#line 13 "/home/changhong/prj/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/csynth.tcl"
+#pragma HLSDIRECTIVE TOP name=main
+# 16 "cnnlstm/src/top.cpp"
+
+#line 6 "/home/changhong/prj/finn/script/LSTM_HLS/hlsprj/cnnlstm/solution1/directives.tcl"
 #pragma HLSDIRECTIVE TOP name=main
 # 16 "cnnlstm/src/top.cpp"
 
