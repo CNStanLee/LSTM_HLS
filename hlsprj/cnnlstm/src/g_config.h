@@ -15,6 +15,7 @@ using namespace std;
 #include "weights.hpp"
 #include "mac.hpp"
 #include "utils.hpp"
+#include "convlayer.h"
 // *************************************
 constexpr unsigned Inp_N = 10; //This factor defines the input length at each time step.
 constexpr unsigned Out_N = 20; //This factor defines the number of LSTM cells in the LSTM layer.
