@@ -40,7 +40,9 @@ from finn.transformation.streamline.reorder import (
     MoveLinearPastEltwiseAdd,
     MoveLinearPastEltwiseMul,
     MoveTransposePastScalarMul,
-    MoveTransposePastJoinAdd
+    MoveTransposePastJoinAdd,
+    MoveScalarMulPastGather_changhong,
+    
 )
 from finn.transformation.streamline.round_thresholds import RoundAndClipThresholds
 from finn.transformation.streamline.sign_to_thres import ConvertSignToThres
@@ -109,8 +111,11 @@ def finn_streamlining(model_finn, model_finn_streamlined_path):
     qmodel_name= f"q{model_name}"
 
     streamline_transformations = [
+
             absorb.AbsorbSignBiasIntoMultiThreshold(),
             MoveMulPastMaxPool(),
+            MoveScalarLinearPastInvariants(),
+            MoveScalarMulPastGather_changhong(),
             MoveScalarLinearPastInvariants(),
             AbsorbMulIntoMultiThreshold_shashwat(),
             MoveScalarMulPastMatMul(), # attention, fixed name here

@@ -17,8 +17,8 @@ def check_missing_shapes(model_path):
 
 
 # --------------------------------------------------------
-model_path = f"/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/models/qcnn_lstm_real_c0.5/combined_submodel_finn_streamlined.onnx"
-fix_model_path = "/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/models/fixed.onnx"
+model_path = f"models/qcnn_lstm_real_c0.5/combined_submodel_finn_streamlined.onnx"
+fix_model_path = "models/fixed.onnx"
 hidden_size = 128
 batch_size = 1
 # --------------------------------------------------------
@@ -85,7 +85,7 @@ def main():
     model = ModelWrapper(model_path)
     print("streamline model behavior test")
     streamlined_output = streamline_model_behavior_test(model)
-    # print("streamlined output:", streamlined_output)
+    print("streamlined output:", streamlined_output)
 
 if __name__ == "__main__":
     main()
