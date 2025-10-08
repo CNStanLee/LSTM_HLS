@@ -7,7 +7,9 @@ open_project clstm
 set_top top
 add_files src/activations.hpp
 add_files src/cnn_lstm_mlp.hpp
+add_files src/cnn_lstm_mlp_weights.hpp
 add_files src/convlayer.h
+add_files src/custom_types.h
 add_files src/eltwise.hpp
 add_files src/interpret.hpp
 add_files src/mac.hpp

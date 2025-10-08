@@ -1,0 +1,410 @@
+<profile>
+    <ReportVersion>
+        <Version>2022.2</Version>
+    </ReportVersion>
+    <UserAssignments>
+        <unit>ns</unit>
+        <ProductFamily>zynquplus</ProductFamily>
+        <Part>xczu7ev-ffvc1156-2-e</Part>
+        <TopModelName>top</TopModelName>
+        <TargetClockPeriod>10.00</TargetClockPeriod>
+        <ClockUncertainty>2.70</ClockUncertainty>
+        <FlowTarget>vivado</FlowTarget>
+    </UserAssignments>
+    <PerformanceEstimates>
+        <PipelineType>no</PipelineType>
+        <SummaryOfTimingAnalysis>
+            <unit>ns</unit>
+            <EstimatedClockPeriod>0.000</EstimatedClockPeriod>
+        </SummaryOfTimingAnalysis>
+        <SummaryOfOverallLatency>
+            <unit>clock cycles</unit>
+            <Best-caseLatency>0</Best-caseLatency>
+            <Average-caseLatency>0</Average-caseLatency>
+            <Worst-caseLatency>0</Worst-caseLatency>
+            <Best-caseRealTimeLatency>0 ns</Best-caseRealTimeLatency>
+            <Average-caseRealTimeLatency>0 ns</Average-caseRealTimeLatency>
+            <Worst-caseRealTimeLatency>0 ns</Worst-caseRealTimeLatency>
+            <Interval-min>1</Interval-min>
+            <Interval-max>1</Interval-max>
+        </SummaryOfOverallLatency>
+    </PerformanceEstimates>
+    <AreaEstimates>
+        <Resources>
+            <BRAM_18K>0</BRAM_18K>
+            <DSP>0</DSP>
+            <FF>0</FF>
+            <LUT>0</LUT>
+            <URAM>0</URAM>
+        </Resources>
+        <AvailableResources>
+            <BRAM_18K>624</BRAM_18K>
+            <DSP>1728</DSP>
+            <FF>460800</FF>
+            <LUT>230400</LUT>
+            <URAM>96</URAM>
+        </AvailableResources>
+    </AreaEstimates>
+    <InterfaceSummary>
+        <RtlPorts>
+            <name>ap_start</name>
+            <Object>top</Object>
+            <Type>return value</Type>
+            <Scope/>
+            <IOProtocol>ap_ctrl_hs</IOProtocol>
+            <IOConfig/>
+            <Dir>in</Dir>
+            <Bits>1</Bits>
+            <Attribute>control</Attribute>
+        </RtlPorts>
+        <RtlPorts>
+            <name>ap_done</name>
+            <Object>top</Object>
+            <Type>return value</Type>
+            <Scope/>
+            <IOProtocol>ap_ctrl_hs</IOProtocol>
+            <IOConfig/>
+            <Dir>out</Dir>
+            <Bits>1</Bits>
+            <Attribute>control</Attribute>
+        </RtlPorts>
+        <RtlPorts>
+            <name>ap_idle</name>
+            <Object>top</Object>
+            <Type>return value</Type>
+            <Scope/>
+            <IOProtocol>ap_ctrl_hs</IOProtocol>
+            <IOConfig/>
+            <Dir>out</Dir>
+            <Bits>1</Bits>
+            <Attribute>control</Attribute>
+        </RtlPorts>
+        <RtlPorts>
+            <name>ap_ready</name>
+            <Object>top</Object>
+            <Type>return value</Type>
+            <Scope/>
+            <IOProtocol>ap_ctrl_hs</IOProtocol>
+            <IOConfig/>
+            <Dir>out</Dir>
+            <Bits>1</Bits>
+            <Attribute>control</Attribute>
+        </RtlPorts>
+        <RtlPorts>
+            <name>ap_return</name>
+            <Object>top</Object>
+            <Type>return value</Type>
+            <Scope/>
+            <IOProtocol>ap_ctrl_hs</IOProtocol>
+            <IOConfig/>
+            <Dir>out</Dir>
+            <Bits>32</Bits>
+            <Attribute>data</Attribute>
+        </RtlPorts>
+    </InterfaceSummary>
+    <RTLDesignHierarchy>
+        <TopModule MAX_DEPTH="1">
+            <ModuleName>top</ModuleName>
+        </TopModule>
+    </RTLDesignHierarchy>
+    <ModuleInformation>
+        <Module>
+            <Name>top</Name>
+            <PerformanceEstimates>
+                <SummaryOfTimingAnalysis>
+                    <TargetClockPeriod>10.00</TargetClockPeriod>
+                    <ClockUncertainty>2.70</ClockUncertainty>
+                    <EstimatedClockPeriod>0.000</EstimatedClockPeriod>
+                </SummaryOfTimingAnalysis>
+                <SummaryOfOverallLatency>
+                    <Best-caseLatency>0</Best-caseLatency>
+                    <Average-caseLatency>0</Average-caseLatency>
+                    <Worst-caseLatency>0</Worst-caseLatency>
+                    <Best-caseRealTimeLatency>0 ns</Best-caseRealTimeLatency>
+                    <Average-caseRealTimeLatency>0 ns</Average-caseRealTimeLatency>
+                    <Worst-caseRealTimeLatency>0 ns</Worst-caseRealTimeLatency>
+                    <PipelineInitiationInterval>1</PipelineInitiationInterval>
+                    <PipelineType>no</PipelineType>
+                </SummaryOfOverallLatency>
+            </PerformanceEstimates>
+            <AreaEstimates>
+                <Resources>
+                    <BRAM_18K>0</BRAM_18K>
+                    <AVAIL_BRAM>624</AVAIL_BRAM>
+                    <UTIL_BRAM>0</UTIL_BRAM>
+                    <DSP>0</DSP>
+                    <AVAIL_DSP>1728</AVAIL_DSP>
+                    <UTIL_DSP>0</UTIL_DSP>
+                    <FF>0</FF>
+                    <AVAIL_FF>460800</AVAIL_FF>
+                    <UTIL_FF>0</UTIL_FF>
+                    <LUT>0</LUT>
+                    <AVAIL_LUT>230400</AVAIL_LUT>
+                    <UTIL_LUT>0</UTIL_LUT>
+                    <URAM>0</URAM>
+                    <AVAIL_URAM>96</AVAIL_URAM>
+                    <UTIL_URAM>0</UTIL_URAM>
+                </Resources>
+            </AreaEstimates>
+        </Module>
+    </ModuleInformation>
+    <FIFOInformation/>
+    <UserConfigCommands/>
+    <ReturnValue ReturnValueName="srcType">int</ReturnValue>
+    <ReturnValue ReturnValueName="srcSize">32</ReturnValue>
+    <ReturnValue ReturnValueName="hwRefs" type="port" interface="ap_return" name="ap_return" usage="data" direction="out"/>
+    <Interfaces>
+        <Interface InterfaceName="ap_ctrl" type="ap_ctrl" busTypeName="acc_handshake" mode="slave">
+            <portMaps>
+                <portMap portMapName="ap_start">start</portMap>
+                <portMap portMapName="ap_done">done</portMap>
+                <portMap portMapName="ap_idle">idle</portMap>
+                <portMap portMapName="ap_ready">ready</portMap>
+            </portMaps>
+            <ports>
+                <port>ap_done</port>
+                <port>ap_idle</port>
+                <port>ap_ready</port>
+                <port>ap_start</port>
+            </ports>
+        </Interface>
+        <Interface InterfaceName="ap_return" type="data" busTypeName="data" protocol="ap_ctrl_hs" mode="master" dataWidth="32">
+            <portMaps>
+                <portMap portMapName="ap_return">DATA</portMap>
+            </portMaps>
+            <ports>
+                <port>ap_return</port>
+            </ports>
+        </Interface>
+    </Interfaces>
+    <ReportHWInterface>
+        <section name="HW Interfaces" level="0">
+            <item name="Other Ports">
+                <table isCollapsed="0">
+                    <keys size="2">Interface, Bitwidth</keys>
+                    <column name="ap_return">32, , , </column>
+                </table>
+            </item>
+            <item name="TOP LEVEL CONTROL">
+                <table isCollapsed="0">
+                    <keys size="3">Interface, Type, Ports</keys>
+                    <column name="ap_ctrl">ap_ctrl_hs, ap_done ap_idle ap_ready ap_start, </column>
+                </table>
+            </item>
+        </section>
+    </ReportHWInterface>
+    <ReportSWInterface>
+        <section name="SW I/O Information" level="0">
+            <item name="Top Function Arguments">
+                <table isCollapsed="1">
+                    <keys size="3">Argument, Direction, Datatype</keys>
+                    <column name="return">out, int</column>
+                </table>
+            </item>
+            <item name="SW-to-HW Mapping">
+                <table isCollapsed="1">
+                    <keys size="3">Argument, HW Interface, HW Type</keys>
+                    <column name="return">ap_return, port, , </column>
+                </table>
+            </item>
+        </section>
+    </ReportSWInterface>
+    <PragmaReport>
+        <Pragma type="inline" location="src/convlayer.h:113" status="valid" parentFunction="convlayer_batch" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="src/convlayer.h:198" status="valid" parentFunction="convlayer_batch_tmr" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="src/convlayer.h:284" status="valid" parentFunction="convlayer_batch_mmv" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="src/interpret.hpp:62" status="valid" parentFunction="xnormul" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="src/interpret.hpp:67" status="valid" parentFunction="operator*" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="src/interpret.hpp:72" status="valid" parentFunction="operator*" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="src/interpret.hpp:80" status="valid" parentFunction="binary" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="src/interpret.hpp:89" status="valid" parentFunction="operator*" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="src/interpret.hpp:97" status="valid" parentFunction="operator*" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="src/interpret.hpp:102" status="valid" parentFunction="operator*" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="src/interpret.hpp:116" status="valid" parentFunction="operator()" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="src/interpret.hpp:122" status="valid" parentFunction="operator()" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="src/interpret.hpp:138" status="valid" parentFunction="container&lt;tv&gt;" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="src/interpret.hpp:143" status="valid" parentFunction="operator[]" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="src/interpret.hpp:147" status="valid" parentFunction="operator[]" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="src/interpret.hpp:151" status="valid" parentFunction="operator()" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="src/interpret.hpp:155" status="valid" parentFunction="operator const type-parameter-1-0 &amp;" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="src/interpret.hpp:163" status="valid" parentFunction="operator()" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="src/interpret.hpp:168" status="valid" parentFunction="operator()" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="src/interpret.hpp:173" status="valid" parentFunction="operator()" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="src/interpret.hpp:204" status="valid" parentFunction="container&lt;tv&gt;" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="src/interpret.hpp:207" status="valid" parentFunction="container&lt;tv&gt;" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="src/interpret.hpp:211" status="valid" parentFunction="operator()" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="src/interpret.hpp:215" status="valid" parentFunction="operator()" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="src/interpret.hpp:220" status="valid" parentFunction="operator[]" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="src/interpret.hpp:224" status="valid" parentFunction="operator const type-parameter-1-0 &amp;" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="src/interpret.hpp:232" status="valid" parentFunction="operator()" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="src/interpret.hpp:237" status="valid" parentFunction="operator()" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="src/interpret.hpp:242" status="valid" parentFunction="operator()" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="src/interpret.hpp:261" status="valid" parentFunction="container&lt;tv&gt;" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="src/interpret.hpp:264" status="valid" parentFunction="container&lt;tv&gt;" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="src/interpret.hpp:267" status="valid" parentFunction="container&lt;tv&gt;" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="src/interpret.hpp:271" status="valid" parentFunction="operator const type-parameter-1-0 &amp;" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="src/interpret.hpp:275" status="valid" parentFunction="operator()" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="src/interpret.hpp:279" status="valid" parentFunction="operator()" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="src/interpret.hpp:284" status="valid" parentFunction="operator[]" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="src/interpret.hpp:292" status="valid" parentFunction="operator()" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="src/interpret.hpp:297" status="valid" parentFunction="operator()" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="src/interpret.hpp:302" status="valid" parentFunction="operator()" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="src/mac.hpp:89" status="valid" parentFunction="mul" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="src/mac.hpp:114" status="valid" parentFunction="mul" variable="" isDirective="0" options=""/>
+        <Pragma type="bind_op" location="src/mac.hpp:116" status="valid" parentFunction="mul" variable="res" isDirective="0" options="variable=res op=mul impl=fabric"/>
+        <Pragma type="inline" location="src/mac.hpp:140" status="valid" parentFunction="mul" variable="" isDirective="0" options=""/>
+        <Pragma type="bind_op" location="src/mac.hpp:142" status="valid" parentFunction="mul" variable="res" isDirective="0" options="variable=res op=mul impl=dsp"/>
+        <Pragma type="inline" location="src/mac.hpp:171" status="valid" parentFunction="mac" variable="" isDirective="0" options=""/>
+        <Pragma type="unroll" location="src/mac.hpp:174" status="valid" parentFunction="mac" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="src/mac.hpp:198" status="valid" parentFunction="mac" variable="" isDirective="0" options=""/>
+        <Pragma type="unroll" location="src/mac.hpp:201" status="valid" parentFunction="mac" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="src/mac.hpp:208" status="valid" parentFunction="mac" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="src/mmv.hpp:53" status="valid" parentFunction="operator[]" variable="" isDirective="0" options=""/>
+        <Pragma type="array_partition" location="src/mvau.hpp:111" status="valid" parentFunction="matrix_vector_activate_batch" variable="inputBuf" isDirective="0" options="variable=inputBuf complete dim=0"/>
+        <Pragma type="array_partition" location="src/mvau.hpp:115" status="valid" parentFunction="matrix_vector_activate_batch" variable="accu" isDirective="0" options="variable=accu complete dim=0"/>
+        <Pragma type="pipeline" location="src/mvau.hpp:125" status="valid" parentFunction="matrix_vector_activate_batch" variable="" isDirective="0" options="style=flp II=1"/>
+        <Pragma type="unroll" location="src/mvau.hpp:141" status="valid" parentFunction="matrix_vector_activate_batch" variable="" isDirective="0" options=""/>
+        <Pragma type="unroll" location="src/mvau.hpp:143" status="valid" parentFunction="matrix_vector_activate_batch" variable="" isDirective="0" options=""/>
+        <Pragma type="unroll" location="src/mvau.hpp:152" status="valid" parentFunction="matrix_vector_activate_batch" variable="" isDirective="0" options=""/>
+        <Pragma type="unroll" location="src/mvau.hpp:166" status="valid" parentFunction="matrix_vector_activate_batch" variable="" isDirective="0" options=""/>
+        <Pragma type="unroll" location="src/mvau.hpp:168" status="valid" parentFunction="matrix_vector_activate_batch" variable="" isDirective="0" options=""/>
+        <Pragma type="array_partition" location="src/mvau.hpp:233" status="valid" parentFunction="matrix_vector_activate_stream_batch" variable="inputBuf" isDirective="0" options="variable=inputBuf complete dim=1"/>
+        <Pragma type="array_partition" location="src/mvau.hpp:236" status="valid" parentFunction="matrix_vector_activate_stream_batch" variable="accu" isDirective="0" options="variable=accu complete dim=0"/>
+        <Pragma type="array_partition" location="src/mvau.hpp:239" status="valid" parentFunction="matrix_vector_activate_stream_batch" variable="w.m_weights" isDirective="0" options="variable=w.m_weights complete dim=0"/>
+        <Pragma type="pipeline" location="src/mvau.hpp:251" status="valid" parentFunction="matrix_vector_activate_stream_batch" variable="" isDirective="0" options="style=flp II=1"/>
+        <Pragma type="unroll" location="src/mvau.hpp:268" status="valid" parentFunction="matrix_vector_activate_stream_batch" variable="" isDirective="0" options=""/>
+        <Pragma type="unroll" location="src/mvau.hpp:275" status="valid" parentFunction="matrix_vector_activate_stream_batch" variable="" isDirective="0" options=""/>
+        <Pragma type="unroll" location="src/mvau.hpp:282" status="valid" parentFunction="matrix_vector_activate_stream_batch" variable="" isDirective="0" options=""/>
+        <Pragma type="unroll" location="src/mvau.hpp:295" status="valid" parentFunction="matrix_vector_activate_stream_batch" variable="" isDirective="0" options=""/>
+        <Pragma type="bind_storage" location="src/slidingwindow.h:74" status="valid" parentFunction="memory_resource" variable="inputBuf" isDirective="0" options="variable=inputBuf type=RAM_2P"/>
+        <Pragma type="bind_storage" location="src/slidingwindow.h:95" status="valid" parentFunction="memory_resource" variable="inputBuf" isDirective="0" options="variable=inputBuf type=RAM_S2P impl=BRAM"/>
+        <Pragma type="bind_storage" location="src/slidingwindow.h:116" status="valid" parentFunction="memory_resource" variable="inputBuf" isDirective="0" options="variable=inputBuf type=RAM_S2P impl=URAM"/>
+        <Pragma type="bind_storage" location="src/slidingwindow.h:137" status="valid" parentFunction="memory_resource" variable="inputBuf" isDirective="0" options="variable=inputBuf type=RAM_S2P impl=LUTRAM"/>
+        <Pragma type="array_partition" location="src/slidingwindow.h:177" status="valid" parentFunction="convolutioninputgenerator" variable="inputBuf" isDirective="0" options="variable=inputBuf complete dim=1"/>
+        <Pragma type="pipeline" location="src/slidingwindow.h:192" status="valid" parentFunction="convolutioninputgenerator" variable="" isDirective="0" options="style=flp II=1"/>
+        <Pragma type="dependence" location="src/slidingwindow.h:243" status="valid" parentFunction="convolutioninputgenerator" variable="inputBuf" isDirective="0" options="variable=inputBuf intra false"/>
+        <Pragma type="dependence" location="src/slidingwindow.h:244" status="valid" parentFunction="convolutioninputgenerator" variable="inputBuf" isDirective="0" options="variable=inputBuf inter false"/>
+        <Pragma type="dependence" location="src/slidingwindow.h:254" status="valid" parentFunction="convolutioninputgenerator" variable="current_block_write" isDirective="0" options="variable=current_block_write intra false"/>
+        <Pragma type="dependence" location="src/slidingwindow.h:308" status="valid" parentFunction="convolutioninputgenerator_mmv" variable="inputBuf" isDirective="0" options="variable=inputBuf inter false"/>
+        <Pragma type="dependence" location="src/slidingwindow.h:309" status="valid" parentFunction="convolutioninputgenerator_mmv" variable="inputBuf" isDirective="0" options="variable=inputBuf intra false"/>
+        <Pragma type="array_partition" location="src/slidingwindow.h:310" status="valid" parentFunction="convolutioninputgenerator_mmv" variable="inputBuf" isDirective="0" options="variable=inputBuf complete dim=1"/>
+        <Pragma type="array_partition" location="src/slidingwindow.h:311" status="valid" parentFunction="convolutioninputgenerator_mmv" variable="inputBuf" isDirective="0" options="variable=inputBuf complete dim=2"/>
+        <Pragma type="pipeline" location="src/slidingwindow.h:326" status="valid" parentFunction="convolutioninputgenerator_mmv" variable="" isDirective="0" options="style=flp II=1"/>
+        <Pragma type="unroll" location="src/slidingwindow.h:333" status="valid" parentFunction="convolutioninputgenerator_mmv" variable="" isDirective="0" options=""/>
+        <Pragma type="unroll" location="src/slidingwindow.h:359" status="valid" parentFunction="convolutioninputgenerator_mmv" variable="" isDirective="0" options=""/>
+        <Pragma type="unroll" location="src/slidingwindow.h:392" status="valid" parentFunction="convolutioninputgenerator_mmv" variable="" isDirective="0" options=""/>
+        <Pragma type="dependence" location="src/slidingwindow.h:394" status="valid" parentFunction="convolutioninputgenerator_mmv" variable="inputBuf" isDirective="0" options="variable=inputBuf intra false"/>
+        <Pragma type="dependence" location="src/slidingwindow.h:395" status="valid" parentFunction="convolutioninputgenerator_mmv" variable="inputBuf" isDirective="0" options="variable=inputBuf inter false"/>
+        <Pragma type="dependence" location="src/slidingwindow.h:406" status="valid" parentFunction="convolutioninputgenerator_mmv" variable="current_block_write" isDirective="0" options="variable=current_block_write intra false"/>
+        <Pragma type="array_partition" location="src/slidingwindow.h:466" status="valid" parentFunction="convolutioninputgenerator_kernel_stride" variable="inputBuf" isDirective="0" options="variable=inputBuf complete dim=1"/>
+        <Pragma type="dependence" location="src/slidingwindow.h:467" status="valid" parentFunction="convolutioninputgenerator_kernel_stride" variable="inputBuf" isDirective="0" options="variable=inputBuf inter false"/>
+        <Pragma type="dependence" location="src/slidingwindow.h:468" status="valid" parentFunction="convolutioninputgenerator_kernel_stride" variable="inputBuf" isDirective="0" options="variable=inputBuf intra false"/>
+        <Pragma type="dependence" location="src/slidingwindow.h:476" status="valid" parentFunction="convolutioninputgenerator_kernel_stride" variable="current_block_write" isDirective="0" options="variable=current_block_write intra false"/>
+        <Pragma type="pipeline" location="src/slidingwindow.h:479" status="valid" parentFunction="convolutioninputgenerator_kernel_stride" variable="" isDirective="0" options="style=flp II=1"/>
+        <Pragma type="dependence" location="src/slidingwindow.h:544" status="valid" parentFunction="convolutioninputgenerator_kernel_stride" variable="inputBuf" isDirective="0" options="variable=inputBuf inter false"/>
+        <Pragma type="dependence" location="src/slidingwindow.h:545" status="valid" parentFunction="convolutioninputgenerator_kernel_stride" variable="inputBuf" isDirective="0" options="variable=inputBuf intra false"/>
+        <Pragma type="dependence" location="src/slidingwindow.h:554" status="valid" parentFunction="convolutioninputgenerator_kernel_stride" variable="current_block_write" isDirective="0" options="variable=current_block_write intra false"/>
+        <Pragma type="dependence" location="src/slidingwindow.h:610" status="valid" parentFunction="convolutioninputgenerator_kernel_stride_mmv" variable="inputBuf" isDirective="0" options="variable=inputBuf inter false"/>
+        <Pragma type="dependence" location="src/slidingwindow.h:611" status="valid" parentFunction="convolutioninputgenerator_kernel_stride_mmv" variable="inputBuf" isDirective="0" options="variable=inputBuf intra false"/>
+        <Pragma type="array_partition" location="src/slidingwindow.h:612" status="valid" parentFunction="convolutioninputgenerator_kernel_stride_mmv" variable="inputBuf" isDirective="0" options="variable=inputBuf complete dim=1"/>
+        <Pragma type="array_partition" location="src/slidingwindow.h:613" status="valid" parentFunction="convolutioninputgenerator_kernel_stride_mmv" variable="inputBuf" isDirective="0" options="variable=inputBuf complete dim=2"/>
+        <Pragma type="dependence" location="src/slidingwindow.h:628" status="valid" parentFunction="convolutioninputgenerator_kernel_stride_mmv" variable="current_block_write" isDirective="0" options="variable=current_block_write intra false"/>
+        <Pragma type="pipeline" location="src/slidingwindow.h:631" status="valid" parentFunction="convolutioninputgenerator_kernel_stride_mmv" variable="" isDirective="0" options="style=flp II=1"/>
+        <Pragma type="unroll" location="src/slidingwindow.h:638" status="valid" parentFunction="convolutioninputgenerator_kernel_stride_mmv" variable="" isDirective="0" options=""/>
+        <Pragma type="unroll" location="src/slidingwindow.h:672" status="valid" parentFunction="convolutioninputgenerator_kernel_stride_mmv" variable="" isDirective="0" options=""/>
+        <Pragma type="unroll" location="src/slidingwindow.h:705" status="valid" parentFunction="convolutioninputgenerator_kernel_stride_mmv" variable="" isDirective="0" options=""/>
+        <Pragma type="dependence" location="src/slidingwindow.h:716" status="valid" parentFunction="convolutioninputgenerator_kernel_stride_mmv" variable="current_block_write" isDirective="0" options="variable=current_block_write intra false"/>
+        <Pragma type="array_partition" location="src/slidingwindow.h:767" status="valid" parentFunction="convolutioninputgenerator_dws" variable="inputBuf" isDirective="0" options="variable=inputBuf complete dim=1"/>
+        <Pragma type="pipeline" location="src/slidingwindow.h:782" status="valid" parentFunction="convolutioninputgenerator_dws" variable="" isDirective="0" options="style=flp II=1"/>
+        <Pragma type="dependence" location="src/slidingwindow.h:833" status="valid" parentFunction="convolutioninputgenerator_dws" variable="inputBuf" isDirective="0" options="variable=inputBuf intra false"/>
+        <Pragma type="dependence" location="src/slidingwindow.h:834" status="valid" parentFunction="convolutioninputgenerator_dws" variable="inputBuf" isDirective="0" options="variable=inputBuf inter false"/>
+        <Pragma type="dependence" location="src/slidingwindow.h:844" status="valid" parentFunction="convolutioninputgenerator_dws" variable="current_block_write" isDirective="0" options="variable=current_block_write intra false"/>
+        <Pragma type="array_partition" location="src/slidingwindow.h:903" status="valid" parentFunction="convolutioninputgenerator_kernel_stride_dws" variable="inputBuf" isDirective="0" options="variable=inputBuf complete dim=1"/>
+        <Pragma type="dependence" location="src/slidingwindow.h:904" status="valid" parentFunction="convolutioninputgenerator_kernel_stride_dws" variable="inputBuf" isDirective="0" options="variable=inputBuf inter false"/>
+        <Pragma type="dependence" location="src/slidingwindow.h:905" status="valid" parentFunction="convolutioninputgenerator_kernel_stride_dws" variable="inputBuf" isDirective="0" options="variable=inputBuf intra false"/>
+        <Pragma type="pipeline" location="src/slidingwindow.h:915" status="valid" parentFunction="convolutioninputgenerator_kernel_stride_dws" variable="" isDirective="0" options="style=flp II=1"/>
+        <Pragma type="dependence" location="src/slidingwindow.h:917" status="valid" parentFunction="convolutioninputgenerator_kernel_stride_dws" variable="current_block_write" isDirective="0" options="variable=current_block_write intra false"/>
+        <Pragma type="dependence" location="src/slidingwindow.h:983" status="valid" parentFunction="convolutioninputgenerator_kernel_stride_dws" variable="inputBuf" isDirective="0" options="variable=inputBuf inter false"/>
+        <Pragma type="dependence" location="src/slidingwindow.h:984" status="valid" parentFunction="convolutioninputgenerator_kernel_stride_dws" variable="inputBuf" isDirective="0" options="variable=inputBuf intra false"/>
+        <Pragma type="dependence" location="src/slidingwindow.h:993" status="valid" parentFunction="convolutioninputgenerator_kernel_stride_dws" variable="current_block_write" isDirective="0" options="variable=current_block_write intra false"/>
+        <Pragma type="dependence" location="src/slidingwindow.h:1048" status="valid" parentFunction="convolutioninputgenerator_dws_mmv" variable="inputBuf" isDirective="0" options="variable=inputBuf inter false"/>
+        <Pragma type="dependence" location="src/slidingwindow.h:1049" status="valid" parentFunction="convolutioninputgenerator_dws_mmv" variable="inputBuf" isDirective="0" options="variable=inputBuf intra false"/>
+        <Pragma type="array_partition" location="src/slidingwindow.h:1050" status="valid" parentFunction="convolutioninputgenerator_dws_mmv" variable="inputBuf" isDirective="0" options="variable=inputBuf complete dim=1"/>
+        <Pragma type="array_partition" location="src/slidingwindow.h:1051" status="valid" parentFunction="convolutioninputgenerator_dws_mmv" variable="inputBuf" isDirective="0" options="variable=inputBuf complete dim=2"/>
+        <Pragma type="pipeline" location="src/slidingwindow.h:1066" status="valid" parentFunction="convolutioninputgenerator_dws_mmv" variable="" isDirective="0" options="style=flp II=1"/>
+        <Pragma type="unroll" location="src/slidingwindow.h:1073" status="valid" parentFunction="convolutioninputgenerator_dws_mmv" variable="" isDirective="0" options=""/>
+        <Pragma type="unroll" location="src/slidingwindow.h:1099" status="valid" parentFunction="convolutioninputgenerator_dws_mmv" variable="" isDirective="0" options=""/>
+        <Pragma type="unroll" location="src/slidingwindow.h:1132" status="valid" parentFunction="convolutioninputgenerator_dws_mmv" variable="" isDirective="0" options=""/>
+        <Pragma type="dependence" location="src/slidingwindow.h:1134" status="valid" parentFunction="convolutioninputgenerator_dws_mmv" variable="inputBuf" isDirective="0" options="variable=inputBuf intra false"/>
+        <Pragma type="dependence" location="src/slidingwindow.h:1135" status="valid" parentFunction="convolutioninputgenerator_dws_mmv" variable="inputBuf" isDirective="0" options="variable=inputBuf inter false"/>
+        <Pragma type="dependence" location="src/slidingwindow.h:1146" status="valid" parentFunction="convolutioninputgenerator_dws_mmv" variable="current_block_write" isDirective="0" options="variable=current_block_write intra false"/>
+        <Pragma type="performance" location="src/slidingwindow.h:1191" status="valid" parentFunction="convolutioninputgenerator_2d_kernel1" variable="" isDirective="0" options="target_ti=IFMDim*IFMDim*IFMChannels/SIMD"/>
+        <Pragma type="pipeline" location="src/slidingwindow.h:1198" status="valid" parentFunction="convolutioninputgenerator_2d_kernel1" variable="" isDirective="0" options="style=flp II=IFMChannels/SIMD"/>
+        <Pragma type="pipeline" location="src/slidingwindow.h:1245" status="valid" parentFunction="convolutioninputgenerator_1d_kernel1" variable="" isDirective="0" options="style=flp II=1"/>
+        <Pragma type="array_partition" location="src/slidingwindow.h:1300" status="valid" parentFunction="convolutioninputgenerator_nonsquare" variable="inputBuf" isDirective="0" options="variable=inputBuf complete dim=1"/>
+        <Pragma type="pipeline" location="src/slidingwindow.h:1315" status="valid" parentFunction="convolutioninputgenerator_nonsquare" variable="" isDirective="0" options="style=flp II=1"/>
+        <Pragma type="dependence" location="src/slidingwindow.h:1366" status="valid" parentFunction="convolutioninputgenerator_nonsquare" variable="inputBuf" isDirective="0" options="variable=inputBuf intra false"/>
+        <Pragma type="dependence" location="src/slidingwindow.h:1367" status="valid" parentFunction="convolutioninputgenerator_nonsquare" variable="inputBuf" isDirective="0" options="variable=inputBuf inter false"/>
+        <Pragma type="dependence" location="src/slidingwindow.h:1377" status="valid" parentFunction="convolutioninputgenerator_nonsquare" variable="current_block_write" isDirective="0" options="variable=current_block_write intra false"/>
+        <Pragma type="array_partition" location="src/slidingwindow.h:1434" status="valid" parentFunction="convolutioninputgenerator_nonsquare_dws" variable="inputBuf" isDirective="0" options="variable=inputBuf complete dim=1"/>
+        <Pragma type="pipeline" location="src/slidingwindow.h:1449" status="valid" parentFunction="convolutioninputgenerator_nonsquare_dws" variable="" isDirective="0" options="style=flp II=1"/>
+        <Pragma type="dependence" location="src/slidingwindow.h:1500" status="valid" parentFunction="convolutioninputgenerator_nonsquare_dws" variable="inputBuf" isDirective="0" options="variable=inputBuf intra false"/>
+        <Pragma type="dependence" location="src/slidingwindow.h:1501" status="valid" parentFunction="convolutioninputgenerator_nonsquare_dws" variable="inputBuf" isDirective="0" options="variable=inputBuf inter false"/>
+        <Pragma type="dependence" location="src/slidingwindow.h:1511" status="valid" parentFunction="convolutioninputgenerator_nonsquare_dws" variable="current_block_write" isDirective="0" options="variable=current_block_write intra false"/>
+        <Pragma type="array_partition" location="src/slidingwindow.h:1575" status="valid" parentFunction="convolutioninputgenerator_nonsquare_dilated" variable="inputBuf" isDirective="0" options="variable=inputBuf complete dim=1"/>
+        <Pragma type="pipeline" location="src/slidingwindow.h:1590" status="valid" parentFunction="convolutioninputgenerator_nonsquare_dilated" variable="" isDirective="0" options="style=flp II=1"/>
+        <Pragma type="dependence" location="src/slidingwindow.h:1642" status="valid" parentFunction="convolutioninputgenerator_nonsquare_dilated" variable="inputBuf" isDirective="0" options="variable=inputBuf intra false"/>
+        <Pragma type="dependence" location="src/slidingwindow.h:1643" status="valid" parentFunction="convolutioninputgenerator_nonsquare_dilated" variable="inputBuf" isDirective="0" options="variable=inputBuf inter false"/>
+        <Pragma type="dependence" location="src/slidingwindow.h:1653" status="valid" parentFunction="convolutioninputgenerator_nonsquare_dilated" variable="current_block_write" isDirective="0" options="variable=current_block_write intra false"/>
+        <Pragma type="array_partition" location="src/slidingwindow.h:1710" status="valid" parentFunction="convolutioninputgenerator_1d_parallel" variable="inputBuf" isDirective="0" options="variable=inputBuf complete"/>
+        <Pragma type="pipeline" location="src/slidingwindow.h:1718" status="valid" parentFunction="convolutioninputgenerator_1d_parallel" variable="" isDirective="0" options="style=flp II=1"/>
+        <Pragma type="unroll" location="src/slidingwindow.h:1739" status="valid" parentFunction="convolutioninputgenerator_1d_parallel" variable="" isDirective="0" options=""/>
+        <Pragma type="dependence" location="src/slidingwindow.h:1760" status="valid" parentFunction="convolutioninputgenerator_1d_parallel" variable="inputBuf" isDirective="0" options="variable=inputBuf intra false"/>
+        <Pragma type="dependence" location="src/slidingwindow.h:1761" status="valid" parentFunction="convolutioninputgenerator_1d_parallel" variable="inputBuf" isDirective="0" options="variable=inputBuf inter false"/>
+        <Pragma type="dependence" location="src/slidingwindow.h:1768" status="valid" parentFunction="convolutioninputgenerator_1d_parallel" variable="current_block_write" isDirective="0" options="variable=current_block_write intra false"/>
+        <Pragma type="pipeline" location="src/slidingwindow.h:1824" status="valid" parentFunction="convolutioninputgenerator_1d_dws_naive" variable="" isDirective="0" options="style=flp II=1"/>
+        <Pragma type="pipeline" location="src/slidingwindow.h:1908" status="valid" parentFunction="convolutioninputgenerator_1d" variable="" isDirective="0" options="style=flp II=1"/>
+        <Pragma type="pipeline" location="src/slidingwindow.h:1984" status="valid" parentFunction="convolutioninputgenerator_1d_dws" variable="" isDirective="0" options="style=flp II=1"/>
+        <Pragma type="pipeline" location="src/slidingwindow.h:2063" status="valid" parentFunction="convolutioninputgenerator_1d_dws_stride" variable="" isDirective="0" options="style=flp II=1"/>
+        <Pragma type="pipeline" location="src/streamtools.h:78" status="valid" parentFunction="streamlimiter" variable="" isDirective="0" options="style=flp II=1"/>
+        <Pragma type="pipeline" location="src/streamtools.h:161" status="valid" parentFunction="sameresize" variable="" isDirective="0" options="style=flp II=1"/>
+        <Pragma type="pipeline" location="src/streamtools.h:235" status="valid" parentFunction="streamingcast" variable="" isDirective="0" options="style=flp II=1"/>
+        <Pragma type="pipeline" location="src/streamtools.h:281" status="valid" parentFunction="fmpadding_nonsquare" variable="" isDirective="0" options="style=flp II=1"/>
+        <Pragma type="inline" location="src/streamtools.h:375" status="valid" parentFunction="fmpadding" variable="" isDirective="0" options=""/>
+        <Pragma type="pipeline" location="src/streamtools.h:452" status="valid" parentFunction="streamingdatawidthconverter_batch" variable="" isDirective="0" options="style=flp II=1"/>
+        <Pragma type="pipeline" location="src/streamtools.h:472" status="valid" parentFunction="streamingdatawidthconverter_batch" variable="" isDirective="0" options="style=flp II=1"/>
+        <Pragma type="pipeline" location="src/streamtools.h:483" status="valid" parentFunction="streamingdatawidthconverter_batch" variable="" isDirective="0" options="style=flp II=1"/>
+        <Pragma type="pipeline" location="src/streamtools.h:592" status="valid" parentFunction="duplicatestreams" variable="" isDirective="0" options="style=flp II=1"/>
+        <Pragma type="pipeline" location="src/streamtools.h:650" status="valid" parentFunction="addstreams" variable="" isDirective="0" options="style=flp II=1"/>
+        <Pragma type="unroll" location="src/streamtools.h:655" status="valid" parentFunction="addstreams" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="src/streamtools.h:724" status="valid" parentFunction="addstreamslayer_batch" variable="" isDirective="0" options=""/>
+        <Pragma type="pipeline" location="src/streamtools.h:771" status="valid" parentFunction="multichandatawidthconverter_batch" variable="" isDirective="0" options="style=flp II=1"/>
+        <Pragma type="unroll" location="src/streamtools.h:778" status="valid" parentFunction="multichandatawidthconverter_batch" variable="" isDirective="0" options=""/>
+        <Pragma type="pipeline" location="src/streamtools.h:794" status="valid" parentFunction="multichandatawidthconverter_batch" variable="" isDirective="0" options="style=flp II=1"/>
+        <Pragma type="unroll" location="src/streamtools.h:800" status="valid" parentFunction="multichandatawidthconverter_batch" variable="" isDirective="0" options=""/>
+        <Pragma type="pipeline" location="src/streamtools.h:812" status="valid" parentFunction="multichandatawidthconverter_batch" variable="" isDirective="0" options="style=flp II=1"/>
+        <Pragma type="unroll" location="src/streamtools.h:816" status="valid" parentFunction="multichandatawidthconverter_batch" variable="" isDirective="0" options=""/>
+        <Pragma type="pipeline" location="src/streamtools.h:852" status="valid" parentFunction="flattenmultichandata" variable="" isDirective="0" options="style=flp II=1"/>
+        <Pragma type="unroll" location="src/streamtools.h:856" status="valid" parentFunction="flattenmultichandata" variable="" isDirective="0" options=""/>
+        <Pragma type="pipeline" location="src/streamtools.h:883" status="valid" parentFunction="packmultichandata" variable="" isDirective="0" options="style=flp II=1"/>
+        <Pragma type="unroll" location="src/streamtools.h:887" status="valid" parentFunction="packmultichandata" variable="" isDirective="0" options=""/>
+        <Pragma type="pipeline" location="src/streamtools.h:976" status="valid" parentFunction="qdma2stream_batch" variable="" isDirective="0" options="style=flp II=1"/>
+        <Pragma type="pipeline" location="src/streamtools.h:999" status="valid" parentFunction="stream2qdma_batch" variable="" isDirective="0" options="style=flp II=1"/>
+        <Pragma type="array_partition" location="src/tmrcheck.hpp:82" status="valid" parentFunction="tmrcheck" variable="red_ch_index" isDirective="0" options="variable=red_ch_index complete dim=0"/>
+        <Pragma type="pipeline" location="src/tmrcheck.hpp:91" status="valid" parentFunction="tmrcheck" variable="" isDirective="0" options="style=flp II=1"/>
+        <Pragma type="array_partition" location="src/tmrcheck.hpp:99" status="valid" parentFunction="tmrcheck" variable="numerrors" isDirective="0" options="variable=numerrors complete dim=0"/>
+        <Pragma type="unroll" location="src/tmrcheck.hpp:103" status="valid" parentFunction="tmrcheck" variable="" isDirective="0" options=""/>
+        <Pragma type="array_partition" location="src/tmrcheck.hpp:129" status="valid" parentFunction="tmrcheck" variable="compute" isDirective="0" options="variable=compute complete dim=0"/>
+        <Pragma type="unroll" location="src/tmrcheck.hpp:132" status="valid" parentFunction="tmrcheck" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="src/weights.hpp:83" status="valid" parentFunction="tileindex" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="src/weights.hpp:88" status="valid" parentFunction="operator[]" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="src/weights.hpp:95" status="valid" parentFunction="weights" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="src/weights.hpp:127" status="valid" parentFunction="tileindex" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="src/weights.hpp:132" status="valid" parentFunction="operator[]" variable="" isDirective="0" options=""/>
+        <Pragma type="unroll" location="src/weights.hpp:135" status="valid" parentFunction="operator[]" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="src/weights.hpp:145" status="valid" parentFunction="weights" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="src/weights.hpp:157" status="valid" parentFunction="operator[]" variable="" isDirective="0" options=""/>
+        <Pragma type="unroll" location="src/weights.hpp:160" status="valid" parentFunction="operator[]" variable="" isDirective="0" options=""/>
+    </PragmaReport>
+</profile>
+

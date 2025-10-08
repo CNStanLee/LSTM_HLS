@@ -1,6 +1,0 @@
-In file included from src/top.cpp:2:
-In file included from src/convlayer.h:57:
-src/mvau.hpp:58:10: fatal error: 'weights.hpp' file not found
-#include "weights.hpp"
-         ^~~~~~~~~~~~~
-1 error generated.

@@ -57,9 +57,19 @@
 			<location>/home/changhong/prj/finn/script/LSTM_HLS/hlsprj/clstm/src/cnn_lstm_mlp.hpp</location>
 		</link>
 		<link>
+			<name>source/cnn_lstm_mlp_weights.hpp</name>
+			<type>1</type>
+			<location>/home/changhong/prj/finn/script/LSTM_HLS/hlsprj/clstm/src/cnn_lstm_mlp_weights.hpp</location>
+		</link>
+		<link>
 			<name>source/convlayer.h</name>
 			<type>1</type>
 			<location>/home/changhong/prj/finn/script/LSTM_HLS/hlsprj/clstm/src/convlayer.h</location>
+		</link>
+		<link>
+			<name>source/custom_types.h</name>
+			<type>1</type>
+			<location>/home/changhong/prj/finn/script/LSTM_HLS/hlsprj/clstm/src/custom_types.h</location>
 		</link>
 		<link>
 			<name>source/eltwise.hpp</name>

@@ -1,0 +1,18 @@
+{"sourceFile": [{
+      "name": "",
+      "directive": [{
+          "functionName": "top",
+          "label": "",
+          "functionLabel": "",
+          "id": "1",
+          "sourceFile": "\/home\/changhong\/prj\/finn\/script\/LSTM_HLS\/hlsprj\/clstm\/clstm\/clstm\/csynth.tcl",
+          "sourceLine": "30",
+          "pragma": {
+            "name": "TOP",
+            "option": [{
+                "name": "name",
+                "value": "top"
+              }]
+          }
+        }]
+    }]}

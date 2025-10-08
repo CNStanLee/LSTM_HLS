@@ -4,7 +4,9 @@
     <file name="../../src/top_tb.cpp" sc="0" tb="1" cflags="" csimflags=""/>
     <file name="src/activations.hpp" sc="0" tb="false" cflags="" blackbox="false" csimflags=""/>
     <file name="src/cnn_lstm_mlp.hpp" sc="0" tb="false" cflags="" blackbox="false" csimflags=""/>
+    <file name="src/cnn_lstm_mlp_weights.hpp" sc="0" tb="false" cflags="" blackbox="false" csimflags=""/>
     <file name="src/convlayer.h" sc="0" tb="false" cflags="" blackbox="false" csimflags=""/>
+    <file name="src/custom_types.h" sc="0" tb="false" cflags="" blackbox="false" csimflags=""/>
     <file name="src/eltwise.hpp" sc="0" tb="false" cflags="" blackbox="false" csimflags=""/>
     <file name="src/interpret.hpp" sc="0" tb="false" cflags="" blackbox="false" csimflags=""/>
     <file name="src/mac.hpp" sc="0" tb="false" cflags="" blackbox="false" csimflags=""/>

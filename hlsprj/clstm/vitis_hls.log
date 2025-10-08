@@ -1,5 +1,5 @@
 INFO: [HLS 200-10] Running '/tools/Xilinx/Vitis_HLS/2022.2/bin/unwrapped/lnx64.o/vitis_hls'
-INFO: [HLS 200-10] For user 'changhong' on host 'changhong-Dell-Pro-Max-Tower-T2-FCT2250' (Linux_x86_64 version 6.8.0-60-generic) on Wed Oct 08 15:36:18 IST 2025
+INFO: [HLS 200-10] For user 'changhong' on host 'changhong-Dell-Pro-Max-Tower-T2-FCT2250' (Linux_x86_64 version 6.8.0-60-generic) on Wed Oct 08 18:54:30 IST 2025
 INFO: [HLS 200-10] On os Ubuntu 22.04.5 LTS
 INFO: [HLS 200-10] In directory '/home/changhong/prj/finn/script/LSTM_HLS/hlsprj/clstm'
 Sourcing Tcl script '/home/changhong/prj/finn/script/LSTM_HLS/hlsprj/clstm/clstm/clstm/csim.tcl'
@@ -9,8 +9,14 @@ INFO: [HLS 200-10] Opening project '/home/changhong/prj/finn/script/LSTM_HLS/hls
 INFO: [HLS 200-1510] Running: set_top top 
 INFO: [HLS 200-1510] Running: add_files src/activations.hpp 
 INFO: [HLS 200-10] Adding design file 'src/activations.hpp' to the project
+INFO: [HLS 200-1510] Running: add_files src/cnn_lstm_mlp.hpp 
+INFO: [HLS 200-10] Adding design file 'src/cnn_lstm_mlp.hpp' to the project
+INFO: [HLS 200-1510] Running: add_files src/cnn_lstm_mlp_weights.hpp 
+INFO: [HLS 200-10] Adding design file 'src/cnn_lstm_mlp_weights.hpp' to the project
 INFO: [HLS 200-1510] Running: add_files src/convlayer.h 
 INFO: [HLS 200-10] Adding design file 'src/convlayer.h' to the project
+INFO: [HLS 200-1510] Running: add_files src/custm_types.h 
+INFO: [HLS 200-10] Adding design file 'src/custm_types.h' to the project
 INFO: [HLS 200-1510] Running: add_files src/eltwise.hpp 
 INFO: [HLS 200-10] Adding design file 'src/eltwise.hpp' to the project
 INFO: [HLS 200-1510] Running: add_files src/interpret.hpp 
@@ -46,12 +52,11 @@ Resolution: For help on HLS 200-1505 see www.xilinx.com/cgi-bin/docs/rdoc?v=2022
 INFO: [HLS 200-1510] Running: set_part xczu7ev-ffvc1156-2-e 
 INFO: [HLS 200-1510] Running: create_clock -period 10 -name default 
 INFO: [HLS 200-1510] Running: csim_design -quiet 
-Running Dispatch Server on port: 37337
+Running Dispatch Server on port: 40901
 INFO: [SIM 211-2] *************** CSIM start ***************
 INFO: [SIM 211-4] CSIM will launch GCC as the compiler.
-   Compiling ../../../../src/top.cpp in debug mode
-   Generating csim.exe
+make: 'csim.exe' is up to date.
 ------ behavior test begin ------------ behavior test ended ------INFO: [SIM 211-1] CSim done with 0 errors.
 INFO: [SIM 211-3] *************** CSIM finish ***************
-INFO: [HLS 200-111] Finished Command csim_design CPU user time: 0.52 seconds. CPU system time: 0.16 seconds. Elapsed time: 0.7 seconds; current allocated memory: 0.000 MB.
-INFO: [HLS 200-112] Total CPU user time: 1.87 seconds. Total CPU system time: 0.53 seconds. Total elapsed time: 12.36 seconds; peak allocated memory: 1.072 GB.
+INFO: [HLS 200-111] Finished Command csim_design CPU user time: 0.02 seconds. CPU system time: 0.1 seconds. Elapsed time: 0.12 seconds; current allocated memory: 0.000 MB.
+INFO: [HLS 200-112] Total CPU user time: 1.3 seconds. Total CPU system time: 0.5 seconds. Total elapsed time: 11.74 seconds; peak allocated memory: 1.072 GB.
