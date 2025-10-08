@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<autopilotfilemapping:AutoPilotFileMapping xmlns:autopilotfilemapping="www.autoesl.com/autopilotfilemapping">
+  <source>
+    <originFiles name="hello_top.cpp" path="/home/changhong/prj/finn/script/LSTM_HLS/hello_top.cpp"/>
+    <originFiles name="cnn_instance.hpp" path="/home/changhong/prj/finn/script/LSTM_HLS/hlsprj/cnn_instance.hpp"/>
+    <originFiles name="nn_config.h" path="/home/changhong/prj/finn/script/LSTM_HLS/hlsprj/nn_config.h"/>
+    <originFiles name="convlayer.h" path="/home/changhong/prj/finn/script/LSTM_HLS/hlsprj/convlayer.h"/>
+  </source>
+  <testbench>
+    <originFiles name="hello_tb.cpp" path="/home/changhong/prj/finn/script/LSTM_HLS/hello_tb.cpp"/>
+  </testbench>
+</autopilotfilemapping:AutoPilotFileMapping>

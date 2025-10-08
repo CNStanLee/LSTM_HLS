@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<autopilotfilemapping:AutoPilotFileMapping xmlns:autopilotfilemapping="www.autoesl.com/autopilotfilemapping">
+  <source>
+    <originFiles name="top.cpp" path="/home/changhong/prj/finn/script/LSTM_HLS/hlsprj/clstm/src/top.cpp"/>
+    <originFiles name="weights.hpp" path="/home/changhong/prj/finn/script/LSTM_HLS/hlsprj/clstm/src/weights.hpp"/>
+    <originFiles name="utils.hpp" path="/home/changhong/prj/finn/script/LSTM_HLS/hlsprj/clstm/src/utils.hpp"/>
+    <originFiles name="tmrcheck.hpp" path="/home/changhong/prj/finn/script/LSTM_HLS/hlsprj/clstm/src/tmrcheck.hpp"/>
+    <originFiles name="streamtools.h" path="/home/changhong/prj/finn/script/LSTM_HLS/hlsprj/clstm/src/streamtools.h"/>
+    <originFiles name="slidingwindow.h" path="/home/changhong/prj/finn/script/LSTM_HLS/hlsprj/clstm/src/slidingwindow.h"/>
+    <originFiles name="mvau.hpp" path="/home/changhong/prj/finn/script/LSTM_HLS/hlsprj/clstm/src/mvau.hpp"/>
+    <originFiles name="mmv.hpp" path="/home/changhong/prj/finn/script/LSTM_HLS/hlsprj/clstm/src/mmv.hpp"/>
+    <originFiles name="maxpool.h" path="/home/changhong/prj/finn/script/LSTM_HLS/hlsprj/clstm/src/maxpool.h"/>
+    <originFiles name="mac.hpp" path="/home/changhong/prj/finn/script/LSTM_HLS/hlsprj/clstm/src/mac.hpp"/>
+    <originFiles name="interpret.hpp" path="/home/changhong/prj/finn/script/LSTM_HLS/hlsprj/clstm/src/interpret.hpp"/>
+    <originFiles name="eltwise.hpp" path="/home/changhong/prj/finn/script/LSTM_HLS/hlsprj/clstm/src/eltwise.hpp"/>
+    <originFiles name="convlayer.h" path="/home/changhong/prj/finn/script/LSTM_HLS/hlsprj/clstm/src/convlayer.h"/>
+    <originFiles name="activations.hpp" path="/home/changhong/prj/finn/script/LSTM_HLS/hlsprj/clstm/src/activations.hpp"/>
+    <originFiles name="cnn_lstm_mlp.hpp" path="/home/changhong/prj/finn/script/LSTM_HLS/hlsprj/clstm/src/cnn_lstm_mlp.hpp"/>
+  </source>
+  <testbench>
+    <originFiles name="top_tb.cpp" path="/home/changhong/prj/finn/script/LSTM_HLS/hlsprj/clstm/src/top_tb.cpp"/>
+  </testbench>
+</autopilotfilemapping:AutoPilotFileMapping>

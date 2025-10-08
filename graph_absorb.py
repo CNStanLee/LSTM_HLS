@@ -122,6 +122,8 @@ def finn_streamlining(model_finn, model_finn_streamlined_path):
             AbsorbMulIntoMultiThreshold_shashwat(),
             MoveScalarMulPastMatMul(), # attention, fixed name here
             CollapseRepeatedMul(),
+            MoveScalarMulPastMatMul(),
+            CollapseRepeatedMul(),
             # InferShapes(),
             # InferDataTypes(),
             # MoveTransposePastScalarMul(),

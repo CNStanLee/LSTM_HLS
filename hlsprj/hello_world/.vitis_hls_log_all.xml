@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<vivadoHLSLog:LogRoot xmlns:vivadoHLSLog="www.xilinx.com/vivadoHLSLog">
+  <errorLogs>
+    <logs>
+      <synLog/>
+      <simLog>
+        <logs message="ERROR: [COSIM 212-4] *** C/RTL co-simulation finished: FAIL ***" projectName="hello_world" solutionName="solution1" date="2025-10-08T14:58:34.777+0100"/>
+        <logs message="ERROR: [COSIM 212-5] *** C/RTL co-simulation file generation failed. ***" projectName="hello_world" solutionName="solution1" date="2025-10-08T14:58:34.718+0100"/>
+        <logs message="ERROR: [COSIM 212-330] Aborting co-simulation: top function 'hello' is not invoked in the test bench." projectName="hello_world" solutionName="solution1" date="2025-10-08T14:58:34.716+0100"/>
+        <logs message="ERROR: [COSIM 212-4] *** C/RTL co-simulation finished: FAIL ***" projectName="hello_world" solutionName="solution1" date="2025-10-08T14:52:37.454+0100"/>
+        <logs message="ERROR: [COSIM 212-5] *** C/RTL co-simulation file generation failed. ***" projectName="hello_world" solutionName="solution1" date="2025-10-08T14:52:37.406+0100"/>
+        <logs message="ERROR: [COSIM 212-330] Aborting co-simulation: top function 'hello' is not invoked in the test bench." projectName="hello_world" solutionName="solution1" date="2025-10-08T14:52:37.403+0100"/>
+      </simLog>
+      <mgLog/>
+      <packageLog/>
+      <csimLog/>
+    </logs>
+  </errorLogs>
+  <warningLogs>
+    <logs>
+      <synLog/>
+      <simLog/>
+      <mgLog/>
+      <packageLog/>
+      <csimLog/>
+    </logs>
+  </warningLogs>
+</vivadoHLSLog:LogRoot>

@@ -1,0 +1,1 @@
+set ::AESL_AUTOSIM::gTopFileName /home/changhong/prj/finn/script/LSTM_HLS/hlsprj/hello_world/solution1/./sim/autowrap/testbench/hello_top.cpp_pre.cpp.tb.cpp

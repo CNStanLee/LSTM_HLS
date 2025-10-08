@@ -1,3 +1,4 @@
+from xml.parsers.expat import model
 import numpy as np
 import finn.core.onnx_exec as oxe
 from qonnx.core.modelwrapper import ModelWrapper
@@ -42,10 +43,10 @@ input_dict["X"] = x
 input_dict["h_t-1"] = h0
 input_dict["c_t-1"] = c0
 input_dict["global_in"] = x.transpose(1,2,0)
-
+input_dict["global_in"] = np.expand_dims(input_dict["global_in"], axis=-1)
 
 def streamline_model_behavior_test(streamlined_model):
-    input_dict["global_in"] = np.expand_dims(input_dict["global_in"], axis=-1)   # add batch dim
+   # add batch dim
     output_dict_streamlined = oxe.execute_onnx(streamlined_model, input_dict,return_full_exec_context=True)
     streamlined_output = np.array(output_dict_streamlined.get("global_out")) 
     print("Streamlined output shape:", streamlined_output.shape)
@@ -53,39 +54,26 @@ def streamline_model_behavior_test(streamlined_model):
 
 
 def main():
-    missing = check_missing_shapes(model_path)
-    print("Tensors with missing shape:", missing)
-
-
-    # model = onnx.load(model_path)
-    # graph = model.graph
-
-    # # 找到所有 initializer 名字
-    # init_names = {init.name for init in graph.initializer}
-
-    # # 遍历常数，给没有 shape 的补 shape
-    # for init in graph.initializer:
-    #     if init.name in ["Mul_2_param0", "Mul_4_param0", "Mul_12_param0",
-    #                     "Mul_11_param0", "Mul_10_param0", "Mul_9_param0",
-    #                     "Mul_5_param0", "Mul_6_param0", "Mul_7_param0", "Mul_8_param0"]:
-    #         np_val = numpy_helper.to_array(init)
-    #         vi = helper.make_tensor_value_info(
-    #             init.name,
-    #             init.data_type,
-    #             np_val.shape if np_val.shape != () else []  # 标量用 []
-    #         )
-    #         graph.value_info.append(vi)
-
-    # onnx.save(model, fix_model_path)
-
-    # missing = check_missing_shapes(fix_model_path)
-    # print("Tensors with missing shape:", missing)
-
     print("load the model")
     model = ModelWrapper(model_path)
     print("streamline model behavior test")
     streamlined_output = streamline_model_behavior_test(model)
     print("streamlined output:", streamlined_output)
+    # step by step test
+
+    # print all nodes in the graph
+    for idx, node in enumerate(model.graph.node):
+        print(f"{idx}: {node.name}")
+
+    output_dict_streamlined = oxe.execute_onnx(model,
+                                                input_dict,
+                                                return_full_exec_context=True,
+                                                  end_node=model.graph.node[67])
+    debug_tensor_name = "MultiThreshold_0_out0"
+    streamlined_output = np.array(output_dict_streamlined.get(debug_tensor_name))
+    print(streamlined_output)
+    print("streamlined output shape:", streamlined_output.shape)
+    print(f"sum values of {debug_tensor_name}: {np.sum(streamlined_output)}")
 
 if __name__ == "__main__":
     main()

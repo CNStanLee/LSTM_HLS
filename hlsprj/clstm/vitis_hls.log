@@ -1,0 +1,57 @@
+INFO: [HLS 200-10] Running '/tools/Xilinx/Vitis_HLS/2022.2/bin/unwrapped/lnx64.o/vitis_hls'
+INFO: [HLS 200-10] For user 'changhong' on host 'changhong-Dell-Pro-Max-Tower-T2-FCT2250' (Linux_x86_64 version 6.8.0-60-generic) on Wed Oct 08 15:36:18 IST 2025
+INFO: [HLS 200-10] On os Ubuntu 22.04.5 LTS
+INFO: [HLS 200-10] In directory '/home/changhong/prj/finn/script/LSTM_HLS/hlsprj/clstm'
+Sourcing Tcl script '/home/changhong/prj/finn/script/LSTM_HLS/hlsprj/clstm/clstm/clstm/csim.tcl'
+INFO: [HLS 200-1510] Running: source /home/changhong/prj/finn/script/LSTM_HLS/hlsprj/clstm/clstm/clstm/csim.tcl
+INFO: [HLS 200-1510] Running: open_project clstm 
+INFO: [HLS 200-10] Opening project '/home/changhong/prj/finn/script/LSTM_HLS/hlsprj/clstm/clstm'.
+INFO: [HLS 200-1510] Running: set_top top 
+INFO: [HLS 200-1510] Running: add_files src/activations.hpp 
+INFO: [HLS 200-10] Adding design file 'src/activations.hpp' to the project
+INFO: [HLS 200-1510] Running: add_files src/convlayer.h 
+INFO: [HLS 200-10] Adding design file 'src/convlayer.h' to the project
+INFO: [HLS 200-1510] Running: add_files src/eltwise.hpp 
+INFO: [HLS 200-10] Adding design file 'src/eltwise.hpp' to the project
+INFO: [HLS 200-1510] Running: add_files src/interpret.hpp 
+INFO: [HLS 200-10] Adding design file 'src/interpret.hpp' to the project
+INFO: [HLS 200-1510] Running: add_files src/mac.hpp 
+INFO: [HLS 200-10] Adding design file 'src/mac.hpp' to the project
+INFO: [HLS 200-1510] Running: add_files src/maxpool.h 
+INFO: [HLS 200-10] Adding design file 'src/maxpool.h' to the project
+INFO: [HLS 200-1510] Running: add_files src/mmv.hpp 
+INFO: [HLS 200-10] Adding design file 'src/mmv.hpp' to the project
+INFO: [HLS 200-1510] Running: add_files src/mvau.hpp 
+INFO: [HLS 200-10] Adding design file 'src/mvau.hpp' to the project
+INFO: [HLS 200-1510] Running: add_files src/slidingwindow.h 
+INFO: [HLS 200-10] Adding design file 'src/slidingwindow.h' to the project
+INFO: [HLS 200-1510] Running: add_files src/streamtools.h 
+INFO: [HLS 200-10] Adding design file 'src/streamtools.h' to the project
+INFO: [HLS 200-1510] Running: add_files src/tmrcheck.hpp 
+INFO: [HLS 200-10] Adding design file 'src/tmrcheck.hpp' to the project
+INFO: [HLS 200-1510] Running: add_files src/top.cpp 
+INFO: [HLS 200-10] Adding design file 'src/top.cpp' to the project
+INFO: [HLS 200-1510] Running: add_files src/utils.hpp 
+INFO: [HLS 200-10] Adding design file 'src/utils.hpp' to the project
+INFO: [HLS 200-1510] Running: add_files src/weights.hpp 
+INFO: [HLS 200-10] Adding design file 'src/weights.hpp' to the project
+INFO: [HLS 200-1510] Running: add_files -tb src/top_tb.cpp 
+INFO: [HLS 200-10] Adding test bench file 'src/top_tb.cpp' to the project
+INFO: [HLS 200-1510] Running: open_solution clstm -flow_target vivado 
+INFO: [HLS 200-10] Opening solution '/home/changhong/prj/finn/script/LSTM_HLS/hlsprj/clstm/clstm/clstm'.
+INFO: [SYN 201-201] Setting up clock 'default' with a period of 10ns.
+INFO: [HLS 200-1611] Setting target device to 'xczu7ev-ffvc1156-2-e'
+INFO: [HLS 200-1505] Using flow_target 'vivado'
+Resolution: For help on HLS 200-1505 see www.xilinx.com/cgi-bin/docs/rdoc?v=2022.2;t=hls+guidance;d=200-1505.html
+INFO: [HLS 200-1510] Running: set_part xczu7ev-ffvc1156-2-e 
+INFO: [HLS 200-1510] Running: create_clock -period 10 -name default 
+INFO: [HLS 200-1510] Running: csim_design -quiet 
+Running Dispatch Server on port: 37337
+INFO: [SIM 211-2] *************** CSIM start ***************
+INFO: [SIM 211-4] CSIM will launch GCC as the compiler.
+   Compiling ../../../../src/top.cpp in debug mode
+   Generating csim.exe
+------ behavior test begin ------------ behavior test ended ------INFO: [SIM 211-1] CSim done with 0 errors.
+INFO: [SIM 211-3] *************** CSIM finish ***************
+INFO: [HLS 200-111] Finished Command csim_design CPU user time: 0.52 seconds. CPU system time: 0.16 seconds. Elapsed time: 0.7 seconds; current allocated memory: 0.000 MB.
+INFO: [HLS 200-112] Total CPU user time: 1.87 seconds. Total CPU system time: 0.53 seconds. Total elapsed time: 12.36 seconds; peak allocated memory: 1.072 GB.

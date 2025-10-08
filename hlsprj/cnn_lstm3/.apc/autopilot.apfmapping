@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<autopilotfilemapping:AutoPilotFileMapping xmlns:autopilotfilemapping="www.autoesl.com/autopilotfilemapping">
+  <source>
+    <originFiles name="top.cpp" path="/home/changhong/prj/finn/script/LSTM_HLS/hlsprj/top.cpp"/>
+  </source>
+  <testbench>
+    <originFiles name="cnn_tb.cpp" path="/home/changhong/prj/finn/script/LSTM_HLS/hlsprj/cnn_tb.cpp"/>
+  </testbench>
+</autopilotfilemapping:AutoPilotFileMapping>
