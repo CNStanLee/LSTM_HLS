@@ -74,6 +74,13 @@ def main():
     print(streamlined_output)
     print("streamlined output shape:", streamlined_output.shape)
     print(f"sum values of {debug_tensor_name}: {np.sum(streamlined_output)}")
+    # save the input and output into a text file
+    # create folder debug if not exist
+    import os
+    if not os.path.exists("debug"):
+        os.makedirs("debug")
+    np.savetxt(f"debug/{model_name}_input.txt", x.flatten(), fmt="%f")
+    np.savetxt(f"debug/{model_name}_streamlined_output.txt", streamlined_output.flatten(), fmt="%f")
 
 if __name__ == "__main__":
     main()

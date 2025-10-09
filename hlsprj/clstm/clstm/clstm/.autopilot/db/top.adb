@@ -30,7 +30,7 @@
                 <count>1</count>
                 <item_version>0</item_version>
                 <item class_id="8" tracking_level="0" version="0">
-                  <first>/home/changhong/prj/finn/script/LSTM_HLS/hlsprj/clstm</first>
+                  <first>/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/clstm</first>
                   <second class_id="9" tracking_level="0" version="0">
                     <count>1</count>
                     <item_version>0</item_version>
@@ -132,7 +132,7 @@
             <coreName/>
             <isStorage>0</isStorage>
             <storageDepth>0</storageDepth>
-            <coreId>4294967295</coreId>
+            <coreId>2242160346</coreId>
             <rtlModuleName/>
           </Obj>
           <node_objs>

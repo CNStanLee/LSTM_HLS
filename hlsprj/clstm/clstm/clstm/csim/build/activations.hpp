@@ -197,31 +197,130 @@ public:
  * The default comparison returns true if the threshold value defined for
  * the indexed row is smaller than the passed accumulator value.
  */
+//template<unsigned NF, unsigned PE, unsigned NumTH,
+//	 typename TA, typename TR, int ActVal = 0, typename Compare = comp::less<TA, TA>>
+//class ThresholdsActivation {
+//public:
+//  TA m_thresholds[PE][NF][NumTH];
+//
+//public:
+//  TA init(__attribute__((unused)) unsigned const  nf, __attribute__((unused)) unsigned const  pe) const {
+//#pragma HLS inline
+//    return  TA(0);
+//  }
+//
+//public:
+//  TR activate(unsigned const  nf, unsigned const  pe,  TA const &accu) const {
+//#pragma HLS inline
+//    TR result=ActVal;
+//	for(unsigned int i=0; i< NumTH; i++){
+//#pragma HLS unroll
+//      result+=Compare()(m_thresholds[pe][nf][i],accu); //m_thresholds[pe][nf][i],accu
+//	//	result+=Compare()(-0.99, 0);
+//    }
+//    return result;
+//  }
+//};
 template<unsigned NF, unsigned PE, unsigned NumTH,
-	 typename TA, typename TR, int ActVal = 0, typename Compare = comp::less<TA, TA>>
+         typename TA, typename TR, int ActVal = 0, typename Compare = comp::less<TA, TA>>
 class ThresholdsActivation {
 public:
   TA m_thresholds[PE][NF][NumTH];
 
 public:
-  TA init(__attribute__((unused)) unsigned const  nf, __attribute__((unused)) unsigned const  pe) const {
+  TA init(__attribute__((unused)) unsigned const nf, __attribute__((unused)) unsigned const pe) const {
 #pragma HLS inline
-    return  TA(0);
+    return TA(0);
   }
 
 public:
-  TR activate(unsigned const  nf, unsigned const  pe,  TA const &accu) const {
+  TR activate(unsigned const nf, unsigned const pe, TA const &accu) const {
 #pragma HLS inline
-    TR result=ActVal;
-	for(unsigned int i=0; i< NumTH; i++){
+    TR result = ActVal;
+    for(unsigned int i = 0; i < NumTH; i++) {
 #pragma HLS unroll
-      result+=Compare()(m_thresholds[pe][nf][i],accu); //m_thresholds[pe][nf][i],accu
-	//	result+=Compare()(-0.99, 0);
+      result += Compare()(m_thresholds[pe][nf][i], accu);
     }
     return result;
   }
-};
 
+public:
+  // 方法1：从一维数组加载权重（按PE-NF-NumTH顺序）
+  void load_weights_from_array(const TA weights[PE * NF * NumTH]) {
+#pragma HLS inline
+    for (unsigned pe = 0; pe < PE; pe++) {
+      for (unsigned nf = 0; nf < NF; nf++) {
+        for (unsigned th = 0; th < NumTH; th++) {
+#pragma HLS unroll
+          unsigned idx = pe * NF * NumTH + nf * NumTH + th;
+          m_thresholds[pe][nf][th] = weights[idx];
+        }
+      }
+    }
+  }
+
+  // 方法2：从三维数组加载权重
+  void load_weights_from_3darray(const TA weights[PE][NF][NumTH]) {
+#pragma HLS inline
+    for (unsigned pe = 0; pe < PE; pe++) {
+      for (unsigned nf = 0; nf < NF; nf++) {
+        for (unsigned th = 0; th < NumTH; th++) {
+#pragma HLS unroll
+          m_thresholds[pe][nf][th] = weights[pe][nf][th];
+        }
+      }
+    }
+  }
+
+  // 方法3：从二维数组加载权重（按NF-NumTH顺序，所有PE共享相同的权重）
+  void load_weights_from_2darray(const TA weights[NF][NumTH]) {
+#pragma HLS inline
+    for (unsigned pe = 0; pe < PE; pe++) {
+      for (unsigned nf = 0; nf < NF; nf++) {
+        for (unsigned th = 0; th < NumTH; th++) {
+#pragma HLS unroll
+          m_thresholds[pe][nf][th] = weights[nf][th];
+        }
+      }
+    }
+  }
+
+  // 方法4：逐个设置权重值
+  void set_weight(unsigned pe, unsigned nf, unsigned th, TA value) {
+#pragma HLS inline
+    if (pe < PE && nf < NF && th < NumTH) {
+      m_thresholds[pe][nf][th] = value;
+    }
+  }
+
+  // 方法5：从hls::stream加载权重
+  template<typename T>
+  void load_weights_from_stream(hls::stream<T>& weight_stream) {
+#pragma HLS inline
+    for (unsigned pe = 0; pe < PE; pe++) {
+      for (unsigned nf = 0; nf < NF; nf++) {
+        for (unsigned th = 0; th < NumTH; th++) {
+#pragma HLS pipeline
+          T data = weight_stream.read();
+          m_thresholds[pe][nf][th] = static_cast<TA>(data.data);
+        }
+      }
+    }
+  }
+
+  // 方法6：常量初始化（所有阈值设置为相同值）
+  void init_constant(TA value) {
+#pragma HLS inline
+    for (unsigned pe = 0; pe < PE; pe++) {
+      for (unsigned nf = 0; nf < NF; nf++) {
+        for (unsigned th = 0; th < NumTH; th++) {
+#pragma HLS unroll
+          m_thresholds[pe][nf][th] = value;
+        }
+      }
+    }
+  }
+};
 
 /*!
  * \brief Use a simple activation function with per-row parameters.

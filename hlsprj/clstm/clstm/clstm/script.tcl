@@ -6,6 +6,7 @@
 open_project clstm
 set_top top
 add_files src/activations.hpp
+add_files src/cnn_lstm_mlp.h
 add_files src/cnn_lstm_mlp.hpp
 add_files src/cnn_lstm_mlp_weights.hpp
 add_files src/convlayer.h
@@ -26,7 +27,7 @@ add_files -tb src/top_tb.cpp
 open_solution "clstm" -flow_target vivado
 set_part {xczu7ev-ffvc1156-2-e}
 create_clock -period 10 -name default
-#source "./clstm/clstm/directives.tcl"
+source "./clstm/clstm/directives.tcl"
 csim_design
 csynth_design
 cosim_design

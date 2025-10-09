@@ -47651,7 +47651,11 @@ void ConvLayer_Batch_MMV(hls::stream<ap_uint<InStreamW>> &in,
 # 3 "src/top.cpp" 2
 
 __attribute__((sdx_kernel("top", 0))) int top(void){
-#line 30 "/home/changhong/prj/finn/script/LSTM_HLS/hlsprj/clstm/clstm/clstm/csynth.tcl"
+#line 31 "/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/clstm/clstm/clstm/csynth.tcl"
+#pragma HLSDIRECTIVE TOP name=top
+# 4 "src/top.cpp"
+
+#line 6 "/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/clstm/clstm/clstm/directives.tcl"
 #pragma HLSDIRECTIVE TOP name=top
 # 4 "src/top.cpp"
 

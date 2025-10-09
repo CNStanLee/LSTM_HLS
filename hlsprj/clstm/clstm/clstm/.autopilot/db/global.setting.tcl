@@ -44,7 +44,7 @@ set SCTraceOption all
 set TargetInfo xczu7ev:-ffvc1156:-2-e
 set SourceFiles {sc {} c ../../src/top.cpp}
 set SourceFlags {sc {} c {{}}}
-set DirectiveFile /home/changhong/prj/finn/script/LSTM_HLS/hlsprj/clstm/clstm/clstm/clstm.directive
+set DirectiveFile /home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/clstm/clstm/clstm/clstm.directive
 set TBFiles {verilog ../../src/top_tb.cpp bc ../../src/top_tb.cpp vhdl ../../src/top_tb.cpp sc ../../src/top_tb.cpp cas ../../src/top_tb.cpp c {}}
 set SpecLanguage C
 set TVInFiles {bc {} c {} sc {} cas {} vhdl {} verilog {}}

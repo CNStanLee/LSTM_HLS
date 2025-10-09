@@ -1,12 +1,13 @@
 {"sourceFile": [{
       "name": "",
-      "directive": [{
+      "directive": [
+        {
           "functionName": "top",
           "label": "",
           "functionLabel": "",
           "id": "1",
-          "sourceFile": "\/home\/changhong\/prj\/finn\/script\/LSTM_HLS\/hlsprj\/clstm\/clstm\/clstm\/csynth.tcl",
-          "sourceLine": "30",
+          "sourceFile": "\/home\/changhong\/prj\/finn_dev\/finn\/script\/LSTM_HLS\/hlsprj\/clstm\/clstm\/clstm\/directives.tcl",
+          "sourceLine": "6",
           "pragma": {
             "name": "TOP",
             "option": [{
@@ -14,5 +15,21 @@
                 "value": "top"
               }]
           }
-        }]
+        },
+        {
+          "functionName": "top",
+          "label": "",
+          "functionLabel": "",
+          "id": "2",
+          "sourceFile": "\/home\/changhong\/prj\/finn_dev\/finn\/script\/LSTM_HLS\/hlsprj\/clstm\/clstm\/clstm\/csynth.tcl",
+          "sourceLine": "31",
+          "pragma": {
+            "name": "TOP",
+            "option": [{
+                "name": "name",
+                "value": "top"
+              }]
+          }
+        }
+      ]
     }]}
