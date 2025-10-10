@@ -1,52 +1,52 @@
 INFO: [HLS 200-10] Running '/tools/Xilinx/Vitis_HLS/2022.2/bin/unwrapped/lnx64.o/vitis_hls'
-INFO: [HLS 200-10] For user 'changhong' on host 'changhong-Alienware-m16-R2' (Linux_x86_64 version 6.8.0-85-generic) on Fri Oct 10 00:03:20 IST 2025
+INFO: [HLS 200-10] For user 'changhong' on host 'changhong-Dell-Pro-Max-Tower-T2-FCT2250' (Linux_x86_64 version 6.8.0-60-generic) on Fri Oct 10 17:58:36 IST 2025
 INFO: [HLS 200-10] On os Ubuntu 22.04.5 LTS
-INFO: [HLS 200-10] In directory '/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/clstm'
-Sourcing Tcl script '/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/clstm/clstm/clstm/csim.tcl'
-INFO: [HLS 200-1510] Running: source /home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/clstm/clstm/clstm/csim.tcl
+INFO: [HLS 200-10] In directory '/home/changhong/prj/finn/script/LSTM_HLS/hlsprj/clstm'
+Sourcing Tcl script '/home/changhong/prj/finn/script/LSTM_HLS/hlsprj/clstm/clstm/clstm/csim.tcl'
+INFO: [HLS 200-1510] Running: source /home/changhong/prj/finn/script/LSTM_HLS/hlsprj/clstm/clstm/clstm/csim.tcl
 INFO: [HLS 200-1510] Running: open_project clstm 
-INFO: [HLS 200-10] Opening project '/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/clstm/clstm'.
+INFO: [HLS 200-10] Opening project '/home/changhong/prj/finn/script/LSTM_HLS/hlsprj/clstm/clstm'.
 INFO: [HLS 200-1510] Running: set_top top 
-INFO: [HLS 200-1510] Running: add_files src/activations.hpp 
-INFO: [HLS 200-10] Adding design file 'src/activations.hpp' to the project
-INFO: [HLS 200-1510] Running: add_files src/cnn_lstm_mlp.h 
-INFO: [HLS 200-10] Adding design file 'src/cnn_lstm_mlp.h' to the project
-INFO: [HLS 200-1510] Running: add_files src/cnn_lstm_mlp.hpp 
-INFO: [HLS 200-10] Adding design file 'src/cnn_lstm_mlp.hpp' to the project
-INFO: [HLS 200-1510] Running: add_files src/cnn_lstm_mlp_weights.hpp 
-INFO: [HLS 200-10] Adding design file 'src/cnn_lstm_mlp_weights.hpp' to the project
-INFO: [HLS 200-1510] Running: add_files src/convlayer.h 
-INFO: [HLS 200-10] Adding design file 'src/convlayer.h' to the project
-INFO: [HLS 200-1510] Running: add_files src/custom_types.h 
-INFO: [HLS 200-10] Adding design file 'src/custom_types.h' to the project
-INFO: [HLS 200-1510] Running: add_files src/eltwise.hpp 
-INFO: [HLS 200-10] Adding design file 'src/eltwise.hpp' to the project
-INFO: [HLS 200-1510] Running: add_files src/interpret.hpp 
-INFO: [HLS 200-10] Adding design file 'src/interpret.hpp' to the project
-INFO: [HLS 200-1510] Running: add_files src/mac.hpp 
-INFO: [HLS 200-10] Adding design file 'src/mac.hpp' to the project
-INFO: [HLS 200-1510] Running: add_files src/maxpool.h 
-INFO: [HLS 200-10] Adding design file 'src/maxpool.h' to the project
-INFO: [HLS 200-1510] Running: add_files src/mmv.hpp 
-INFO: [HLS 200-10] Adding design file 'src/mmv.hpp' to the project
-INFO: [HLS 200-1510] Running: add_files src/mvau.hpp 
-INFO: [HLS 200-10] Adding design file 'src/mvau.hpp' to the project
-INFO: [HLS 200-1510] Running: add_files src/slidingwindow.h 
-INFO: [HLS 200-10] Adding design file 'src/slidingwindow.h' to the project
-INFO: [HLS 200-1510] Running: add_files src/streamtools.h 
-INFO: [HLS 200-10] Adding design file 'src/streamtools.h' to the project
-INFO: [HLS 200-1510] Running: add_files src/tmrcheck.hpp 
-INFO: [HLS 200-10] Adding design file 'src/tmrcheck.hpp' to the project
-INFO: [HLS 200-1510] Running: add_files src/top.cpp 
-INFO: [HLS 200-10] Adding design file 'src/top.cpp' to the project
-INFO: [HLS 200-1510] Running: add_files src/utils.hpp 
-INFO: [HLS 200-10] Adding design file 'src/utils.hpp' to the project
 INFO: [HLS 200-1510] Running: add_files src/weights.hpp 
 INFO: [HLS 200-10] Adding design file 'src/weights.hpp' to the project
-INFO: [HLS 200-1510] Running: add_files -tb src/top_tb.cpp 
+INFO: [HLS 200-1510] Running: add_files src/utils.hpp 
+INFO: [HLS 200-10] Adding design file 'src/utils.hpp' to the project
+INFO: [HLS 200-1510] Running: add_files src/top.cpp 
+INFO: [HLS 200-10] Adding design file 'src/top.cpp' to the project
+INFO: [HLS 200-1510] Running: add_files src/tmrcheck.hpp 
+INFO: [HLS 200-10] Adding design file 'src/tmrcheck.hpp' to the project
+INFO: [HLS 200-1510] Running: add_files src/streamtools.h 
+INFO: [HLS 200-10] Adding design file 'src/streamtools.h' to the project
+INFO: [HLS 200-1510] Running: add_files src/slidingwindow.h 
+INFO: [HLS 200-10] Adding design file 'src/slidingwindow.h' to the project
+INFO: [HLS 200-1510] Running: add_files src/mvau.hpp 
+INFO: [HLS 200-10] Adding design file 'src/mvau.hpp' to the project
+INFO: [HLS 200-1510] Running: add_files src/mmv.hpp 
+INFO: [HLS 200-10] Adding design file 'src/mmv.hpp' to the project
+INFO: [HLS 200-1510] Running: add_files src/maxpool.h 
+INFO: [HLS 200-10] Adding design file 'src/maxpool.h' to the project
+INFO: [HLS 200-1510] Running: add_files src/mac.hpp 
+INFO: [HLS 200-10] Adding design file 'src/mac.hpp' to the project
+INFO: [HLS 200-1510] Running: add_files src/interpret.hpp 
+INFO: [HLS 200-10] Adding design file 'src/interpret.hpp' to the project
+INFO: [HLS 200-1510] Running: add_files src/eltwise.hpp 
+INFO: [HLS 200-10] Adding design file 'src/eltwise.hpp' to the project
+INFO: [HLS 200-1510] Running: add_files src/custom_types.h 
+INFO: [HLS 200-10] Adding design file 'src/custom_types.h' to the project
+INFO: [HLS 200-1510] Running: add_files src/convlayer.h 
+INFO: [HLS 200-10] Adding design file 'src/convlayer.h' to the project
+INFO: [HLS 200-1510] Running: add_files src/cnn_lstm_mlp_weights.hpp 
+INFO: [HLS 200-10] Adding design file 'src/cnn_lstm_mlp_weights.hpp' to the project
+INFO: [HLS 200-1510] Running: add_files src/cnn_lstm_mlp.hpp 
+INFO: [HLS 200-10] Adding design file 'src/cnn_lstm_mlp.hpp' to the project
+INFO: [HLS 200-1510] Running: add_files src/cnn_lstm_mlp.h 
+INFO: [HLS 200-10] Adding design file 'src/cnn_lstm_mlp.h' to the project
+INFO: [HLS 200-1510] Running: add_files src/activations.hpp 
+INFO: [HLS 200-10] Adding design file 'src/activations.hpp' to the project
+INFO: [HLS 200-1510] Running: add_files -tb src/top_tb.cpp -cflags -Wno-unknown-pragmas -Wno-unknown-pragmas -Wno-unknown-pragmas -csimflags -Wno-unknown-pragmas 
 INFO: [HLS 200-10] Adding test bench file 'src/top_tb.cpp' to the project
 INFO: [HLS 200-1510] Running: open_solution clstm -flow_target vivado 
-INFO: [HLS 200-10] Opening solution '/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/clstm/clstm/clstm'.
+INFO: [HLS 200-10] Opening solution '/home/changhong/prj/finn/script/LSTM_HLS/hlsprj/clstm/clstm/clstm'.
 INFO: [SYN 201-201] Setting up clock 'default' with a period of 10ns.
 INFO: [HLS 200-1611] Setting target device to 'xczu7ev-ffvc1156-2-e'
 INFO: [HLS 200-1505] Using flow_target 'vivado'
@@ -55,13 +55,14 @@ INFO: [HLS 200-1510] Running: set_part xczu7ev-ffvc1156-2-e
 INFO: [HLS 200-1510] Running: create_clock -period 10 -name default 
 INFO: [HLS 200-1510] Running: source ./clstm/clstm/directives.tcl
 INFO: [HLS 200-1510] Running: set_directive_top -name top top 
-INFO: [HLS 200-1510] Running: csim_design -setup -quiet 
-Running Dispatch Server on port: 41895
+INFO: [HLS 200-1510] Running: csim_design -quiet 
+Running Dispatch Server on port: 35553
 INFO: [SIM 211-2] *************** CSIM start ***************
 INFO: [SIM 211-4] CSIM will launch GCC as the compiler.
    Compiling ../../../../src/top_tb.cpp in debug mode
    Generating csim.exe
-INFO: [SIM 211-1] CSim file generation done with 0 errors.
+------ behavior test begin ------input size = 32------ forward  ------0 255 0 0 255 255 0 255 0 255 0 0 0 255 0 0 255 0 255 255 255 0 0 255 255 0 255 255 255 0 255 255 ------ reading results  ------0 255 0 0 255 255 0 255 0 255 0 0 0 255 0 0 255 0 255 255 255 0 0 255 255 0 255 255 255 0 255 255 ------ behavior test ended ------INFO [HLS SIM]: The maximum depth reached by any hls::stream() instance in the design is 32
+INFO: [SIM 211-1] CSim done with 0 errors.
 INFO: [SIM 211-3] *************** CSIM finish ***************
-INFO: [HLS 200-111] Finished Command csim_design CPU user time: 1.08 seconds. CPU system time: 0.26 seconds. Elapsed time: 1.36 seconds; current allocated memory: 0.000 MB.
-INFO: [HLS 200-112] Total CPU user time: 3.73 seconds. Total CPU system time: 0.76 seconds. Total elapsed time: 14.43 seconds; peak allocated memory: 1.075 GB.
+INFO: [HLS 200-111] Finished Command csim_design CPU user time: 0.72 seconds. CPU system time: 0.33 seconds. Elapsed time: 1.05 seconds; current allocated memory: 0.000 MB.
+INFO: [HLS 200-112] Total CPU user time: 2.02 seconds. Total CPU system time: 0.75 seconds. Total elapsed time: 12.71 seconds; peak allocated memory: 1.098 GB.

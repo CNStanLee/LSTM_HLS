@@ -1,6 +1,6 @@
 <dict>
   <key>main-file</key>
-  <string>/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/clstm/clstm/clstm/.autopilot/db/top.pp.0.cpp</string>
+  <string>/home/changhong/prj/finn/script/LSTM_HLS/hlsprj/clstm/clstm/clstm/.autopilot/db/top.pp.0.cpp</string>
   <key>diagnostics</key>
   <array>
     <dict>
@@ -3719,7 +3719,7 @@
       <key>level</key>
       <string>warning</string>
       <key>filename</key>
-      <string>/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/clstm/clstm/clstm/csynth.tcl</string>
+      <string>/home/changhong/prj/finn/script/LSTM_HLS/hlsprj/clstm/clstm/clstm/csynth.tcl</string>
       <key>line</key>
       <integer>31</integer>
       <key>column</key>
@@ -3735,7 +3735,7 @@
       <key>level</key>
       <string>warning</string>
       <key>filename</key>
-      <string>/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/clstm/clstm/clstm/directives.tcl</string>
+      <string>/home/changhong/prj/finn/script/LSTM_HLS/hlsprj/clstm/clstm/clstm/directives.tcl</string>
       <key>line</key>
       <integer>6</integer>
       <key>column</key>

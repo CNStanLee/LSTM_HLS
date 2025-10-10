@@ -9,11 +9,12 @@ int main(void){
 	hls::stream<ap_axis<8,2,5,6>> global_output;
 
 	float float_inputs[] = {
-	    -0.174079, 1.316306, 0.735104, -1.370410, -0.399291, -0.058488, 2.292501, 0.183736,
-	    0.294389, 0.048863, -0.258132, -0.999940, -0.729064, -0.032288, 0.137615, -1.036745,
-	    -0.285918, 0.471259, -0.254717, -0.102317, -0.775240, -0.133278, -0.083695, 1.317922,
-	    -2.877262, 1.705585, 0.888133, 0.444237, 0.115318, 0.432858, 0.093336, 0.363944
+	    -0.234664, 0.417880, -0.191400, -0.139787, 0.220556, 0.027209, -0.426979, 0.250457,
+	    -0.074330, 0.242246, -0.447144, -0.460665, -0.429546, 0.219645, -0.481580, -0.334149,
+	    0.076268, -0.093793, 0.108359, 0.081015, 0.478529, -0.134894, -0.009770, 0.476819,
+	    0.092038, -0.305413, 0.199973, 0.285488, 0.412750, -0.458805, 0.301407, 0.494747
 	};
+
 
 	const int INPUT_SIZE = sizeof(float_inputs) / sizeof(float_inputs[0]);
 
@@ -24,12 +25,19 @@ int main(void){
 	    nn_int32_t bits;
 	    memcpy(&bits, &f, sizeof(f));
 	    data_inp.data = bits;
-//	    data_inp.data = static_cast<nn_int32_t>(float_inputs[i]);
-//	    data_inp.data = float_inputs[i];
 	    global_input.write(data_inp);
 	}
+	printf("------ forward  ------\r");
 	test_forward(global_input,global_output);
-
+	printf("------ reading results  ------\r");
+	while(!global_output.empty()){
+		ap_axis<8,2,5,6> data_oup;
+		nn_uint8_t result;
+		data_oup = global_output.read();
+		result = *reinterpret_cast<nn_uint8_t*>(&data_oup.data);
+		printf("%d ", result);
+	}
+	printf("\r");
 	printf("------ behavior test ended ------\r");
 	return 0;
 }

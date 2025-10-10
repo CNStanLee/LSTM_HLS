@@ -2,5 +2,13 @@ INFO: [SIM 2] *************** CSIM start ***************
 INFO: [SIM 4] CSIM will launch GCC as the compiler.
    Compiling ../../../../src/top_tb.cpp in debug mode
    Generating csim.exe
-INFO: [SIM 1] CSim file generation done with 0 errors.
+------ behavior test begin ------
+input size = 32
+------ forward  ------
+0 255 0 0 255 255 0 255 0 255 0 0 0 255 0 0 255 0 255 255 255 0 0 255 255 0 255 255 255 0 255 255 
+------ reading results  ------
+0 255 0 0 255 255 0 255 0 255 0 0 0 255 0 0 255 0 255 255 255 0 0 255 255 0 255 255 255 0 255 255 
+------ behavior test ended ------
+INFO [HLS SIM]: The maximum depth reached by any hls::stream() instance in the design is 32
+INFO: [SIM 1] CSim done with 0 errors.
 INFO: [SIM 3] *************** CSIM finish ***************
