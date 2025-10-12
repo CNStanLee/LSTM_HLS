@@ -87,46 +87,251 @@
  * \param r 				Resource type for the hardware implementation of the MAC block
  */
 
+//template<
+//		unsigned int ConvKernelDim,
+//		unsigned int IFMChannels,
+//		unsigned int IFMDim,
+//		unsigned int OFMChannels,
+//		unsigned int OFMDim,
+//
+//		unsigned int SIMD, 				// number of SIMD lanes
+//		unsigned int PE,				// number of PEs
+//
+//		typename TSrcI,      // redefine I/O interpretation as needed for input activations
+//		typename TDstI,		// redefine I/O interpretation as needed for output activations
+//		typename TWeightI,	// redefine I/O interpretation as needed for weigths
+//
+//		int InStreamW, int OutStreamW,  // safely deducible (stream width must be int though!)
+//		typename TW,   typename TA,  typename R
+//>
+//void ConvLayer_Batch(hls::stream<ap_uint<InStreamW>>  &in,
+//			    hls::stream<ap_uint<OutStreamW>> &out,
+//			    TW const        &weights,
+//			    TA const        &activation,
+//			    unsigned const   reps,
+//				R const &r) {
+//#pragma HLS INLINE
+//  unsigned const MatrixW = ConvKernelDim * ConvKernelDim * IFMChannels;
+//  unsigned const MatrixH = OFMChannels;
+//  unsigned const InpPerImage = IFMDim * IFMDim * IFMChannels * TSrcI::width / InStreamW;
+//  hls::stream<ap_uint<SIMD*TSrcI::width> > wa_in("StreamingConvLayer_Batch.wa_in");
+//  hls::stream<ap_uint<SIMD*TSrcI::width> > convInp("StreamingConvLayer_Batch.convInp");
+//  hls::stream<ap_uint<PE*TDstI::width> > mvOut("StreamingConvLayer_Batch.mvOut");
+//  StreamingDataWidthConverter_Batch<InStreamW, SIMD*TSrcI::width, InpPerImage>(in, wa_in, reps);
+//  ConvolutionInputGenerator<ConvKernelDim, IFMChannels, TSrcI::width, IFMDim,
+//			OFMDim, SIMD,1>(wa_in, convInp, reps, ap_resource_dflt());
+//  Matrix_Vector_Activate_Batch<MatrixW, MatrixH, SIMD, PE, 1, TSrcI, TDstI, TWeightI>
+//    (static_cast<hls::stream<ap_uint<SIMD*TSrcI::width>>&>(convInp),
+//     static_cast<hls::stream<ap_uint<PE*TDstI::width>>&>  (mvOut),
+//     weights, activation, reps* OFMDim * OFMDim, r);
+//  StreamingDataWidthConverter_Batch<PE*TDstI::width, OutStreamW, OFMDim * OFMDim * (OFMChannels / PE)>(mvOut, out, reps);
+//
+//}
 template<
-		unsigned int ConvKernelDim,		
-		unsigned int IFMChannels,		
-		unsigned int IFMDim,			
-		unsigned int OFMChannels,		
-		unsigned int OFMDim,			
-		
-		unsigned int SIMD, 				// number of SIMD lanes
-		unsigned int PE,				// number of PEs
-		
-		typename TSrcI = Identity,      // redefine I/O interpretation as needed for input activations
-		typename TDstI = Identity,		// redefine I/O interpretation as needed for output activations
-		typename TWeightI = Identity,	// redefine I/O interpretation as needed for weigths
+    unsigned int ConvKernelDim,     // 卷积核尺寸
+    unsigned int IFMChannels,       // 输入通道数
+    unsigned int IFMDim,           // 输入特征图尺寸
+    unsigned int OFMChannels,      // 输出通道数
+    unsigned int OFMDim,           // 输出特征图尺寸
 
-		int InStreamW, int OutStreamW,  // safely deducible (stream width must be int though!)
-		typename TW,   typename TA,  typename R
+    unsigned int SIMD,             // SIMD通道数
+    unsigned int PE,               // PE数量
+
+    typename TSrcI,     // 输入激活数据类型转换
+    typename TDstI,     // 输出激活数据类型转换
+    typename TWeightI,  // 权重数据类型转换
+
+    int InStreamW, int OutStreamW, // 输入输出流位宽
+    typename TW, typename TA, typename R
 >
-void ConvLayer_Batch(hls::stream<ap_uint<InStreamW>>  &in,
-			    hls::stream<ap_uint<OutStreamW>> &out,
-			    TW const        &weights,
-			    TA const        &activation,
-			    unsigned const   reps,
-				R const &r) {
-#pragma HLS INLINE
-  unsigned const MatrixW = ConvKernelDim * ConvKernelDim * IFMChannels;
-  unsigned const MatrixH = OFMChannels;
-  unsigned const InpPerImage = IFMDim * IFMDim * IFMChannels * TSrcI::width / InStreamW;
-  hls::stream<ap_uint<SIMD*TSrcI::width> > wa_in("StreamingConvLayer_Batch.wa_in");
-  hls::stream<ap_uint<SIMD*TSrcI::width> > convInp("StreamingConvLayer_Batch.convInp");
-  hls::stream<ap_uint<PE*TDstI::width> > mvOut("StreamingConvLayer_Batch.mvOut");
-  StreamingDataWidthConverter_Batch<InStreamW, SIMD*TSrcI::width, InpPerImage>(in, wa_in, reps);
-  ConvolutionInputGenerator<ConvKernelDim, IFMChannels, TSrcI::width, IFMDim,
-			OFMDim, SIMD,1>(wa_in, convInp, reps, ap_resource_dflt());
-  Matrix_Vector_Activate_Batch<MatrixW, MatrixH, SIMD, PE, 1, TSrcI, TDstI, TWeightI>
-    (static_cast<hls::stream<ap_uint<SIMD*TSrcI::width>>&>(convInp),
-     static_cast<hls::stream<ap_uint<PE*TDstI::width>>&>  (mvOut),
-     weights, activation, reps* OFMDim * OFMDim, r);
-  StreamingDataWidthConverter_Batch<PE*TDstI::width, OutStreamW, OFMDim * OFMDim * (OFMChannels / PE)>(mvOut, out, reps);
+class ConvLayer_Batch {
+private:
+    // 内部缓冲区
+    TW m_weights[OFMChannels][ConvKernelDim * ConvKernelDim * IFMChannels];
+    TA m_activation_params[OFMChannels];
 
-}
+public:
+    // 初始化方法
+    void init(__attribute__((unused)) unsigned const ofm,
+              __attribute__((unused)) unsigned const pe) const {
+        #pragma HLS inline
+        // 初始化逻辑
+    }
+
+public:
+    // 主执行函数
+    void execute(hls::stream<ap_uint<InStreamW>> &in,
+                 hls::stream<ap_uint<OutStreamW>> &out,
+                 unsigned const reps,
+                 R const &r) {
+        #pragma HLS INLINE
+
+        unsigned const MatrixW = ConvKernelDim * ConvKernelDim * IFMChannels;
+        unsigned const MatrixH = OFMChannels;
+        unsigned const InpPerImage = IFMDim * IFMDim * IFMChannels * TSrcI::width / InStreamW;
+
+        hls::stream<ap_uint<SIMD*TSrcI::width>> wa_in("conv_layer_wa_in");
+        hls::stream<ap_uint<SIMD*TSrcI::width>> convInp("conv_layer_convInp");
+        hls::stream<ap_uint<PE*TDstI::width>> mvOut("conv_layer_mvOut");
+
+        // 数据宽度转换
+        StreamingDataWidthConverter_Batch<InStreamW, SIMD*TSrcI::width, InpPerImage>
+            (in, wa_in, reps);
+
+        // 卷积输入生成
+        ConvolutionInputGenerator<ConvKernelDim, IFMChannels, TSrcI::width, IFMDim,
+                                OFMDim, SIMD, 1>
+            (wa_in, convInp, reps, ap_resource_dflt());
+
+        // 矩阵向量激活计算
+        Matrix_Vector_Activate_Batch<MatrixW, MatrixH, SIMD, PE, 1, TSrcI, TDstI, TWeightI>
+            (static_cast<hls::stream<ap_uint<SIMD*TSrcI::width>>&>(convInp),
+             static_cast<hls::stream<ap_uint<PE*TDstI::width>>&>(mvOut),
+             m_weights, m_activation_params, reps * OFMDim * OFMDim, r);
+
+        // 输出数据宽度转换
+        StreamingDataWidthConverter_Batch<PE*TDstI::width, OutStreamW,
+                                        OFMDim * OFMDim * (OFMChannels / PE)>
+            (mvOut, out, reps);
+    }
+
+public:
+    // 方法1：从一维数组加载权重
+    void load_weights_from_array(const TW weights[OFMChannels * ConvKernelDim * ConvKernelDim * IFMChannels]) {
+        #pragma HLS inline
+        for (unsigned ofm = 0; ofm < OFMChannels; ofm++) {
+            for (unsigned idx = 0; idx < ConvKernelDim * ConvKernelDim * IFMChannels; idx++) {
+                #pragma HLS unroll
+                unsigned global_idx = ofm * ConvKernelDim * ConvKernelDim * IFMChannels + idx;
+                m_weights[ofm][idx] = weights[global_idx];
+            }
+        }
+    }
+
+    // 方法2：从二维数组加载权重
+    void load_weights_from_2darray(const TW weights[OFMChannels][ConvKernelDim * ConvKernelDim * IFMChannels]) {
+        #pragma HLS inline
+        for (unsigned ofm = 0; ofm < OFMChannels; ofm++) {
+            for (unsigned idx = 0; idx < ConvKernelDim * ConvKernelDim * IFMChannels; idx++) {
+                #pragma HLS unroll
+                m_weights[ofm][idx] = weights[ofm][idx];
+            }
+        }
+    }
+
+    // 方法3：从hls::stream加载权重
+    template<typename T>
+    void load_weights_from_stream(hls::stream<T>& weight_stream) {
+        #pragma HLS inline
+        for (unsigned ofm = 0; ofm < OFMChannels; ofm++) {
+            for (unsigned idx = 0; idx < ConvKernelDim * ConvKernelDim * IFMChannels; idx++) {
+                #pragma HLS pipeline
+                T data = weight_stream.read();
+                m_weights[ofm][idx] = static_cast<TW>(data);
+            }
+        }
+    }
+
+    // 方法4：设置单个权重值
+    void set_weight(unsigned ofm, unsigned kernel_row, unsigned kernel_col, unsigned ifm, TW value) {
+        #pragma HLS inline
+        if (ofm < OFMChannels && kernel_row < ConvKernelDim &&
+            kernel_col < ConvKernelDim && ifm < IFMChannels) {
+            unsigned idx = (kernel_row * ConvKernelDim * IFMChannels) +
+                          (kernel_col * IFMChannels) + ifm;
+            m_weights[ofm][idx] = value;
+        }
+    }
+
+    // 方法5：常量初始化权重
+    void init_weights_constant(TW value) {
+        #pragma HLS inline
+        for (unsigned ofm = 0; ofm < OFMChannels; ofm++) {
+            for (unsigned idx = 0; idx < ConvKernelDim * ConvKernelDim * IFMChannels; idx++) {
+                #pragma HLS unroll
+                m_weights[ofm][idx] = value;
+            }
+        }
+    }
+
+    template<unsigned int IFM, unsigned int KW>
+    void load_weights_from_4darray_generic(const TW weights[OFMChannels][IFM][ConvKernelDim][KW]) {
+        #pragma HLS inline
+        static_assert(IFM == IFMChannels, "IFM dimension must match IFMChannels");
+
+        for (unsigned ofm = 0; ofm < OFMChannels; ofm++) {
+            for (unsigned ifm = 0; ifm < IFMChannels; ifm++) {
+                for (unsigned kh = 0; kh < ConvKernelDim; kh++) {
+                    for (unsigned kw = 0; kw < KW; kw++) {
+                        #pragma HLS unroll
+                        unsigned internal_idx = kh * (ConvKernelDim * IFMChannels) +
+                                               kw * IFMChannels + ifm;
+                        m_weights[ofm][internal_idx] = weights[ofm][ifm][kh][kw];
+                    }
+                    // 如果KW小于ConvKernelDim，填充剩余位置为0
+                    for (unsigned kw = KW; kw < ConvKernelDim; kw++) {
+                        #pragma HLS unroll
+                        unsigned internal_idx = kh * (ConvKernelDim * IFMChannels) +
+                                               kw * IFMChannels + ifm;
+                        m_weights[ofm][internal_idx] = TW(0);
+                    }
+                }
+            }
+        }
+    }
+
+
+    // 激活参数设置方法
+    void set_activation_param(unsigned ofm, TA value) {
+        #pragma HLS inline
+        if (ofm < OFMChannels) {
+            m_activation_params[ofm] = value;
+        }
+    }
+
+    // 批量设置激活参数
+    void load_activation_params(const TA params[OFMChannels]) {
+        #pragma HLS inline
+        for (unsigned ofm = 0; ofm < OFMChannels; ofm++) {
+            #pragma HLS unroll
+            m_activation_params[ofm] = params[ofm];
+        }
+    }
+};
+
+//// 保持向后兼容的函数接口
+//template<
+//    unsigned int ConvKernelDim,
+//    unsigned int IFMChannels,
+//    unsigned int IFMDim,
+//    unsigned int OFMChannels,
+//    unsigned int OFMDim,
+//    unsigned int SIMD,
+//    unsigned int PE,
+//    typename TSrcI = Identity,
+//    typename TDstI = Identity,
+//    typename TWeightI = Identity,
+//    int InStreamW, int OutStreamW,
+//    typename TW, typename TA, typename R
+//>
+//void ConvLayer_Batch(hls::stream<ap_uint<InStreamW>> &in,
+//                     hls::stream<ap_uint<OutStreamW>> &out,
+//                     TW const &weights,
+//                     TA const &activation,
+//                     unsigned const reps,
+//                     R const &r) {
+//    #pragma HLS INLINE
+//
+//    // 创建临时对象并执行
+//    static ConvLayer_Batch<ConvKernelDim, IFMChannels, IFMDim, OFMChannels, OFMDim,
+//                          SIMD, PE, TSrcI, TDstI, TWeightI, InStreamW, OutStreamW, TW, TA, R>
+//        conv_layer;
+//
+//    // 这里需要根据weights和activation参数来设置内部状态
+//    // 注意：这需要根据具体的权重和激活参数类型来调整
+//
+//    conv_layer.execute(in, out, reps, r);
+//}
 
 /**
  * \brief   Convolutional layer implementation with STMR

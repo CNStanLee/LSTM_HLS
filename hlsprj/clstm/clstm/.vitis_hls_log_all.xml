@@ -7,6 +7,21 @@
       <mgLog/>
       <packageLog/>
       <csimLog>
+        <logs message="ERROR: [SIM 211-100] 'csim_design' failed: compilation error(s)." projectName="clstm" solutionName="clstm" date="2025-10-12T23:32:37.678+0100"/>
+        <logs message="ERROR: [SIM 211-100] 'csim_design' failed: compilation error(s)." projectName="clstm" solutionName="clstm" date="2025-10-12T23:31:14.277+0100"/>
+        <logs message="ERROR: [SIM 211-100] 'csim_design' failed: compilation error(s)." projectName="clstm" solutionName="clstm" date="2025-10-12T23:24:29.242+0100"/>
+        <logs message="ERROR: [SIM 211-100] 'csim_design' failed: compilation error(s)." projectName="clstm" solutionName="clstm" date="2025-10-12T23:23:26.372+0100"/>
+        <logs message="ERROR: [SIM 211-100] 'csim_design' failed: compilation error(s)." projectName="clstm" solutionName="clstm" date="2025-10-12T23:18:31.176+0100"/>
+        <logs message="ERROR: [SIM 211-100] 'csim_design' failed: compilation error(s)." projectName="clstm" solutionName="clstm" date="2025-10-12T23:17:16.468+0100"/>
+        <logs message="ERROR: [SIM 211-100] 'csim_design' failed: compilation error(s)." projectName="clstm" solutionName="clstm" date="2025-10-12T23:14:24.279+0100"/>
+        <logs message="ERROR: [SIM 211-100] 'csim_design' failed: compilation error(s)." projectName="clstm" solutionName="clstm" date="2025-10-12T23:13:30.499+0100"/>
+        <logs message="ERROR: [SIM 211-100] 'csim_design' failed: compilation error(s)." projectName="clstm" solutionName="clstm" date="2025-10-12T23:06:54.940+0100"/>
+        <logs message="ERROR: [SIM 211-100] 'csim_design' failed: compilation error(s)." projectName="clstm" solutionName="clstm" date="2025-10-12T22:58:19.954+0100"/>
+        <logs message="ERROR: [SIM 211-100] 'csim_design' failed: compilation error(s)." projectName="clstm" solutionName="clstm" date="2025-10-12T22:33:23.195+0100"/>
+        <logs message="ERROR: [SIM 211-100] 'csim_design' failed: compilation error(s)." projectName="clstm" solutionName="clstm" date="2025-10-12T22:31:58.423+0100"/>
+        <logs message="ERROR: [SIM 211-100] 'csim_design' failed: compilation error(s)." projectName="clstm" solutionName="clstm" date="2025-10-12T22:30:35.551+0100"/>
+        <logs message="ERROR: [SIM 211-100] 'csim_design' failed: compilation error(s)." projectName="clstm" solutionName="clstm" date="2025-10-12T22:29:49.882+0100"/>
+        <logs message="ERROR: [SIM 211-100] 'csim_design' failed: compilation error(s)." projectName="clstm" solutionName="clstm" date="2025-10-12T22:28:22.498+0100"/>
         <logs message="ERROR: [SIM 211-100] 'csim_design' failed: compilation error(s)." projectName="clstm" solutionName="clstm" date="2025-10-10T17:53:09.364+0100"/>
         <logs message="ERROR: [SIM 211-100] CSim file generation failed: compilation error(s)." projectName="clstm" solutionName="clstm" date="2025-10-10T16:08:39.114+0100"/>
         <logs message="ERROR: [SIM 211-100] CSim file generation failed: compilation error(s)." projectName="clstm" solutionName="clstm" date="2025-10-10T16:04:50.497+0100"/>

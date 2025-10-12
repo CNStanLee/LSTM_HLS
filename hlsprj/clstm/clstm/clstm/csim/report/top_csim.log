@@ -1,14 +1,95 @@
 INFO: [SIM 2] *************** CSIM start ***************
 INFO: [SIM 4] CSIM will launch GCC as the compiler.
    Compiling ../../../../src/top_tb.cpp in debug mode
-   Generating csim.exe
------- behavior test begin ------
-input size = 32
------- forward  ------
-0 255 0 0 255 255 0 255 0 255 0 0 0 255 0 0 255 0 255 255 255 0 0 255 255 0 255 255 255 0 255 255 
------- reading results  ------
-0 255 0 0 255 255 0 255 0 255 0 0 0 255 0 0 255 0 255 255 255 0 0 255 255 0 255 255 255 0 255 255 
------- behavior test ended ------
-INFO [HLS SIM]: The maximum depth reached by any hls::stream() instance in the design is 32
-INFO: [SIM 1] CSim done with 0 errors.
+In file included from ../../../../src/convlayer.h:57,
+                 from ../../../../src/cnn_lstm_mlp.hpp:14,
+                 from ../../../../src/top_tb.cpp:2:
+../../../../src/mvau.hpp: In instantiation of ‘void Matrix_Vector_Activate_Batch(hls::stream<TI>&, hls::stream<TO>&, const TW&, const TA&, int, const R&) [with unsigned int MatrixW = 9; unsigned int MatrixH = 32; unsigned int SIMD = 1; unsigned int PE = 1; unsigned int MMV = 1; TSrcI = Identity; TDstI = Identity; TWeightI = Identity; TI = ap_uint<1>; TO = ap_uint<1>; TW = ap_int<4> [32][9]; TA = PassThroughActivation<ap_int<4> > [32]; R = ap_resource_dsp]’:
+../../../../src/convlayer.h:188:13:   required from ‘void ConvLayer_Batch<ConvKernelDim, IFMChannels, IFMDim, OFMChannels, OFMDim, SIMD, PE, TSrcI, TDstI, TWeightI, InStreamW, OutStreamW, TW, TA, R>::execute(hls::stream<ap_uint<InStreamW> >&, hls::stream<ap_uint<OutStreamW> >&, unsigned int, const R&) [with unsigned int ConvKernelDim = 3; unsigned int IFMChannels = 1; unsigned int IFMDim = 32; unsigned int OFMChannels = 32; unsigned int OFMDim = 30; unsigned int SIMD = 1; unsigned int PE = 1; TSrcI = Identity; TDstI = Identity; TWeightI = Identity; int InStreamW = 8; int OutStreamW = 32; TW = ap_int<4>; TA = PassThroughActivation<ap_int<4> >; R = ap_resource_dsp]’
+../../../../src/cnn_lstm_mlp.hpp:67:63:   required from here
+../../../../src/mvau.hpp:114:23: error: request for member ‘init’ in ‘activation’, which is of non-class type ‘const PassThroughActivation<ap_int<4> > [32]’
+   decltype(activation.init(0,0))  accu[MMV][PE];
+            ~~~~~~~~~~~^~~~
+../../../../src/mvau.hpp:114:23: error: request for member ‘init’ in ‘activation’, which is of non-class type ‘const PassThroughActivation<ap_int<4> > [32]’
+../../../../src/mvau.hpp:144:38: error: request for member ‘init’ in ‘activation’, which is of non-class type ‘const PassThroughActivation<ap_int<4> > [32]’
+           accu[mmv][pe] = activation.init(nf, pe);
+                           ~~~~~~~~~~~^~~~
+../../../../src/mvau.hpp:150:29: error: request for member ‘weights’ in ‘weights’, which is of non-class type ‘const ap_int<4> [32][9]’
+     auto const &w = weights.weights(tile);
+                     ~~~~~~~~^~~~~~~
+../../../../src/mvau.hpp:155:34: error: no match for call to ‘(Identity) (ap_uint<1>&, unsigned int&)’
+         auto const  act = TSrcI()(inElem, mmv);
+                           ~~~~~~~^~~~~~~~~~~~~
+In file included from ../../../../src/activations.hpp:55,
+                 from ../../../../src/cnn_lstm_mlp.hpp:4,
+                 from ../../../../src/top_tb.cpp:2:
+../../../../src/interpret.hpp:115:12: note: candidate: ‘template<class T> const T& Identity::operator()(const T&) const’
+   T const &operator()(T const &v) const {
+            ^~~~~~~~
+../../../../src/interpret.hpp:115:12: note:   template argument deduction/substitution failed:
+In file included from ../../../../src/convlayer.h:57,
+                 from ../../../../src/cnn_lstm_mlp.hpp:14,
+                 from ../../../../src/top_tb.cpp:2:
+../../../../src/mvau.hpp:155:34: note:   candidate expects 1 argument, 2 provided
+         auto const  act = TSrcI()(inElem, mmv);
+                           ~~~~~~~^~~~~~~~~~~~~
+In file included from ../../../../src/activations.hpp:55,
+                 from ../../../../src/cnn_lstm_mlp.hpp:4,
+                 from ../../../../src/top_tb.cpp:2:
+../../../../src/interpret.hpp:121:5: note: candidate: ‘template<class T> T Identity::operator()() const’
+   T operator()() const {
+     ^~~~~~~~
+../../../../src/interpret.hpp:121:5: note:   template argument deduction/substitution failed:
+In file included from ../../../../src/convlayer.h:57,
+                 from ../../../../src/cnn_lstm_mlp.hpp:14,
+                 from ../../../../src/top_tb.cpp:2:
+../../../../src/mvau.hpp:155:34: note:   candidate expects 0 arguments, 2 provided
+         auto const  act = TSrcI()(inElem, mmv);
+                           ~~~~~~~^~~~~~~~~~~~~
+../../../../src/mvau.hpp:169:18: error: no match for call to ‘(ap_uint<1>) (unsigned int&, unsigned int&, int)’
+           outElem(pe,mmv,1) = activation.activate(nf, pe, accu[mmv][pe]);
+           ~~~~~~~^~~~~~~~~~
+In file included from /tools/Xilinx/Vitis_HLS/2022.2/include/ap_int.h:11,
+                 from ../../../../src/interpret.hpp:51,
+                 from ../../../../src/activations.hpp:55,
+                 from ../../../../src/cnn_lstm_mlp.hpp:4,
+                 from ../../../../src/top_tb.cpp:2:
+/tools/Xilinx/Vitis_HLS/2022.2/include/ap_int_base.h:1084:37: note: candidate: ‘ap_range_ref<_AP_W, _AP_S> ap_int_base<_AP_W, _AP_S>::operator()(int, int) [with int _AP_W = 1; bool _AP_S = false]’
+   INLINE ap_range_ref<_AP_W, _AP_S> operator()(int Hi, int Lo) {
+                                     ^~~~~~~~
+/tools/Xilinx/Vitis_HLS/2022.2/include/ap_int_base.h:1084:37: note:   candidate expects 2 arguments, 3 provided
+/tools/Xilinx/Vitis_HLS/2022.2/include/ap_int_base.h:1088:37: note: candidate: ‘ap_range_ref<_AP_W, _AP_S> ap_int_base<_AP_W, _AP_S>::operator()(int, int) const [with int _AP_W = 1; bool _AP_S = false]’
+   INLINE ap_range_ref<_AP_W, _AP_S> operator()(int Hi, int Lo) const {
+                                     ^~~~~~~~
+/tools/Xilinx/Vitis_HLS/2022.2/include/ap_int_base.h:1088:37: note:   candidate expects 2 arguments, 3 provided
+/tools/Xilinx/Vitis_HLS/2022.2/include/ap_int_base.h:1093:37: note: candidate: ‘template<int _AP_W2, bool _AP_S2, int _AP_W3, bool _AP_S3> ap_range_ref<_AP_W, _AP_S> ap_int_base<_AP_W, _AP_S>::operator()(const ap_int_base<_AP_W2, _AP_S2>&, const ap_int_base<_AP_W3, _AP_S3>&) [with int _AP_W2 = _AP_W2; bool _AP_S2 = _AP_S2; int _AP_W3 = _AP_W3; bool _AP_S3 = _AP_S3; int _AP_W = 1; bool _AP_S = false]’
+   INLINE ap_range_ref<_AP_W, _AP_S> operator()(
+                                     ^~~~~~~~
+/tools/Xilinx/Vitis_HLS/2022.2/include/ap_int_base.h:1093:37: note:   template argument deduction/substitution failed:
+In file included from ../../../../src/convlayer.h:57,
+                 from ../../../../src/cnn_lstm_mlp.hpp:14,
+                 from ../../../../src/top_tb.cpp:2:
+../../../../src/mvau.hpp:169:18: note:   mismatched types ‘const ap_int_base<_AP_W, _AP_S>’ and ‘unsigned int’
+           outElem(pe,mmv,1) = activation.activate(nf, pe, accu[mmv][pe]);
+           ~~~~~~~^~~~~~~~~~
+In file included from /tools/Xilinx/Vitis_HLS/2022.2/include/ap_int.h:11,
+                 from ../../../../src/interpret.hpp:51,
+                 from ../../../../src/activations.hpp:55,
+                 from ../../../../src/cnn_lstm_mlp.hpp:4,
+                 from ../../../../src/top_tb.cpp:2:
+/tools/Xilinx/Vitis_HLS/2022.2/include/ap_int_base.h:1102:37: note: candidate: ‘template<int _AP_W2, bool _AP_S2, int _AP_W3, bool _AP_S3> ap_range_ref<_AP_W, _AP_S> ap_int_base<_AP_W, _AP_S>::operator()(const ap_int_base<_AP_W2, _AP_S2>&, const ap_int_base<_AP_W3, _AP_S3>&) const [with int _AP_W2 = _AP_W2; bool _AP_S2 = _AP_S2; int _AP_W3 = _AP_W3; bool _AP_S3 = _AP_S3; int _AP_W = 1; bool _AP_S = false]’
+   INLINE ap_range_ref<_AP_W, _AP_S> operator()(
+                                     ^~~~~~~~
+/tools/Xilinx/Vitis_HLS/2022.2/include/ap_int_base.h:1102:37: note:   template argument deduction/substitution failed:
+In file included from ../../../../src/convlayer.h:57,
+                 from ../../../../src/cnn_lstm_mlp.hpp:14,
+                 from ../../../../src/top_tb.cpp:2:
+../../../../src/mvau.hpp:169:18: note:   mismatched types ‘const ap_int_base<_AP_W, _AP_S>’ and ‘unsigned int’
+           outElem(pe,mmv,1) = activation.activate(nf, pe, accu[mmv][pe]);
+           ~~~~~~~^~~~~~~~~~
+../../../../src/mvau.hpp:169:42: error: request for member ‘activate’ in ‘activation’, which is of non-class type ‘const PassThroughActivation<ap_int<4> > [32]’
+           outElem(pe,mmv,1) = activation.activate(nf, pe, accu[mmv][pe]);
+                               ~~~~~~~~~~~^~~~~~~~
+make: *** [csim.mk:78: obj/top_tb.o] Error 1
+ERR: [SIM 100] 'csim_design' failed: compilation error(s).
 INFO: [SIM 3] *************** CSIM finish ***************

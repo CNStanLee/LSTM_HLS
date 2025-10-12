@@ -25,4 +25,8 @@ obj/top_tb.o: ../../../../src/top_tb.cpp ../../../../src/cnn_lstm_mlp.hpp \
  ../../../../src/cnn_lstm_mlp_weights.hpp ../../../../src/custom_types.h \
  /tools/Xilinx/Vitis_HLS/2022.2/include/ap_axi_sdata.h \
  /tools/Xilinx/Vitis_HLS/2022.2/include/ap_int.h \
- ../../../../src/cnn_lstm_mlp.h
+ ../../../../src/cnn_lstm_mlp.h ../../../../src/convlayer.h \
+ ../../../../src/streamtools.h ../../../../src/mmv.hpp \
+ ../../../../src/slidingwindow.h ../../../../src/utils.hpp \
+ ../../../../src/mvau.hpp ../../../../src/mac.hpp \
+ ../../../../src/weights.hpp ../../../../src/tmrcheck.hpp
