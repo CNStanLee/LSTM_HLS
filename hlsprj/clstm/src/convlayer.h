@@ -163,7 +163,8 @@ public:
     void execute(hls::stream<ap_uint<InStreamW>> &in,
                  hls::stream<ap_uint<OutStreamW>> &out,
                  unsigned const reps,
-                 R const &r) {
+                 R const &r,
+				 TA  const &activation) {
         #pragma HLS INLINE
 
         unsigned const MatrixW = ConvKernelDim * ConvKernelDim * IFMChannels;
@@ -187,7 +188,7 @@ public:
         Matrix_Vector_Activate_Batch<MatrixW, MatrixH, SIMD, PE, 1, TSrcI, TDstI, TWeightI>
             (static_cast<hls::stream<ap_uint<SIMD*TSrcI::width>>&>(convInp),
              static_cast<hls::stream<ap_uint<PE*TDstI::width>>&>(mvOut),
-             m_weights, m_activation_params, reps * OFMDim * OFMDim, r);
+             m_weights, activation, reps * OFMDim * OFMDim, ap_resource_dflt());
 
         // 输出数据宽度转换
         StreamingDataWidthConverter_Batch<PE*TDstI::width, OutStreamW,
@@ -501,7 +502,7 @@ void ConvLayer_Batch_MMV(hls::stream<ap_uint<InStreamW>>  &in,
   StreamingDataWidthConverter_Batch<InStreamW, SIMD * TSrcI::width, InpPerImage>(in, wa_in, reps);
 
   ConvolutionInputGenerator_MMV<ConvKernelDim, IFMChannels, TSrcI::width, IFMDim,
-			OFMDim, SIMD, STRIDE, MMV>(wa_in, convInp, reps, ap_resource_dflt());
+			OFMDim, SIMD, STRIDE, MMV>(wa_in, convInp, reps, ap_resource_lutram());
   Matrix_Vector_Activate_Batch<MatrixW, MatrixH, SIMD, PE, MMV, TSrcI, TDstI, TWeightI>
     (static_cast<hls::stream<MultiChanData<MMV,SIMD*TSrcI::width>>&>(convInp),
      static_cast<hls::stream<MultiChanData<MMV,PE*TDstI::width>>&>(mmv2dwc),

@@ -1,0 +1,34 @@
+{
+  "ConvolutionInputGenerator_hls_0": {
+    "BRAM_18K": "0",
+    "FF": "174",
+    "LUT": "585",
+    "DSP48E": 0,
+    "URAM": "0",
+    "DSP": "0"
+  },
+  "MVAU_hls_0": {
+    "BRAM_18K": "0",
+    "FF": "316",
+    "LUT": "5546",
+    "DSP48E": 0,
+    "URAM": "0",
+    "DSP": "16"
+  },
+  "ConvolutionInputGenerator_hls_1": {
+    "BRAM_18K": "0",
+    "FF": "534",
+    "LUT": "588",
+    "DSP48E": 0,
+    "URAM": "0",
+    "DSP": "0"
+  },
+  "MVAU_hls_1": {
+    "BRAM_18K": "0",
+    "FF": "11461",
+    "LUT": "32827",
+    "DSP48E": 0,
+    "URAM": "0",
+    "DSP": "576"
+  }
+}

@@ -23,10 +23,11 @@ int test_forward(
     #pragma HLS PIPELINE II=1  // pipeline interval
 
 
-	// mt_0
 	// NF PE NumTh, input_type, output_type, minimum value of output
     ThresholdsActivation<1, 1, 255, nn_f32_t, nn_int8_t, -256> MultiThreshold_0;
     MultiThreshold_0.load_weights_from_array(MultiThreshold_0_param0);
+    ThresholdsActivation<1, 1, 15, nn_f32_t, nn_uint4_t, 0> MultiThreshold_3;
+    MultiThreshold_3.load_weights_from_2darray(MultiThreshold_3_param0);
     // conv_0
     const unsigned int CONV_KERNEL_DIM = 3;
     const unsigned int IFM_CHANNELS = 1;
@@ -35,10 +36,11 @@ int test_forward(
     const unsigned int OFM_DIM = 30;
     const unsigned int SIMD_LANES = 1;
     const unsigned int PE_COUNT = 1;
+    // TA is activation type to define params -> define activation function params
     ap_resource_dsp dsp_resource;
     ConvLayer_Batch<CONV_KERNEL_DIM, IFM_CHANNELS, IFM_DIM, OFM_CHANNELS, OFM_DIM,
                     SIMD_LANES, PE_COUNT, Identity, Identity, Identity,
-                    8, 32, nn_int4_t, PassThroughActivation<nn_int4_t>, ap_resource_dsp> conv_layer;
+                    8, 32, nn_int4_t, nn_uint4_t, ap_resource_dsp> conv_layer;
     conv_layer.load_weights_from_4darray_generic<1, 1>(Conv_0_param0);
     while(!global_input.empty()){
         #pragma HLS LOOP_TRIPCOUNT min=32 max=32
@@ -64,7 +66,7 @@ int test_forward(
         data_oup.data = out;
 
         // conv0
-        conv_layer.execute(out_mt0, out_conv0, 1, dsp_resource);
+        conv_layer.execute(out_mt0, out_conv0, 1, dsp_resource, MultiThreshold_3);
         global_output.write(data_oup);
     }
 	printf("\r");

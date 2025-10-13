@@ -1,0 +1,15 @@
+{
+  "Defaults": {},
+  "ConvolutionInputGenerator_0": {
+    "preferred_impl_style": "hls"
+  },
+  "MVAU_0": {
+    "preferred_impl_style": "hls"
+  },
+  "ConvolutionInputGenerator_1": {
+    "preferred_impl_style": "hls"
+  },
+  "MVAU_1": {
+    "preferred_impl_style": "hls"
+  }
+}
