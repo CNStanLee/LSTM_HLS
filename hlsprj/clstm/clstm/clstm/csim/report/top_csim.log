@@ -91,5 +91,5 @@ In file included from ../../../../src/convlayer.h:57,
            outElem(pe,mmv,1) = activation.activate(nf, pe, accu[mmv][pe]);
                                ~~~~~~~~~~~^~~~~~~~
 make: *** [csim.mk:78: obj/top_tb.o] Error 1
-ERR: [SIM 100] 'csim_design' failed: compilation error(s).
+ERR: [SIM 100] CSim file generation failed: compilation error(s).
 INFO: [SIM 3] *************** CSIM finish ***************
