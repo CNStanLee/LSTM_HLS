@@ -13,6 +13,7 @@ add_files src/convlayer.h
 add_files src/custom_types.h
 add_files src/eltwise.hpp
 add_files src/interpret.hpp
+add_files layer_mt0.cpp
 add_files src/mac.hpp
 add_files src/maxpool.h
 add_files src/mmv.hpp
@@ -23,7 +24,7 @@ add_files src/tmrcheck.hpp
 add_files src/top.cpp
 add_files src/utils.hpp
 add_files src/weights.hpp
-add_files -tb src/top_tb.cpp -cflags "-Wno-unknown-pragmas -Wno-unknown-pragmas -Wno-unknown-pragmas -Wno-unknown-pragmas -Wno-unknown-pragmas -Wno-unknown-pragmas" -csimflags "-Wno-unknown-pragmas"
+add_files -tb src/top_tb.cpp -cflags "-Wno-unknown-pragmas -Wno-unknown-pragmas -Wno-unknown-pragmas -Wno-unknown-pragmas -Wno-unknown-pragmas -Wno-unknown-pragmas -Wno-unknown-pragmas" -csimflags "-Wno-unknown-pragmas"
 open_solution "clstm" -flow_target vivado
 set_part {xczu7ev-ffvc1156-2-e}
 create_clock -period 10 -name default

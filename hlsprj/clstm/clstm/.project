@@ -82,6 +82,11 @@
 			<location>/home/changhong/prj/finn_dev/finn/LSTM_HLS/hlsprj/clstm/src/interpret.hpp</location>
 		</link>
 		<link>
+			<name>source/layer_mt0.cpp</name>
+			<type>1</type>
+			<location>/home/changhong/prj/finn_dev/finn/LSTM_HLS/hlsprj/clstm/layer_mt0.cpp</location>
+		</link>
+		<link>
 			<name>source/mac.hpp</name>
 			<type>1</type>
 			<location>/home/changhong/prj/finn_dev/finn/LSTM_HLS/hlsprj/clstm/src/mac.hpp</location>
