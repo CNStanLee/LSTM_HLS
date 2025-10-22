@@ -4,6 +4,7 @@
 
 int main(void){
 	printf("------ behavior test begin ------\r");
+	nn_int32_t sum_value = 0;
 	// generate input
 	hls::stream<ap_axis<32,2,5,6>> global_input;
 	hls::stream<ap_axis<8,2,5,6>> global_output;
@@ -28,7 +29,9 @@ int main(void){
 	    global_input.write(data_inp);
 	}
 	printf("------ forward  ------\r");
-	test_forward(global_input,global_output);
+//	test_forward2(global_input,global_output);
+	//test_forward(global_input,global_output);
+	test_forward_with_mvau(global_input,global_output);
 	printf("------ reading results  ------\r");
 	while(!global_output.empty()){
 		ap_axis<8,2,5,6> data_oup;
@@ -36,7 +39,10 @@ int main(void){
 		data_oup = global_output.read();
 		result = *reinterpret_cast<nn_uint8_t*>(&data_oup.data);
 		printf("%d ", result);
+		sum_value = sum_value + result;
 	}
+	printf("\r sum value: \r ");
+	printf("%d ", sum_value);
 	printf("\r");
 	printf("------ behavior test ended ------\r");
 	return 0;

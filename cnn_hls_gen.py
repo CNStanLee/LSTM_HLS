@@ -51,15 +51,16 @@ if __name__ == "__main__":
     pynq_part_map["KV260_SOM"] = "xck26-sfvc784-2LV-c"
     pynq_part_map["U50"] = "xcu50-fsvh2104-2L-e"
     ready_model_filename = "models/subcnn_finn_streamlined.onnx"
-    rtlsim_output_dir = "rtlsim_output/model_generation_test"
-    specialize_layers_config_file = 'models/cnn_sp_layers.json'
+    #ready_model_filename = "models/cybsec-mlp-ready-64.onnx"
+    rtlsim_output_dir = "rtlsim_output/model_generation_test2"
+    #specialize_layers_config_file = 'models/cnn_sp_layers.json'
     cfg_stitched_ip = build.DataflowBuildConfig(
         output_dir          = rtlsim_output_dir,
         mvau_wwidth_max     = 80,
         target_fps          = 1000000,
         synth_clk_period_ns = 10.0,    
         fpga_part           = pynq_part_map["ZCU104"],
-        specialize_layers_config_file = specialize_layers_config_file,
+        #specialize_layers_config_file = specialize_layers_config_file,
         generate_outputs=[
             build_cfg.DataflowOutputType.STITCHED_IP,
             build_cfg.DataflowOutputType.RTLSIM_PERFORMANCE,

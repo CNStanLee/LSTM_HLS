@@ -17,7 +17,7 @@ __SIM_DDS__ = 1
 
 ObjDir = obj
 
-HLS_SOURCES = ../../../../src/top_tb.cpp ../../../../src/top.cpp
+HLS_SOURCES = ../../../../src/top_tb.cpp ../../../../src/top.cpp ../../../../src/layer2_MVAU0.cpp ../../../../src/layer1_Im2Col0.cpp ../../../../src/layer0_mt0.cpp
 
 override TARGET := csim.exe
 
@@ -75,7 +75,7 @@ all: $(TARGET)
 
 $(ObjDir)/top_tb.o: ../../../../src/top_tb.cpp $(ObjDir)/.dir
 	$(Echo) "   Compiling ../../../../src/top_tb.cpp in $(BuildMode) mode" $(AVE_DIR_DLOG)
-	$(Verb)  $(CC) ${CCFLAG} -c -MMD -Wno-unknown-pragmas -Wno-unknown-pragmas -Wno-unknown-pragmas -Wno-unknown-pragmas -Wno-unknown-pragmas -Wno-unknown-pragmas -Wno-unknown-pragmas -Wno-unknown-pragmas  $(IFLAG) $(DFLAG) $< -o $@ ; \
+	$(Verb)  $(CC) ${CCFLAG} -c -MMD -Wno-unknown-pragmas -Wno-unknown-pragmas -Wno-unknown-pragmas -Wno-unknown-pragmas -Wno-unknown-pragmas -Wno-unknown-pragmas -Wno-unknown-pragmas -Wno-unknown-pragmas -Wno-unknown-pragmas  $(IFLAG) $(DFLAG) $< -o $@ ; \
 
 -include $(ObjDir)/top_tb.d
 
@@ -84,3 +84,21 @@ $(ObjDir)/top.o: ../../../../src/top.cpp $(ObjDir)/.dir
 	$(Verb)  $(CC) ${CCFLAG} -c -MMD  $(IFLAG) $(DFLAG) $< -o $@ ; \
 
 -include $(ObjDir)/top.d
+
+$(ObjDir)/layer2_MVAU0.o: ../../../../src/layer2_MVAU0.cpp $(ObjDir)/.dir
+	$(Echo) "   Compiling ../../../../src/layer2_MVAU0.cpp in $(BuildMode) mode" $(AVE_DIR_DLOG)
+	$(Verb)  $(CC) ${CCFLAG} -c -MMD  $(IFLAG) $(DFLAG) $< -o $@ ; \
+
+-include $(ObjDir)/layer2_MVAU0.d
+
+$(ObjDir)/layer1_Im2Col0.o: ../../../../src/layer1_Im2Col0.cpp $(ObjDir)/.dir
+	$(Echo) "   Compiling ../../../../src/layer1_Im2Col0.cpp in $(BuildMode) mode" $(AVE_DIR_DLOG)
+	$(Verb)  $(CC) ${CCFLAG} -c -MMD  $(IFLAG) $(DFLAG) $< -o $@ ; \
+
+-include $(ObjDir)/layer1_Im2Col0.d
+
+$(ObjDir)/layer0_mt0.o: ../../../../src/layer0_mt0.cpp $(ObjDir)/.dir
+	$(Echo) "   Compiling ../../../../src/layer0_mt0.cpp in $(BuildMode) mode" $(AVE_DIR_DLOG)
+	$(Verb)  $(CC) ${CCFLAG} -c -MMD  $(IFLAG) $(DFLAG) $< -o $@ ; \
+
+-include $(ObjDir)/layer0_mt0.d

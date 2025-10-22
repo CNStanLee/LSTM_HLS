@@ -29,4 +29,5 @@ obj/top_tb.o: ../../../../src/top_tb.cpp ../../../../src/cnn_lstm_mlp.hpp \
  ../../../../src/streamtools.h ../../../../src/mmv.hpp \
  ../../../../src/slidingwindow.h ../../../../src/utils.hpp \
  ../../../../src/mvau.hpp ../../../../src/mac.hpp \
- ../../../../src/weights.hpp ../../../../src/tmrcheck.hpp
+ ../../../../src/weights.hpp ../../../../src/tmrcheck.hpp \
+ ../../../../src/mvau_weights_include.h

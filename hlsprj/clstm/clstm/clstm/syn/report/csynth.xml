@@ -210,9 +210,52 @@
         </section>
     </ReportSWInterface>
     <PragmaReport>
+        <Pragma type="inline" location="src/activations.hpp:145" status="valid" parentFunction="init" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="src/activations.hpp:163" status="valid" parentFunction="activate" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="src/activations.hpp:180" status="valid" parentFunction="thresholdactivation&lt;ta, compare&gt;" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="src/activations.hpp:185" status="valid" parentFunction="activate" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="src/activations.hpp:232" status="valid" parentFunction="init" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="src/activations.hpp:238" status="valid" parentFunction="activate" variable="" isDirective="0" options=""/>
+        <Pragma type="unroll" location="src/activations.hpp:241" status="valid" parentFunction="activate" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="src/activations.hpp:250" status="valid" parentFunction="load_weights_from_array" variable="" isDirective="0" options=""/>
+        <Pragma type="unroll" location="src/activations.hpp:254" status="valid" parentFunction="load_weights_from_array" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="src/activations.hpp:264" status="valid" parentFunction="load_weights_from_3darray" variable="" isDirective="0" options=""/>
+        <Pragma type="unroll" location="src/activations.hpp:268" status="valid" parentFunction="load_weights_from_3darray" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="src/activations.hpp:277" status="valid" parentFunction="load_weights_from_2darray" variable="" isDirective="0" options=""/>
+        <Pragma type="unroll" location="src/activations.hpp:281" status="valid" parentFunction="load_weights_from_2darray" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="src/activations.hpp:290" status="valid" parentFunction="set_weight" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="src/activations.hpp:299" status="valid" parentFunction="load_weights_from_stream" variable="" isDirective="0" options=""/>
+        <Pragma type="pipeline" location="src/activations.hpp:303" status="valid" parentFunction="load_weights_from_stream" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="src/activations.hpp:313" status="valid" parentFunction="init_constant" variable="" isDirective="0" options=""/>
+        <Pragma type="unroll" location="src/activations.hpp:317" status="valid" parentFunction="init_constant" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="src/activations.hpp:347" status="valid" parentFunction="init" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="src/activations.hpp:352" status="valid" parentFunction="activate" variable="" isDirective="0" options=""/>
+        <Pragma type="pipeline" location="src/activations.hpp:396" status="valid" parentFunction="thresholding_batch" variable="" isDirective="0" options="style=flp II=1"/>
+        <Pragma type="unroll" location="src/activations.hpp:402" status="valid" parentFunction="thresholding_batch" variable="" isDirective="0" options=""/>
+        <Pragma type="array_partition" location="src/activations.hpp:452" status="valid" parentFunction="thresholding_stream_batch" variable="internal_thr.m_thresholds" isDirective="0" options="variable=internal_thr.m_thresholds complete dim=0"/>
+        <Pragma type="pipeline" location="src/activations.hpp:458" status="valid" parentFunction="thresholding_stream_batch" variable="" isDirective="0" options="style=flp II=1"/>
+        <Pragma type="unroll" location="src/activations.hpp:471" status="valid" parentFunction="thresholding_stream_batch" variable="" isDirective="0" options=""/>
+        <Pragma type="unroll" location="src/activations.hpp:476" status="valid" parentFunction="thresholding_stream_batch" variable="" isDirective="0" options=""/>
         <Pragma type="inline" location="src/convlayer.h:113" status="valid" parentFunction="convlayer_batch" variable="" isDirective="0" options=""/>
-        <Pragma type="inline" location="src/convlayer.h:198" status="valid" parentFunction="convlayer_batch_tmr" variable="" isDirective="0" options=""/>
-        <Pragma type="inline" location="src/convlayer.h:284" status="valid" parentFunction="convlayer_batch_mmv" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="src/convlayer.h:157" status="valid" parentFunction="init" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="src/convlayer.h:168" status="valid" parentFunction="execute" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="src/convlayer.h:202" status="valid" parentFunction="load_weights_from_array" variable="" isDirective="0" options=""/>
+        <Pragma type="unroll" location="src/convlayer.h:205" status="valid" parentFunction="load_weights_from_array" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="src/convlayer.h:214" status="valid" parentFunction="load_weights_from_2darray" variable="" isDirective="0" options=""/>
+        <Pragma type="unroll" location="src/convlayer.h:217" status="valid" parentFunction="load_weights_from_2darray" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="src/convlayer.h:226" status="valid" parentFunction="load_weights_from_stream" variable="" isDirective="0" options=""/>
+        <Pragma type="pipeline" location="src/convlayer.h:229" status="valid" parentFunction="load_weights_from_stream" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="src/convlayer.h:238" status="valid" parentFunction="set_weight" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="src/convlayer.h:249" status="valid" parentFunction="init_weights_constant" variable="" isDirective="0" options=""/>
+        <Pragma type="unroll" location="src/convlayer.h:252" status="valid" parentFunction="init_weights_constant" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="src/convlayer.h:260" status="valid" parentFunction="load_weights_from_4darray_generic" variable="" isDirective="0" options=""/>
+        <Pragma type="unroll" location="src/convlayer.h:267" status="valid" parentFunction="load_weights_from_4darray_generic" variable="" isDirective="0" options=""/>
+        <Pragma type="unroll" location="src/convlayer.h:274" status="valid" parentFunction="load_weights_from_4darray_generic" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="src/convlayer.h:287" status="valid" parentFunction="set_activation_param" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="src/convlayer.h:295" status="valid" parentFunction="load_activation_params" variable="" isDirective="0" options=""/>
+        <Pragma type="unroll" location="src/convlayer.h:297" status="valid" parentFunction="load_activation_params" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="src/convlayer.h:404" status="valid" parentFunction="convlayer_batch_tmr" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="src/convlayer.h:490" status="valid" parentFunction="convlayer_batch_mmv" variable="" isDirective="0" options=""/>
         <Pragma type="inline" location="src/interpret.hpp:62" status="valid" parentFunction="xnormul" variable="" isDirective="0" options=""/>
         <Pragma type="inline" location="src/interpret.hpp:67" status="valid" parentFunction="operator*" variable="" isDirective="0" options=""/>
         <Pragma type="inline" location="src/interpret.hpp:72" status="valid" parentFunction="operator*" variable="" isDirective="0" options=""/>
@@ -249,6 +292,18 @@
         <Pragma type="inline" location="src/interpret.hpp:292" status="valid" parentFunction="operator()" variable="" isDirective="0" options=""/>
         <Pragma type="inline" location="src/interpret.hpp:297" status="valid" parentFunction="operator()" variable="" isDirective="0" options=""/>
         <Pragma type="inline" location="src/interpret.hpp:302" status="valid" parentFunction="operator()" variable="" isDirective="0" options=""/>
+        <Pragma type="interface" location="src/layer0_mt0.cpp:9" status="valid" parentFunction="multithreshold_0_block" variable="in0_V" isDirective="0" options="axis port=in0_V"/>
+        <Pragma type="interface" location="src/layer0_mt0.cpp:10" status="valid" parentFunction="multithreshold_0_block" variable="out_V" isDirective="0" options="axis port=out_V"/>
+        <Pragma type="interface" location="src/layer0_mt0.cpp:11" status="valid" parentFunction="multithreshold_0_block" variable="return" isDirective="0" options="ap_ctrl_none port=return"/>
+        <Pragma type="interface" location="src/layer1_Im2Col0.cpp:31" status="valid" parentFunction="convolutioninputgenerator_hls_0" variable="in0_V" isDirective="0" options="axis port=in0_V"/>
+        <Pragma type="interface" location="src/layer1_Im2Col0.cpp:32" status="valid" parentFunction="convolutioninputgenerator_hls_0" variable="out_V" isDirective="0" options="axis port=out_V"/>
+        <Pragma type="interface" location="src/layer1_Im2Col0.cpp:33" status="valid" parentFunction="convolutioninputgenerator_hls_0" variable="return" isDirective="0" options="ap_ctrl_none port=return"/>
+        <Pragma type="interface" location="src/layer2_MVAU0.cpp:103" status="valid" parentFunction="mvau_hls_0" variable="in0_V" isDirective="0" options="axis port=in0_V"/>
+        <Pragma type="interface" location="src/layer2_MVAU0.cpp:104" status="valid" parentFunction="mvau_hls_0" variable="out_V" isDirective="0" options="axis port=out_V"/>
+        <Pragma type="interface" location="src/layer2_MVAU0.cpp:105" status="valid" parentFunction="mvau_hls_0" variable="return" isDirective="0" options="ap_ctrl_none port=return"/>
+        <Pragma type="interface" location="src/layer2_MVAU0.cpp:106" status="valid" parentFunction="mvau_hls_0" variable="weights_V" isDirective="0" options="axis port=weights_V"/>
+        <Pragma type="array_partition" location="src/layer2_MVAU0.cpp:107" status="valid" parentFunction="mvau_hls_0" variable="threshs.m_thresholds" isDirective="0" options="variable=threshs.m_thresholds complete dim=1"/>
+        <Pragma type="array_partition" location="src/layer2_MVAU0.cpp:108" status="valid" parentFunction="mvau_hls_0" variable="threshs.m_thresholds" isDirective="0" options="variable=threshs.m_thresholds complete dim=3"/>
         <Pragma type="inline" location="src/mac.hpp:89" status="valid" parentFunction="mul" variable="" isDirective="0" options=""/>
         <Pragma type="inline" location="src/mac.hpp:114" status="valid" parentFunction="mul" variable="" isDirective="0" options=""/>
         <Pragma type="bind_op" location="src/mac.hpp:116" status="valid" parentFunction="mul" variable="res" isDirective="0" options="variable=res op=mul impl=fabric"/>
@@ -259,6 +314,41 @@
         <Pragma type="inline" location="src/mac.hpp:198" status="valid" parentFunction="mac" variable="" isDirective="0" options=""/>
         <Pragma type="unroll" location="src/mac.hpp:201" status="valid" parentFunction="mac" variable="" isDirective="0" options=""/>
         <Pragma type="inline" location="src/mac.hpp:208" status="valid" parentFunction="mac" variable="" isDirective="0" options=""/>
+        <Pragma type="unroll" location="src/maxpool.h:74" status="valid" parentFunction="streamingmaxpool" variable="" isDirective="0" options=""/>
+        <Pragma type="pipeline" location="src/maxpool.h:83" status="valid" parentFunction="streamingmaxpool" variable="" isDirective="0" options="style=flp II=1"/>
+        <Pragma type="pipeline" location="src/maxpool.h:91" status="valid" parentFunction="streamingmaxpool" variable="" isDirective="0" options="style=flp II=1"/>
+        <Pragma type="array_partition" location="src/maxpool.h:146" status="valid" parentFunction="streamingmaxpool_precision" variable="buf" isDirective="0" options="variable=buf complete dim=2"/>
+        <Pragma type="unroll" location="src/maxpool.h:149" status="valid" parentFunction="streamingmaxpool_precision" variable="" isDirective="0" options=""/>
+        <Pragma type="pipeline" location="src/maxpool.h:159" status="valid" parentFunction="streamingmaxpool_precision" variable="" isDirective="0" options="style=flp II=1"/>
+        <Pragma type="unroll" location="src/maxpool.h:162" status="valid" parentFunction="streamingmaxpool_precision" variable="" isDirective="0" options=""/>
+        <Pragma type="unroll" location="src/maxpool.h:176" status="valid" parentFunction="streamingmaxpool_precision" variable="" isDirective="0" options=""/>
+        <Pragma type="inline" location="src/maxpool.h:210" status="valid" parentFunction="streamingmaxpool_precision_batch" variable="" isDirective="0" options=""/>
+        <Pragma type="array_partition" location="src/maxpool.h:255" status="valid" parentFunction="streamingmaxpool_precision_1d" variable="buf" isDirective="0" options="variable=buf complete dim=2"/>
+        <Pragma type="pipeline" location="src/maxpool.h:258" status="valid" parentFunction="streamingmaxpool_precision_1d" variable="" isDirective="0" options="style=flp II=1"/>
+        <Pragma type="unroll" location="src/maxpool.h:260" status="valid" parentFunction="streamingmaxpool_precision_1d" variable="" isDirective="0" options=""/>
+        <Pragma type="pipeline" location="src/maxpool.h:272" status="valid" parentFunction="streamingmaxpool_precision_1d" variable="" isDirective="0" options="style=flp II=1"/>
+        <Pragma type="unroll" location="src/maxpool.h:275" status="valid" parentFunction="streamingmaxpool_precision_1d" variable="" isDirective="0" options=""/>
+        <Pragma type="pipeline" location="src/maxpool.h:288" status="valid" parentFunction="streamingmaxpool_precision_1d" variable="" isDirective="0" options="style=flp II=1"/>
+        <Pragma type="unroll" location="src/maxpool.h:290" status="valid" parentFunction="streamingmaxpool_precision_1d" variable="" isDirective="0" options=""/>
+        <Pragma type="pipeline" location="src/maxpool.h:302" status="valid" parentFunction="streamingmaxpool_precision_1d" variable="" isDirective="0" options="style=flp II=1"/>
+        <Pragma type="inline" location="src/maxpool.h:331" status="valid" parentFunction="streamingmaxpool_precision_batch_1d" variable="" isDirective="0" options=""/>
+        <Pragma type="pipeline" location="src/maxpool.h:370" status="valid" parentFunction="relu_batch" variable="" isDirective="0" options="style=flp II=1"/>
+        <Pragma type="unroll" location="src/maxpool.h:373" status="valid" parentFunction="relu_batch" variable="" isDirective="0" options=""/>
+        <Pragma type="bind_storage" location="src/maxpool.h:415" status="valid" parentFunction="accpool_batch" variable="accumulators" isDirective="0" options="variable=accumulators type=RAM_2P impl=LUTRAM"/>
+        <Pragma type="pipeline" location="src/maxpool.h:421" status="valid" parentFunction="accpool_batch" variable="" isDirective="0" options="style=flp II=1"/>
+        <Pragma type="unroll" location="src/maxpool.h:425" status="valid" parentFunction="accpool_batch" variable="" isDirective="0" options=""/>
+        <Pragma type="array_partition" location="src/maxpool.h:477" status="valid" parentFunction="labelselect_batch" variable="topval" isDirective="0" options="variable=topval complete dim=1"/>
+        <Pragma type="array_partition" location="src/maxpool.h:479" status="valid" parentFunction="labelselect_batch" variable="toplabels" isDirective="0" options="variable=toplabels complete dim=1"/>
+        <Pragma type="unroll" location="src/maxpool.h:484" status="valid" parentFunction="labelselect_batch" variable="" isDirective="0" options=""/>
+        <Pragma type="pipeline" location="src/maxpool.h:489" status="valid" parentFunction="labelselect_batch" variable="" isDirective="0" options="style=flp II=1"/>
+        <Pragma type="unroll" location="src/maxpool.h:492" status="valid" parentFunction="labelselect_batch" variable="" isDirective="0" options=""/>
+        <Pragma type="unroll" location="src/maxpool.h:501" status="valid" parentFunction="labelselect_batch" variable="" isDirective="0" options=""/>
+        <Pragma type="unroll" location="src/maxpool.h:508" status="valid" parentFunction="labelselect_batch" variable="" isDirective="0" options=""/>
+        <Pragma type="array_partition" location="src/maxpool.h:570" status="valid" parentFunction="pool_batch" variable="accu" isDirective="0" options="variable=accu complete dim=0"/>
+        <Pragma type="pipeline" location="src/maxpool.h:576" status="valid" parentFunction="pool_batch" variable="" isDirective="0" options="style=flp II=1"/>
+        <Pragma type="unroll" location="src/maxpool.h:583" status="valid" parentFunction="pool_batch" variable="" isDirective="0" options=""/>
+        <Pragma type="unroll" location="src/maxpool.h:590" status="valid" parentFunction="pool_batch" variable="" isDirective="0" options=""/>
+        <Pragma type="unroll" location="src/maxpool.h:599" status="valid" parentFunction="pool_batch" variable="" isDirective="0" options=""/>
         <Pragma type="inline" location="src/mmv.hpp:53" status="valid" parentFunction="operator[]" variable="" isDirective="0" options=""/>
         <Pragma type="array_partition" location="src/mvau.hpp:111" status="valid" parentFunction="matrix_vector_activate_batch" variable="inputBuf" isDirective="0" options="variable=inputBuf complete dim=0"/>
         <Pragma type="array_partition" location="src/mvau.hpp:115" status="valid" parentFunction="matrix_vector_activate_batch" variable="accu" isDirective="0" options="variable=accu complete dim=0"/>

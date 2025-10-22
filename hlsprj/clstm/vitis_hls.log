@@ -1,14 +1,16 @@
 INFO: [HLS 200-10] Running '/tools/Xilinx/Vitis_HLS/2022.2/bin/unwrapped/lnx64.o/vitis_hls'
-INFO: [HLS 200-10] For user 'changhong' on host 'changhong-Alienware-m16-R2' (Linux_x86_64 version 6.8.0-85-generic) on Mon Oct 13 21:50:31 IST 2025
+INFO: [HLS 200-10] For user 'changhong' on host 'changhong-Alienware-m16-R2' (Linux_x86_64 version 6.8.0-85-generic) on Tue Oct 21 22:47:33 IST 2025
 INFO: [HLS 200-10] On os Ubuntu 22.04.5 LTS
-INFO: [HLS 200-10] In directory '/home/changhong/prj/finn_dev/finn/LSTM_HLS/hlsprj/clstm'
-Sourcing Tcl script '/home/changhong/prj/finn_dev/finn/LSTM_HLS/hlsprj/clstm/clstm/clstm/csim.tcl'
-INFO: [HLS 200-1510] Running: source /home/changhong/prj/finn_dev/finn/LSTM_HLS/hlsprj/clstm/clstm/clstm/csim.tcl
+INFO: [HLS 200-10] In directory '/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/clstm'
+Sourcing Tcl script '/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/clstm/clstm/clstm/csim.tcl'
+INFO: [HLS 200-1510] Running: source /home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/clstm/clstm/clstm/csim.tcl
 INFO: [HLS 200-1510] Running: open_project clstm 
-INFO: [HLS 200-10] Opening project '/home/changhong/prj/finn_dev/finn/LSTM_HLS/hlsprj/clstm/clstm'.
+INFO: [HLS 200-10] Opening project '/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/clstm/clstm'.
 INFO: [HLS 200-1510] Running: set_top top 
 INFO: [HLS 200-1510] Running: add_files src/activations.hpp 
 INFO: [HLS 200-10] Adding design file 'src/activations.hpp' to the project
+INFO: [HLS 200-1510] Running: add_files src/bnn-library.h 
+INFO: [HLS 200-10] Adding design file 'src/bnn-library.h' to the project
 INFO: [HLS 200-1510] Running: add_files src/cnn_lstm_mlp.h 
 INFO: [HLS 200-10] Adding design file 'src/cnn_lstm_mlp.h' to the project
 INFO: [HLS 200-1510] Running: add_files src/cnn_lstm_mlp.hpp 
@@ -23,6 +25,12 @@ INFO: [HLS 200-1510] Running: add_files src/eltwise.hpp
 INFO: [HLS 200-10] Adding design file 'src/eltwise.hpp' to the project
 INFO: [HLS 200-1510] Running: add_files src/interpret.hpp 
 INFO: [HLS 200-10] Adding design file 'src/interpret.hpp' to the project
+INFO: [HLS 200-1510] Running: add_files src/layer0_mt0.cpp 
+INFO: [HLS 200-10] Adding design file 'src/layer0_mt0.cpp' to the project
+INFO: [HLS 200-1510] Running: add_files src/layer1_Im2Col0.cpp 
+INFO: [HLS 200-10] Adding design file 'src/layer1_Im2Col0.cpp' to the project
+INFO: [HLS 200-1510] Running: add_files src/layer2_MVAU0.cpp 
+INFO: [HLS 200-10] Adding design file 'src/layer2_MVAU0.cpp' to the project
 INFO: [HLS 200-1510] Running: add_files src/mac.hpp 
 INFO: [HLS 200-10] Adding design file 'src/mac.hpp' to the project
 INFO: [HLS 200-1510] Running: add_files src/maxpool.h 
@@ -31,6 +39,8 @@ INFO: [HLS 200-1510] Running: add_files src/mmv.hpp
 INFO: [HLS 200-10] Adding design file 'src/mmv.hpp' to the project
 INFO: [HLS 200-1510] Running: add_files src/mvau.hpp 
 INFO: [HLS 200-10] Adding design file 'src/mvau.hpp' to the project
+INFO: [HLS 200-1510] Running: add_files src/mvau_weights_include.h 
+INFO: [HLS 200-10] Adding design file 'src/mvau_weights_include.h' to the project
 INFO: [HLS 200-1510] Running: add_files src/slidingwindow.h 
 INFO: [HLS 200-10] Adding design file 'src/slidingwindow.h' to the project
 INFO: [HLS 200-1510] Running: add_files src/streamtools.h 
@@ -43,10 +53,10 @@ INFO: [HLS 200-1510] Running: add_files src/utils.hpp
 INFO: [HLS 200-10] Adding design file 'src/utils.hpp' to the project
 INFO: [HLS 200-1510] Running: add_files src/weights.hpp 
 INFO: [HLS 200-10] Adding design file 'src/weights.hpp' to the project
-INFO: [HLS 200-1510] Running: add_files -tb src/top_tb.cpp -cflags -Wno-unknown-pragmas -Wno-unknown-pragmas -Wno-unknown-pragmas -Wno-unknown-pragmas -Wno-unknown-pragmas -Wno-unknown-pragmas -csimflags -Wno-unknown-pragmas 
+INFO: [HLS 200-1510] Running: add_files -tb src/top_tb.cpp -cflags -Wno-unknown-pragmas -Wno-unknown-pragmas -Wno-unknown-pragmas -Wno-unknown-pragmas -Wno-unknown-pragmas -Wno-unknown-pragmas -Wno-unknown-pragmas -csimflags -Wno-unknown-pragmas 
 INFO: [HLS 200-10] Adding test bench file 'src/top_tb.cpp' to the project
 INFO: [HLS 200-1510] Running: open_solution clstm -flow_target vivado 
-INFO: [HLS 200-10] Opening solution '/home/changhong/prj/finn_dev/finn/LSTM_HLS/hlsprj/clstm/clstm/clstm'.
+INFO: [HLS 200-10] Opening solution '/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/clstm/clstm/clstm'.
 INFO: [SYN 201-201] Setting up clock 'default' with a period of 10ns.
 INFO: [HLS 200-1611] Setting target device to 'xczu7ev-ffvc1156-2-e'
 INFO: [HLS 200-1505] Using flow_target 'vivado'
@@ -56,102 +66,35 @@ INFO: [HLS 200-1510] Running: create_clock -period 10 -name default
 INFO: [HLS 200-1510] Running: source ./clstm/clstm/directives.tcl
 INFO: [HLS 200-1510] Running: set_directive_top -name top top 
 INFO: [HLS 200-1510] Running: csim_design -quiet 
-Running Dispatch Server on port: 33407
+Running Dispatch Server on port: 40595
 INFO: [SIM 211-2] *************** CSIM start ***************
 INFO: [SIM 211-4] CSIM will launch GCC as the compiler.
    Compiling ../../../../src/top_tb.cpp in debug mode
-In file included from ../../../../src/convlayer.h:57,
-                 from ../../../../src/cnn_lstm_mlp.hpp:14,
-                 from ../../../../src/top_tb.cpp:2:
-../../../../src/mvau.hpp: In instantiation of ‘void Matrix_Vector_Activate_Batch(hls::stream<TI>&, hls::stream<TO>&, const TW&, const TA&, int, const R&) [with unsigned int MatrixW = 9; unsigned int MatrixH = 32; unsigned int SIMD = 1; unsigned int PE = 1; unsigned int MMV = 1; TSrcI = Identity; TDstI = Identity; TWeightI = Identity; TI = ap_uint<1>; TO = ap_uint<1>; TW = ap_int<4> [32][9]; TA = ThresholdsActivation<1, 1, 15, float, ap_uint<4>, 0>; R = ap_resource_dflt]’:
-../../../../src/convlayer.h:189:13:   required from ‘void ConvLayer_Batch<ConvKernelDim, IFMChannels, IFMDim, OFMChannels, OFMDim, SIMD, PE, TSrcI, TDstI, TWeightI, InStreamW, OutStreamW, TW, TA, R>::execute(hls::stream<ap_uint<InStreamW> >&, hls::stream<ap_uint<OutStreamW> >&, unsigned int, const R&, const TA&) [with unsigned int ConvKernelDim = 3; unsigned int IFMChannels = 1; unsigned int IFMDim = 32; unsigned int OFMChannels = 32; unsigned int OFMDim = 30; unsigned int SIMD = 1; unsigned int PE = 1; TSrcI = Identity; TDstI = Identity; TWeightI = Identity; int InStreamW = 8; int OutStreamW = 32; TW = ap_int<4>; TA = ThresholdsActivation<1, 1, 15, float, ap_uint<4>, 0>; R = ap_resource_dsp]’
-../../../../src/cnn_lstm_mlp.hpp:69:81:   required from here
-../../../../src/mvau.hpp:150:29: error: request for member ‘weights’ in ‘weights’, which is of non-class type ‘const ap_int<4> [32][9]’
-     auto const &w = weights.weights(tile);
-                     ~~~~~~~~^~~~~~~
-../../../../src/mvau.hpp:155:34: error: no match for call to ‘(Identity) (ap_uint<1>&, unsigned int&)’
-         auto const  act = TSrcI()(inElem, mmv);
-                           ~~~~~~~^~~~~~~~~~~~~
-In file included from ../../../../src/activations.hpp:55,
-                 from ../../../../src/cnn_lstm_mlp.hpp:4,
-                 from ../../../../src/top_tb.cpp:2:
-../../../../src/interpret.hpp:115:12: note: candidate: ‘template<class T> const T& Identity::operator()(const T&) const’
-   T const &operator()(T const &v) const {
-            ^~~~~~~~
-../../../../src/interpret.hpp:115:12: note:   template argument deduction/substitution failed:
-In file included from ../../../../src/convlayer.h:57,
-                 from ../../../../src/cnn_lstm_mlp.hpp:14,
-                 from ../../../../src/top_tb.cpp:2:
-../../../../src/mvau.hpp:155:34: note:   candidate expects 1 argument, 2 provided
-         auto const  act = TSrcI()(inElem, mmv);
-                           ~~~~~~~^~~~~~~~~~~~~
-In file included from ../../../../src/activations.hpp:55,
-                 from ../../../../src/cnn_lstm_mlp.hpp:4,
-                 from ../../../../src/top_tb.cpp:2:
-../../../../src/interpret.hpp:121:5: note: candidate: ‘template<class T> T Identity::operator()() const’
-   T operator()() const {
-     ^~~~~~~~
-../../../../src/interpret.hpp:121:5: note:   template argument deduction/substitution failed:
-In file included from ../../../../src/convlayer.h:57,
-                 from ../../../../src/cnn_lstm_mlp.hpp:14,
-                 from ../../../../src/top_tb.cpp:2:
-../../../../src/mvau.hpp:155:34: note:   candidate expects 0 arguments, 2 provided
-         auto const  act = TSrcI()(inElem, mmv);
-                           ~~~~~~~^~~~~~~~~~~~~
-../../../../src/mvau.hpp:169:18: error: no match for call to ‘(ap_uint<1>) (unsigned int&, unsigned int&, int)’
-           outElem(pe,mmv,1) = activation.activate(nf, pe, accu[mmv][pe]);
-           ~~~~~~~^~~~~~~~~~
-In file included from /tools/Xilinx/Vitis_HLS/2022.2/include/ap_int.h:11,
-                 from ../../../../src/interpret.hpp:51,
-                 from ../../../../src/activations.hpp:55,
-                 from ../../../../src/cnn_lstm_mlp.hpp:4,
-                 from ../../../../src/top_tb.cpp:2:
-/tools/Xilinx/Vitis_HLS/2022.2/include/ap_int_base.h:1084:37: note: candidate: ‘ap_range_ref<_AP_W, _AP_S> ap_int_base<_AP_W, _AP_S>::operator()(int, int) [with int _AP_W = 1; bool _AP_S = false]’
-   INLINE ap_range_ref<_AP_W, _AP_S> operator()(int Hi, int Lo) {
-                                     ^~~~~~~~
-/tools/Xilinx/Vitis_HLS/2022.2/include/ap_int_base.h:1084:37: note:   candidate expects 2 arguments, 3 provided
-/tools/Xilinx/Vitis_HLS/2022.2/include/ap_int_base.h:1088:37: note: candidate: ‘ap_range_ref<_AP_W, _AP_S> ap_int_base<_AP_W, _AP_S>::operator()(int, int) const [with int _AP_W = 1; bool _AP_S = false]’
-   INLINE ap_range_ref<_AP_W, _AP_S> operator()(int Hi, int Lo) const {
-                                     ^~~~~~~~
-/tools/Xilinx/Vitis_HLS/2022.2/include/ap_int_base.h:1088:37: note:   candidate expects 2 arguments, 3 provided
-/tools/Xilinx/Vitis_HLS/2022.2/include/ap_int_base.h:1093:37: note: candidate: ‘template<int _AP_W2, bool _AP_S2, int _AP_W3, bool _AP_S3> ap_range_ref<_AP_W, _AP_S> ap_int_base<_AP_W, _AP_S>::operator()(const ap_int_base<_AP_W2, _AP_S2>&, const ap_int_base<_AP_W3, _AP_S3>&) [with int _AP_W2 = _AP_W2; bool _AP_S2 = _AP_S2; int _AP_W3 = _AP_W3; bool _AP_S3 = _AP_S3; int _AP_W = 1; bool _AP_S = false]’
-   INLINE ap_range_ref<_AP_W, _AP_S> operator()(
-                                     ^~~~~~~~
-/tools/Xilinx/Vitis_HLS/2022.2/include/ap_int_base.h:1093:37: note:   template argument deduction/substitution failed:
-In file included from ../../../../src/convlayer.h:57,
-                 from ../../../../src/cnn_lstm_mlp.hpp:14,
-                 from ../../../../src/top_tb.cpp:2:
-../../../../src/mvau.hpp:169:18: note:   mismatched types ‘const ap_int_base<_AP_W, _AP_S>’ and ‘unsigned int’
-           outElem(pe,mmv,1) = activation.activate(nf, pe, accu[mmv][pe]);
-           ~~~~~~~^~~~~~~~~~
-In file included from /tools/Xilinx/Vitis_HLS/2022.2/include/ap_int.h:11,
-                 from ../../../../src/interpret.hpp:51,
-                 from ../../../../src/activations.hpp:55,
-                 from ../../../../src/cnn_lstm_mlp.hpp:4,
-                 from ../../../../src/top_tb.cpp:2:
-/tools/Xilinx/Vitis_HLS/2022.2/include/ap_int_base.h:1102:37: note: candidate: ‘template<int _AP_W2, bool _AP_S2, int _AP_W3, bool _AP_S3> ap_range_ref<_AP_W, _AP_S> ap_int_base<_AP_W, _AP_S>::operator()(const ap_int_base<_AP_W2, _AP_S2>&, const ap_int_base<_AP_W3, _AP_S3>&) const [with int _AP_W2 = _AP_W2; bool _AP_S2 = _AP_S2; int _AP_W3 = _AP_W3; bool _AP_S3 = _AP_S3; int _AP_W = 1; bool _AP_S = false]’
-   INLINE ap_range_ref<_AP_W, _AP_S> operator()(
-                                     ^~~~~~~~
-/tools/Xilinx/Vitis_HLS/2022.2/include/ap_int_base.h:1102:37: note:   template argument deduction/substitution failed:
-In file included from ../../../../src/convlayer.h:57,
-                 from ../../../../src/cnn_lstm_mlp.hpp:14,
-                 from ../../../../src/top_tb.cpp:2:
-../../../../src/mvau.hpp:169:18: note:   mismatched types ‘const ap_int_base<_AP_W, _AP_S>’ and ‘unsigned int’
-           outElem(pe,mmv,1) = activation.activate(nf, pe, accu[mmv][pe]);
-           ~~~~~~~^~~~~~~~~~
-make: *** [csim.mk:78: obj/top_tb.o] Error 1
-ERROR: [SIM 211-100] 'csim_design' failed: compilation error(s).
+   Generating csim.exe
+------ behavior test begin ------input size = 32------ forward  ------=== Original Weights [input_ch][output_ch] ===
+First 8 output channels:
+Output ch  0:  -7   5   2 
+Output ch  1:  -7   4   5 
+Output ch  2:   5   0  -5 
+Output ch  3:  -4  -3   7 
+Output ch  4:   4   0  -4 
+Output ch  5:   7   4  -7 
+Output ch  6:   5   2  -6 
+Output ch  7:  -7   5   4 
+
+=== First Weight Pack (96 bits) ===
+Hex: 0x000000007c047dcb05549259
+Unpacked weights [PE][SIMD]:
+  PE0 (out_ch= 0):  -7   5   2 
+  PE1 (out_ch= 1):  -7   4   5 
+  PE2 (out_ch= 2):   5   0  -5 
+  PE3 (out_ch= 3):  -4  -3   7 
+  PE4 (out_ch= 4):   4   0  -4 
+  PE5 (out_ch= 5):   7   4  -7 
+  PE6 (out_ch= 6):   5   2  -6 
+  PE7 (out_ch= 7):  -7   5   4 
+------ reading results  ------0 0 0 15 0 0 0 0 7 15 0 0 0 0 4 1 15 0 0 0 5 0 0 15 0 0 0 0 15 15 0 3 15 15 0 15 0 0 0 15 15 5 1 15 0 0 15 3 0 1 0 1 0 0 15 0 15 0 11 0 13 0 4 0 0 0 15 0 15 15 15 0 0 0 0 0 15 15 0 15 0 15 6 0 15 15 15 0 0 15 15 0 0 0 0 15 0 0 15 0 15 14 15 0 0 11 0 0 15 15 0 15 15 0 9 0 15 2 0 9 0 15 12 0 1 15 0 15 0 0 0 15 0 0 0 0 15 15 0 15 0 0 15 6 15 0 0 0 0 0 0 0 0 0 0 0 15 15 0 0 15 11 0 0 0 0 0 14 15 0 0 15 15 13 15 15 0 12 0 0 0 0 15 0 13 0 15 0 0 0 0 6 0 0 0 15 0 0 0 0 12 15 0 13 0 0 15 0 15 0 0 0 0 0 0 15 0 0 0 0 15 15 0 0 15 10 0 0 0 0 4 15 12 0 0 6 15 15 15 15 0 15 0 0 0 10 15 0 15 0 15 0 0 0 0 8 0 0 15 0 15 0 0 0 3 15 0 0 0 6 0 4 15 0 2 0 15 0 0 15 0 0 0 0 15 15 0 14 15 15 0 15 0 0 0 15 15 6 0 15 0 0 15 8 3 0 0 0 0 0 15 0 15 0 15 0 14 0 0 0 0 0 0 0 0 0 0 0 7 8 0 0 0 4 7 6 9 0 0 0 0 0 6 0 0 0 5 0 8 7 0 4 0 0 15 0 15 10 15 0 2 0 0 0 15 15 0 15 0 7 0 0 6 10 15 0 0 15 15 0 0 2 0 15 0 0 0 15 0 0 0 0 9 15 0 0 0 3 4 5 15 0 0 0 4 0 0 12 0 0 0 0 15 15 0 8 15 15 0 15 0 0 0 15 15 12 0 15 0 0 15 6 8 0 0 0 0 0 15 0 15 0 8 0 15 0 1 0 0 0 15 0 15 15 15 0 1 0 0 0 15 15 0 15 0 14 1 0 6 15 15 0 0 15 15 0 0 0 0 15 0 0 0 15 0 0 0 0 10 15 0 0 0 0 13 0 15 0 0 0 3 0 0 15 0 0 0 0 15 15 0 0 15 13 0 0 0 0 3 15 15 0 0 11 15 15 15 15 0 15 0 0 0 10 15 0 15 0 15 0 0 0 0 9 0 0 15 0 15 12 15 0 0 15 0 0 15 15 0 15 15 0 9 0 15 0 0 14 0 15 2 0 7 15 0 15 3 0 0 15 0 0 0 0 15 15 0 15 0 3 15 12 15 0 0 0 0 0 9 0 0 0 0 0 15 15 0 5 15 15 0 15 0 0 0 15 15 15 0 15 0 0 15 3 15 0 0 0 0 0 5 0 15 0 0 0 15 10 6 0 15 15 0 15 0 0 0 15 15 6 3 15 0 0 15 2 2 0 0 3 0 0 15 0 15 0 6 0 14 0 7 0 0 0 15 0 15 15 15 0 0 0 0 0 15 15 0 12 0 15 5 0 10 15 15 0 0 15 15 0 0 0 0 15 0 0 15 0 15 15 15 0 0 1 0 0 15 15 0 15 9 0 11 0 15 9 2 6 0 15 15 0 0 15 0 15 0 0 0 15 0 0 0 0 15 15 0 15 0 0 15 3 15 0 0 0 0 0 0 6 0 0 0 0 15 15 0 0 15 9 0 0 0 0 0 14 15 0 0 14 15 15 15 15 0 15 0 0 0 2 15 0 13 0 15 0 0 0 0 8 0 0 15 0 15 1 15 0 3 15 0 0 12 15 0 13 15 0 3 0 15 0 0 8 0 14 0 0 12 15 0 15 7 0 0 12 0 0 0 0 15 15 0 12 0 7 15 13 15 0 0 0 0 0 15 0 0 0 10 0 15 15 0 7 15 6 0 15 0 0 0 2 15 15 0 15 0 0 15 7 15 0 0 0 0 0 6 0 2 0 0 0 15 14 0 0 15 0 3 0 2 0 0 0 11 0 0 0 15 15 9 15 0 8 0 0 0 0 15 0 0 0 15 0 0 0 0 11 0 0 15 0 15 0 0 0 6 15 0 0 0 14 0 11 15 0 0 0 9 0 0 4 0 0 0 0 15 15 0 15  sum value:  5096 ------ behavior test ended ------INFO [HLS SIM]: The maximum depth reached by any hls::stream() instance in the design is 960
+INFO: [SIM 211-1] CSim done with 0 errors.
 INFO: [SIM 211-3] *************** CSIM finish ***************
-INFO: [HLS 200-111] Finished Command csim_design CPU user time: 1.01 seconds. CPU system time: 0.21 seconds. Elapsed time: 1.21 seconds; current allocated memory: 0.000 MB.
-4
-    while executing
-"source /home/changhong/prj/finn_dev/finn/LSTM_HLS/hlsprj/clstm/clstm/clstm/csim.tcl"
-    invoked from within
-"hls::main /home/changhong/prj/finn_dev/finn/LSTM_HLS/hlsprj/clstm/clstm/clstm/csim.tcl"
-    ("uplevel" body line 1)
-    invoked from within
-"uplevel 1 hls::main {*}$newargs"
-    (procedure "hls_proc" line 16)
-    invoked from within
-"hls_proc [info nameofexecutable] $argv"
-INFO: [HLS 200-112] Total CPU user time: 3.17 seconds. Total CPU system time: 0.72 seconds. Total elapsed time: 13.77 seconds; peak allocated memory: 1.072 GB.
+INFO: [HLS 200-111] Finished Command csim_design CPU user time: 1.96 seconds. CPU system time: 0.36 seconds. Elapsed time: 2.32 seconds; current allocated memory: 0.000 MB.
+INFO: [HLS 200-112] Total CPU user time: 4.1 seconds. Total CPU system time: 0.84 seconds. Total elapsed time: 14.8 seconds; peak allocated memory: 1.073 GB.

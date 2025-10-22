@@ -20,10 +20,11 @@ from finn.transformation.streamline.absorb import (
     Absorb1BitMulIntoConv,
     Absorb1BitMulIntoMatMul,
     AbsorbAddIntoMultiThreshold,
-    AbsorbMulIntoMultiThreshold_shashwat,
     AbsorbSignBiasIntoMultiThreshold,
     FactorOutMulSignMagnitude,
-    AbsorbTransposeIntoMultiThreshold
+    AbsorbMulIntoMultiThreshold,
+    AbsorbTransposeIntoMultiThreshold,
+    AbsorbConsecutiveTransposes,    
 )
 from finn.transformation.streamline.collapse_repeated import (
     CollapseRepeatedAdd,
@@ -63,6 +64,7 @@ from qonnx.transformation.general import (
     GiveReadableTensorNames,
     GiveUniqueNodeNames,
 )
+from qonnx.transformation.lower_convs_to_matmul import LowerConvsToMatMul
 from qonnx.transformation.infer_datatypes import InferDataTypes
 from qonnx.transformation.remove import RemoveIdentityOps
 from qonnx.core.modelwrapper import ModelWrapper
@@ -72,7 +74,8 @@ from qonnx.util.cleanup import cleanup as qonnx_cleanup
 from qonnx.transformation.change_3d_tensors_to_4d import Change3DTo4DTensors
 from qonnx.transformation.infer_data_layouts import InferDataLayouts
 from qonnx.transformation.general import RemoveUnusedTensors
-
+from finn.transformation.streamline.reorder import MakeMaxPoolNHWC
+from qonnx.transformation.change_3d_tensors_to_4d import Change3DTo4DTensors
 # --------------------------------------------------------
 combined_model_path = "models/cnn_lstm_mlp_merged.onnx"
 tidy_up_model_path = "models/combined_tidy.onnx"
@@ -111,15 +114,25 @@ def finn_streamlining(model_finn, model_finn_streamlined_path):
     qmodel_name= f"q{model_name}"
 
     streamline_transformations = [
+            #Streamline(),  # convert 1DCNN
+            # 1DCNN start
+            Change3DTo4DTensors(),
+            LowerConvsToMatMul(),
+            MakeMaxPoolNHWC(),
+            AbsorbTransposeIntoMultiThreshold(),
+            MakeMaxPoolNHWC(),
+            AbsorbConsecutiveTransposes(),
+            # 1DCNN end
 
             absorb.AbsorbSignBiasIntoMultiThreshold(),
             MoveMulPastMaxPool(),
             MoveScalarLinearPastInvariants(),
             MoveScalarMulPastGather_changhong(),
             MoveScalarLinearPastInvariants(),
-            AbsorbMulIntoMultiThreshold_shashwat(),
+            AbsorbMulIntoMultiThreshold(),
             MoveScalarMulPastMatMul(), # attention, fixed name here
-            AbsorbMulIntoMultiThreshold_shashwat(),
+            # AbsorbMulIntoMultiThreshold_shashwat(),
+            AbsorbMulIntoMultiThreshold(),
             MoveScalarMulPastMatMul(), # attention, fixed name here
             CollapseRepeatedMul(),
             MoveScalarMulPastMatMul(),

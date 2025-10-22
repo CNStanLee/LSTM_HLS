@@ -47508,9 +47508,9 @@ template<
   unsigned int SIMD,
   unsigned int PE,
 
-  typename TSrcI = Identity,
-  typename TDstI = Identity,
-  typename TWeightI = Identity,
+  typename TSrcI,
+  typename TDstI,
+  typename TWeightI,
 
   int InStreamW, int OutStreamW,
   typename TW, typename TA, typename R
@@ -47538,7 +47538,179 @@ void ConvLayer_Batch(hls::stream<ap_uint<InStreamW>> &in,
   StreamingDataWidthConverter_Batch<PE*TDstI::width, OutStreamW, OFMDim * OFMDim * (OFMChannels / PE)>(mvOut, out, reps);
 
 }
-# 168 "src/convlayer.h"
+template<
+    unsigned int ConvKernelDim,
+    unsigned int IFMChannels,
+    unsigned int IFMDim,
+    unsigned int OFMChannels,
+    unsigned int OFMDim,
+
+    unsigned int SIMD,
+    unsigned int PE,
+
+    typename TSrcI,
+    typename TDstI,
+    typename TWeightI,
+
+    int InStreamW, int OutStreamW,
+    typename TW, typename TA, typename R
+>
+class ConvLayer_Batch_new {
+private:
+
+    TW m_weights[OFMChannels][ConvKernelDim * ConvKernelDim * IFMChannels];
+    TA m_activation_params[OFMChannels];
+
+public:
+
+    void init(__attribute__((unused)) unsigned const ofm,
+              __attribute__((unused)) unsigned const pe) const {
+#pragma HLS inline
+
+ }
+
+public:
+
+    void execute(hls::stream<ap_uint<InStreamW>> &in,
+                 hls::stream<ap_uint<OutStreamW>> &out,
+                 unsigned const reps,
+                 R const &r,
+     TA const &activation) {
+#pragma HLS INLINE
+
+ unsigned const MatrixW = ConvKernelDim * ConvKernelDim * IFMChannels;
+        unsigned const MatrixH = OFMChannels;
+        unsigned const InpPerImage = IFMDim * IFMDim * IFMChannels * TSrcI::width / InStreamW;
+
+        hls::stream<ap_uint<SIMD*TSrcI::width>> wa_in("conv_layer_wa_in");
+        hls::stream<ap_uint<SIMD*TSrcI::width>> convInp("conv_layer_convInp");
+        hls::stream<ap_uint<PE*TDstI::width>> mvOut("conv_layer_mvOut");
+
+
+        StreamingDataWidthConverter_Batch<InStreamW, SIMD*TSrcI::width, InpPerImage>
+            (in, wa_in, reps);
+
+
+        ConvolutionInputGenerator<ConvKernelDim, IFMChannels, TSrcI::width, IFMDim,
+                                OFMDim, SIMD, 1>
+            (wa_in, convInp, reps, ap_resource_dflt());
+
+
+        Matrix_Vector_Activate_Batch<MatrixW, MatrixH, SIMD, PE, 1, TSrcI, TDstI, TWeightI>
+            (static_cast<hls::stream<ap_uint<SIMD*TSrcI::width>>&>(convInp),
+             static_cast<hls::stream<ap_uint<PE*TDstI::width>>&>(mvOut),
+             m_weights, activation, reps * OFMDim * OFMDim, ap_resource_dflt());
+
+
+        StreamingDataWidthConverter_Batch<PE*TDstI::width, OutStreamW,
+                                        OFMDim * OFMDim * (OFMChannels / PE)>
+            (mvOut, out, reps);
+    }
+
+public:
+
+    void load_weights_from_array(const TW weights[OFMChannels * ConvKernelDim * ConvKernelDim * IFMChannels]) {
+#pragma HLS inline
+ VITIS_LOOP_203_1: for (unsigned ofm = 0; ofm < OFMChannels; ofm++) {
+            VITIS_LOOP_204_2: for (unsigned idx = 0; idx < ConvKernelDim * ConvKernelDim * IFMChannels; idx++) {
+#pragma HLS unroll
+ unsigned global_idx = ofm * ConvKernelDim * ConvKernelDim * IFMChannels + idx;
+                m_weights[ofm][idx] = weights[global_idx];
+            }
+        }
+    }
+
+
+    void load_weights_from_2darray(const TW weights[OFMChannels][ConvKernelDim * ConvKernelDim * IFMChannels]) {
+#pragma HLS inline
+ VITIS_LOOP_215_1: for (unsigned ofm = 0; ofm < OFMChannels; ofm++) {
+            VITIS_LOOP_216_2: for (unsigned idx = 0; idx < ConvKernelDim * ConvKernelDim * IFMChannels; idx++) {
+#pragma HLS unroll
+ m_weights[ofm][idx] = weights[ofm][idx];
+            }
+        }
+    }
+
+
+    template<typename T>
+    void load_weights_from_stream(hls::stream<T>& weight_stream) {
+#pragma HLS inline
+ VITIS_LOOP_227_1: for (unsigned ofm = 0; ofm < OFMChannels; ofm++) {
+            VITIS_LOOP_228_2: for (unsigned idx = 0; idx < ConvKernelDim * ConvKernelDim * IFMChannels; idx++) {
+#pragma HLS pipeline
+ T data = weight_stream.read();
+                m_weights[ofm][idx] = static_cast<TW>(data);
+            }
+        }
+    }
+
+
+    void set_weight(unsigned ofm, unsigned kernel_row, unsigned kernel_col, unsigned ifm, TW value) {
+#pragma HLS inline
+ if (ofm < OFMChannels && kernel_row < ConvKernelDim &&
+            kernel_col < ConvKernelDim && ifm < IFMChannels) {
+            unsigned idx = (kernel_row * ConvKernelDim * IFMChannels) +
+                          (kernel_col * IFMChannels) + ifm;
+            m_weights[ofm][idx] = value;
+        }
+    }
+
+
+    void init_weights_constant(TW value) {
+#pragma HLS inline
+ VITIS_LOOP_250_1: for (unsigned ofm = 0; ofm < OFMChannels; ofm++) {
+            VITIS_LOOP_251_2: for (unsigned idx = 0; idx < ConvKernelDim * ConvKernelDim * IFMChannels; idx++) {
+#pragma HLS unroll
+ m_weights[ofm][idx] = value;
+            }
+        }
+    }
+
+    template<unsigned int IFM, unsigned int KW>
+    void load_weights_from_4darray_generic(const TW weights[OFMChannels][IFM][ConvKernelDim][KW]) {
+#pragma HLS inline
+ static_assert(IFM == IFMChannels, "IFM dimension must match IFMChannels");
+
+        VITIS_LOOP_263_1: for (unsigned ofm = 0; ofm < OFMChannels; ofm++) {
+            VITIS_LOOP_264_2: for (unsigned ifm = 0; ifm < IFMChannels; ifm++) {
+                VITIS_LOOP_265_3: for (unsigned kh = 0; kh < ConvKernelDim; kh++) {
+                    VITIS_LOOP_266_4: for (unsigned kw = 0; kw < KW; kw++) {
+#pragma HLS unroll
+ unsigned internal_idx = kh * (ConvKernelDim * IFMChannels) +
+                                               kw * IFMChannels + ifm;
+                        m_weights[ofm][internal_idx] = weights[ofm][ifm][kh][kw];
+                    }
+
+                    VITIS_LOOP_273_5: for (unsigned kw = KW; kw < ConvKernelDim; kw++) {
+#pragma HLS unroll
+ unsigned internal_idx = kh * (ConvKernelDim * IFMChannels) +
+                                               kw * IFMChannels + ifm;
+                        m_weights[ofm][internal_idx] = TW(0);
+                    }
+                }
+            }
+        }
+    }
+
+
+
+    void set_activation_param(unsigned ofm, TA value) {
+#pragma HLS inline
+ if (ofm < OFMChannels) {
+            m_activation_params[ofm] = value;
+        }
+    }
+
+
+    void load_activation_params(const TA params[OFMChannels]) {
+#pragma HLS inline
+ VITIS_LOOP_296_1: for (unsigned ofm = 0; ofm < OFMChannels; ofm++) {
+#pragma HLS unroll
+ m_activation_params[ofm] = params[ofm];
+        }
+    }
+};
+# 374 "src/convlayer.h"
 template<
         unsigned int ConvKernelDim,
         unsigned int IFMChannels,
@@ -47596,7 +47768,7 @@ void ConvLayer_Batch_TMR(hls::stream<ap_uint<InStreamW>> &in,
 
   TMRCheck_Batch<TDstI::width, OFMChannels, NUM_RED, REDF, OFMDim, MAX_CH_WIDTH>(tmr_in, out, errortype, channel_mask, red_cha_index, reps);
 }
-# 259 "src/convlayer.h"
+# 465 "src/convlayer.h"
 template<
   unsigned int ConvKernelDim,
   unsigned int IFMChannels,
@@ -47637,7 +47809,7 @@ void ConvLayer_Batch_MMV(hls::stream<ap_uint<InStreamW>> &in,
   StreamingDataWidthConverter_Batch<InStreamW, SIMD * TSrcI::width, InpPerImage>(in, wa_in, reps);
 
   ConvolutionInputGenerator_MMV<ConvKernelDim, IFMChannels, TSrcI::width, IFMDim,
-   OFMDim, SIMD, STRIDE, MMV>(wa_in, convInp, reps, ap_resource_dflt());
+   OFMDim, SIMD, STRIDE, MMV>(wa_in, convInp, reps, ap_resource_lutram());
   Matrix_Vector_Activate_Batch<MatrixW, MatrixH, SIMD, PE, MMV, TSrcI, TDstI, TWeightI>
     (static_cast<hls::stream<MultiChanData<MMV,SIMD*TSrcI::width>>&>(convInp),
      static_cast<hls::stream<MultiChanData<MMV,PE*TDstI::width>>&>(mmv2dwc),
@@ -47651,11 +47823,11 @@ void ConvLayer_Batch_MMV(hls::stream<ap_uint<InStreamW>> &in,
 # 3 "src/top.cpp" 2
 
 __attribute__((sdx_kernel("top", 0))) int top(void){
-#line 31 "/home/changhong/prj/finn/script/LSTM_HLS/hlsprj/clstm/clstm/clstm/csynth.tcl"
+#line 36 "/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/clstm/clstm/clstm/csynth.tcl"
 #pragma HLSDIRECTIVE TOP name=top
 # 4 "src/top.cpp"
 
-#line 6 "/home/changhong/prj/finn/script/LSTM_HLS/hlsprj/clstm/clstm/clstm/directives.tcl"
+#line 6 "/home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/clstm/clstm/clstm/directives.tcl"
 #pragma HLSDIRECTIVE TOP name=top
 # 4 "src/top.cpp"
 
