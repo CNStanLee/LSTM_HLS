@@ -1,1 +1,0 @@
-set ::AESL_AUTOSIM::gTopFileName /home/changhong/prj/finn_dev/finn/script/LSTM_HLS/hlsprj/clstm/clstm/clstm/./sim/autowrap/testbench/top.cpp_pre.cpp.tb.cpp
