@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<vivadoHLSLog:LogRoot xmlns:vivadoHLSLog="www.xilinx.com/vivadoHLSLog">
+  <errorLogs>
+    <logs>
+      <csimLog>
+        <logs message="ERROR: [SIM 211-100] 'csim_design' failed: compilation error(s)." projectName="clstm2_prj" solutionName="solution1" date="2025-10-22T15:09:06.132+0100"/>
+        <logs message="ERROR: [SIM 211-100] 'csim_design' failed: compilation error(s)." projectName="clstm2_prj" solutionName="solution1" date="2025-10-22T15:08:46.035+0100"/>
+        <logs message="ERROR: [SIM 211-100] 'csim_design' failed: compilation error(s)." projectName="clstm2_prj" solutionName="solution1" date="2025-10-22T14:45:58.824+0100"/>
+        <logs message="ERROR: [SIM 211-100] 'csim_design' failed: compilation error(s)." projectName="clstm2_prj" solutionName="solution1" date="2025-10-22T14:39:08.534+0100"/>
+        <logs message="ERROR: [SIM 211-100] 'csim_design' failed: compilation error(s)." projectName="clstm2_prj" solutionName="solution1" date="2025-10-22T14:26:58.188+0100"/>
+        <logs message="ERROR: [SIM 211-100] CSim failed with errors." projectName="clstm2_prj" solutionName="solution1" date="2025-10-22T14:20:57.450+0100"/>
+        <logs message="ERROR: [SIM 211-100] CSim failed with errors." projectName="clstm2_prj" solutionName="solution1" date="2025-10-22T14:16:54.995+0100"/>
+        <logs message="ERROR: [SIM 211-100] 'csim_design' failed: compilation error(s)." projectName="clstm2_prj" solutionName="solution1" date="2025-10-22T12:12:10.989+0100"/>
+        <logs message="ERROR: [SIM 211-100] 'csim_design' failed: compilation error(s)." projectName="clstm2_prj" solutionName="solution1" date="2025-10-22T10:39:02.651+0100"/>
+        <logs message="ERROR: [SIM 211-100] 'csim_design' failed: compilation error(s)." projectName="clstm2_prj" solutionName="solution1" date="2025-10-22T10:38:15.980+0100"/>
+        <logs message="ERROR: [SIM 211-100] 'csim_design' failed: compilation error(s)." projectName="clstm2_prj" solutionName="solution1" date="2025-10-22T10:36:27.970+0100"/>
+      </csimLog>
+    </logs>
+  </errorLogs>
+  <warningLogs>
+    <logs>
+      <csimLog>
+        <logs message="WARNING [HLS SIM]: hls::stream 'stream_05' contains leftover data, which may result in RTL simulation hanging.&#xA;------ reading results  ------&#xD;&#xD; sum value: &#xD; 0 &#xD;------ behavior test ended ------&#xD;INFO [HLS SIM]: The maximum depth reached by any hls::stream() instance in the design is 120" projectName="clstm2_prj" solutionName="solution1" date="2025-10-22T15:12:29.379+0100" type="Warning"/>
+        <logs message="WARNING [HLS SIM]: hls::stream 'stream_05' contains leftover data, which may result in RTL simulation hanging.&#xA;------ reading results  ------&#xD;&#xD; sum value: &#xD; 0 &#xD;------ behavior test ended ------&#xD;INFO [HLS SIM]: The maximum depth reached by any hls::stream() instance in the design is 120" projectName="clstm2_prj" solutionName="solution1" date="2025-10-22T15:10:02.039+0100" type="Warning"/>
+        <logs message="WARNING [HLS SIM]: hls::stream 'stream_05' contains leftover data, which may result in RTL simulation hanging.&#xA;------ reading results  ------&#xD;&#xD; sum value: &#xD; 0 &#xD;------ behavior test ended ------&#xD;INFO [HLS SIM]: The maximum depth reached by any hls::stream() instance in the design is 120" projectName="clstm2_prj" solutionName="solution1" date="2025-10-22T15:06:10.099+0100" type="Warning"/>
+        <logs message="WARNING [HLS SIM]: hls::stream 'stream_05' contains leftover data, which may result in RTL simulation hanging.&#xA;------ reading results  ------&#xD;&#xD; sum value: &#xD; 0 &#xD;------ behavior test ended ------&#xD;INFO [HLS SIM]: The maximum depth reached by any hls::stream() instance in the design is 90" projectName="clstm2_prj" solutionName="solution1" date="2025-10-22T14:47:41.394+0100" type="Warning"/>
+        <logs message="WARNING [HLS SIM]: hls::stream 'stream_05' contains leftover data, which may result in RTL simulation hanging.&#xA;------ reading results  ------&#xD;&#xD; sum value: &#xD; 0 &#xD;------ behavior test ended ------&#xD;INFO [HLS SIM]: The maximum depth reached by any hls::stream() instance in the design is 120" projectName="clstm2_prj" solutionName="solution1" date="2025-10-22T14:42:40.853+0100" type="Warning"/>
+        <logs message="WARNING [HLS SIM]: hls::stream 'stream_05' contains leftover data, which may result in RTL simulation hanging.&#xA;------ reading results  ------&#xD;&#xD; sum value: &#xD; 0 &#xD;------ behavior test ended ------&#xD;INFO [HLS SIM]: The maximum depth reached by any hls::stream() instance in the design is 120" projectName="clstm2_prj" solutionName="solution1" date="2025-10-22T14:39:39.321+0100" type="Warning"/>
+        <logs message="WARNING [HLS SIM]: hls::stream 'stream_05' contains leftover data, which may result in RTL simulation hanging.&#xA;------ reading results  ------&#xD;&#xD; sum value: &#xD; 0 &#xD;------ behavior test ended ------&#xD;INFO [HLS SIM]: The maximum depth reached by any hls::stream() instance in the design is 120" projectName="clstm2_prj" solutionName="solution1" date="2025-10-22T14:36:52.604+0100" type="Warning"/>
+        <logs message="WARNING [HLS SIM]: hls::stream 'stream_05' contains leftover data, which may result in RTL simulation hanging.&#xA;------ reading results  ------&#xD;&#xD; sum value: &#xD; 0 &#xD;------ behavior test ended ------&#xD;INFO [HLS SIM]: The maximum depth reached by any hls::stream() instance in the design is 120" projectName="clstm2_prj" solutionName="solution1" date="2025-10-22T14:27:45.247+0100" type="Warning"/>
+      </csimLog>
+    </logs>
+  </warningLogs>
+</vivadoHLSLog:LogRoot>

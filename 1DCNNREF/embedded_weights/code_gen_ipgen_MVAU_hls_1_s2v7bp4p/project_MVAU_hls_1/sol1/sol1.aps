@@ -1,0 +1,24 @@
+<AutoPilot:solution xmlns:AutoPilot="com.autoesl.autopilot.solution">
+    <name>
+        <value string="sol1"/>
+    </name>
+    <project>
+        <value string="project_MVAU_hls_1"/>
+    </project>
+    <flowTarget value="vivado"/>
+    <config>
+        <config_interface m_axi_latency="0" m_axi_addr64="1"/>
+        <config_compile complex-mul-dsp="0" disable_unroll_code_size_check="1" pipeline_style="flp"/>
+        <config_rtl module_auto_prefix="1" deadlock_detection="none"/>
+    </config>
+    <targetInfo>
+        <TargetInfo value="xczu7ev:-ffvc1156:-2-e"/>
+    </targetInfo>
+    <libraryList>
+        <library value="xilinx/zynquplus/zynquplus" name="DefaultPlatform"/>
+    </libraryList>
+    <clockList>
+        <clock name="default" period="10.0" default="false"/>
+    </clockList>
+</AutoPilot:solution>
+

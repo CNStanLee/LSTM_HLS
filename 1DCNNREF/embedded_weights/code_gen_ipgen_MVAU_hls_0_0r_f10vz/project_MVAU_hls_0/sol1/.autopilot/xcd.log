@@ -1,0 +1,25 @@
+Wed Oct 22 12:30:03 2025: Running xcd server. This server was built by gradle.
+Wed Oct 22 12:30:03 2025: Server was asked to start on port: '33093'
+Wed Oct 22 12:30:03 2025: Server is using token UUID: '1f787828-0da1-4528-b064-6692df6bdcd3'
+Wed Oct 22 12:30:03 2025: SESSION_MGR: creating session with session uuid: '6d04a3e9-ade5-4ab9-8d63-1f78fcd2ec76' and name 'default'
+Wed Oct 22 12:30:03 2025: Attempting to start server on port '33093'
+Wed Oct 22 12:30:03 2025: XCD main fifo: created main fifo '/tmp/xcdmain1f787828-0da1-4528-b064-6692df6bdcd3', fd read = 12
+Wed Oct 22 12:30:03 2025: Running Dispatch Server
+Wed Oct 22 12:30:03 2025: Version 2.2.0
+Wed Oct 22 12:30:12 2025: Dispatch Server: Accepted socket connection from client
+Wed Oct 22 12:30:12 2025: Starting Socket connection
+Wed Oct 22 12:30:12 2025: EXCHANGE_TOKEN received, server token: 1f787828-0da1-4528-b064-6692df6bdcd3, passed token: 1f787828-0da1-4528-b064-6692df6bdcd3
+Wed Oct 22 12:30:12 2025: SESSION_MGR: creating session with session uuid: '023c73fa-63a2-472c-b3da-7f01cbc46e84' and name 'vitis_hls'
+Wed Oct 22 12:30:12 2025: KERNEL_SVC: creating session with uuid: '023c73fa-63a2-472c-b3da-7f01cbc46e84' and name 'vitis_hls'
+Wed Oct 22 12:30:12 2025: GUIDANCE_SMGR: creating guidance session with uuid: '023c73fa-63a2-472c-b3da-7f01cbc46e84' and name 'vitis_hls'
+Wed Oct 22 12:30:39 2025: STOP_SERVER received, server token: 1f787828-0da1-4528-b064-6692df6bdcd3, passed token: 1f787828-0da1-4528-b064-6692df6bdcd3
+Wed Oct 22 12:30:39 2025: Socket received request to stop server.
+Wed Oct 22 12:30:39 2025: Dispatch Server: do_await_stop
+Wed Oct 22 12:30:39 2025: Dispatch Server: stopping mainFifo_
+Wed Oct 22 12:30:39 2025: XCD main fifo: Stopping
+Wed Oct 22 12:30:39 2025: XCD main fifo: do_read error code: Operation canceled
+Wed Oct 22 12:30:39 2025: XCD main fifo: bytes_transferred: 0
+Wed Oct 22 12:30:39 2025: SERVER: destructor for server bound to port 33093
+Wed Oct 22 12:30:39 2025: XCD main fifo: Good unlink of /tmp/xcdmain1f787828-0da1-4528-b064-6692df6bdcd3
+Wed Oct 22 12:30:39 2025: Server exiting with status 0.
+Wed Oct 22 12:30:39 2025: Closing log file.

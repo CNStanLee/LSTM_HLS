@@ -107,6 +107,16 @@ def main():
     # create folder debug if not exist
     np.savetxt(f"debug/{debug_tensor_name}.txt", streamlined_output.flatten(), fmt="%f")
 
+    # MatMul_4_out0
+    debug_tensor_name = "MatMul_4_out0"
+    streamlined_output = np.array(output_dict_streamlined.get(debug_tensor_name))
+    print(streamlined_output)
+    print("streamlined output shape:", streamlined_output.shape)
+    print(f"sum values of {debug_tensor_name}: {np.sum(streamlined_output)}")
+    # save the input and output into a text file
+    # create folder debug if not exist
+    np.savetxt(f"debug/{debug_tensor_name}.txt", streamlined_output.flatten(), fmt="%f")
+
     # MVAU
     debug_tensor_name = "MultiThreshold_3_out0"
     streamlined_output = np.array(output_dict_streamlined.get(debug_tensor_name))

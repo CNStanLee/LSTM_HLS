@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<autopilotfilemapping:AutoPilotFileMapping xmlns:autopilotfilemapping="www.autoesl.com/autopilotfilemapping">
+  <source>
+    <originFiles name="top.cpp" path="/home/changhong/prj/finn/script/LSTM_HLS/hlsprj/clstm2/top.cpp"/>
+    <originFiles name="layer2_MVAU0.cpp" path="/home/changhong/prj/finn/script/LSTM_HLS/hlsprj/clstm2/layer2_MVAU0.cpp"/>
+    <originFiles name="layer1_Im2Col0.cpp" path="/home/changhong/prj/finn/script/LSTM_HLS/hlsprj/clstm2/layer1_Im2Col0.cpp"/>
+    <originFiles name="layer0_mt0.cpp" path="/home/changhong/prj/finn/script/LSTM_HLS/hlsprj/clstm2/layer0_mt0.cpp"/>
+    <originFiles name="cnn_lstm_mlp_weights.hpp" path="/home/changhong/prj/finn/script/LSTM_HLS/hlsprj/clstm2/cnn_lstm_mlp_weights.hpp"/>
+    <originFiles name="cnn_lstm_mlp.hpp" path="/home/changhong/prj/finn/script/LSTM_HLS/hlsprj/clstm2/cnn_lstm_mlp.hpp"/>
+    <originFiles name="layers.h" path="/home/changhong/prj/finn/script/LSTM_HLS/hlsprj/clstm2/layers.h"/>
+  </source>
+  <testbench>
+    <originFiles name="e2e.cpp" path="/home/changhong/prj/finn/script/LSTM_HLS/hlsprj/clstm2/e2e.cpp"/>
+  </testbench>
+</autopilotfilemapping:AutoPilotFileMapping>

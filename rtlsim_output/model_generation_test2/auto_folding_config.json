@@ -1,6 +1,6 @@
 {
   "Defaults": {},
-  "ConvolutionInputGenerator_rtl_0": {
+  "ConvolutionInputGenerator_hls_0": {
     "SIMD": 1,
     "parallel_window": 0,
     "ram_style": "distributed"
@@ -13,7 +13,7 @@
     "mem_mode": "internal_decoupled",
     "runtime_writeable_weights": 0
   },
-  "ConvolutionInputGenerator_rtl_1": {
+  "ConvolutionInputGenerator_hls_1": {
     "SIMD": 32,
     "parallel_window": 0,
     "ram_style": "distributed"
