@@ -1,0 +1,366 @@
+
+
+================================================================
+== Synthesis Summary Report of 'top'
+================================================================
++ General Information: 
+    * Date:           Tue Oct 21 16:03:36 2025
+    * Version:        2022.2 (Build 3670227 on Oct 13 2022)
+    * Project:        clstm
+    * Solution:       clstm (Vivado IP Flow Target)
+    * Product family: zynquplus
+    * Target device:  xczu7ev-ffvc1156-2-e
+    
+
++ Performance & Resource Estimates: 
+    
+    PS: '+' for module; 'o' for loop; '*' for dataflow
+    +--------+------+------+---------+--------+----------+---------+------+----------+------+----+---+----+-----+
+    | Modules| Issue|      | Latency | Latency| Iteration|         | Trip |          |      |    |   |    |     |
+    | & Loops| Type | Slack| (cycles)|  (ns)  |  Latency | Interval| Count| Pipelined| BRAM | DSP| FF| LUT| URAM|
+    +--------+------+------+---------+--------+----------+---------+------+----------+------+----+---+----+-----+
+    |+ top   |     -|  7.30|        0|   0.000|         -|        1|     -|        no|     -|   -|  -|   -|    -|
+    +--------+------+------+---------+--------+----------+---------+------+----------+------+----+---+----+-----+
+
+
+================================================================
+== HW Interfaces
+================================================================
+* Other Ports
++-----------+----------+
+| Interface | Bitwidth |
++-----------+----------+
+| ap_return | 32       |
++-----------+----------+
+
+* TOP LEVEL CONTROL
++-----------+------------+-----------------------------------+
+| Interface | Type       | Ports                             |
++-----------+------------+-----------------------------------+
+| ap_ctrl   | ap_ctrl_hs | ap_done ap_idle ap_ready ap_start |
++-----------+------------+-----------------------------------+
+
+
+================================================================
+== SW I/O Information
+================================================================
+* Top Function Arguments
++----------+-----------+----------+
+| Argument | Direction | Datatype |
++----------+-----------+----------+
+| return   | out       | int      |
++----------+-----------+----------+
+
+* SW-to-HW Mapping
++----------+--------------+---------+
+| Argument | HW Interface | HW Type |
++----------+--------------+---------+
+| return   | ap_return    | port    |
++----------+--------------+---------+
+
+
+================================================================
+== Bind Op Report
+================================================================
+  No bind op info in design
+
+================================================================
+== Bind Storage Report
+================================================================
+  No bind storage info in design
+
+================================================================
+== Pragma Report
+================================================================
+* Valid Pragma Syntax
++-----------------+---------------------------------------------------+----------------------------------------------------------------------------------------------+
+| Type            | Options                                           | Location                                                                                     |
++-----------------+---------------------------------------------------+----------------------------------------------------------------------------------------------+
+| inline          |                                                   | src/activations.hpp:145 in init                                                              |
+| inline          |                                                   | src/activations.hpp:163 in activate                                                          |
+| inline          |                                                   | src/activations.hpp:180 in thresholdactivation<ta, compare>                                  |
+| inline          |                                                   | src/activations.hpp:185 in activate                                                          |
+| inline          |                                                   | src/activations.hpp:232 in init                                                              |
+| inline          |                                                   | src/activations.hpp:238 in activate                                                          |
+| unroll          |                                                   | src/activations.hpp:241 in activate                                                          |
+| inline          |                                                   | src/activations.hpp:250 in load_weights_from_array                                           |
+| unroll          |                                                   | src/activations.hpp:254 in load_weights_from_array                                           |
+| inline          |                                                   | src/activations.hpp:264 in load_weights_from_3darray                                         |
+| unroll          |                                                   | src/activations.hpp:268 in load_weights_from_3darray                                         |
+| inline          |                                                   | src/activations.hpp:277 in load_weights_from_2darray                                         |
+| unroll          |                                                   | src/activations.hpp:281 in load_weights_from_2darray                                         |
+| inline          |                                                   | src/activations.hpp:290 in set_weight                                                        |
+| inline          |                                                   | src/activations.hpp:299 in load_weights_from_stream                                          |
+| pipeline        |                                                   | src/activations.hpp:303 in load_weights_from_stream                                          |
+| inline          |                                                   | src/activations.hpp:313 in init_constant                                                     |
+| unroll          |                                                   | src/activations.hpp:317 in init_constant                                                     |
+| inline          |                                                   | src/activations.hpp:347 in init                                                              |
+| inline          |                                                   | src/activations.hpp:352 in activate                                                          |
+| pipeline        | style=flp II=1                                    | src/activations.hpp:396 in thresholding_batch                                                |
+| unroll          |                                                   | src/activations.hpp:402 in thresholding_batch                                                |
+| array_partition | variable=internal_thr.m_thresholds complete dim=0 | src/activations.hpp:452 in thresholding_stream_batch, internal_thr.m_thresholds              |
+| pipeline        | style=flp II=1                                    | src/activations.hpp:458 in thresholding_stream_batch                                         |
+| unroll          |                                                   | src/activations.hpp:471 in thresholding_stream_batch                                         |
+| unroll          |                                                   | src/activations.hpp:476 in thresholding_stream_batch                                         |
+| inline          |                                                   | src/convlayer.h:113 in convlayer_batch                                                       |
+| inline          |                                                   | src/convlayer.h:157 in init                                                                  |
+| inline          |                                                   | src/convlayer.h:168 in execute                                                               |
+| inline          |                                                   | src/convlayer.h:202 in load_weights_from_array                                               |
+| unroll          |                                                   | src/convlayer.h:205 in load_weights_from_array                                               |
+| inline          |                                                   | src/convlayer.h:214 in load_weights_from_2darray                                             |
+| unroll          |                                                   | src/convlayer.h:217 in load_weights_from_2darray                                             |
+| inline          |                                                   | src/convlayer.h:226 in load_weights_from_stream                                              |
+| pipeline        |                                                   | src/convlayer.h:229 in load_weights_from_stream                                              |
+| inline          |                                                   | src/convlayer.h:238 in set_weight                                                            |
+| inline          |                                                   | src/convlayer.h:249 in init_weights_constant                                                 |
+| unroll          |                                                   | src/convlayer.h:252 in init_weights_constant                                                 |
+| inline          |                                                   | src/convlayer.h:260 in load_weights_from_4darray_generic                                     |
+| unroll          |                                                   | src/convlayer.h:267 in load_weights_from_4darray_generic                                     |
+| unroll          |                                                   | src/convlayer.h:274 in load_weights_from_4darray_generic                                     |
+| inline          |                                                   | src/convlayer.h:287 in set_activation_param                                                  |
+| inline          |                                                   | src/convlayer.h:295 in load_activation_params                                                |
+| unroll          |                                                   | src/convlayer.h:297 in load_activation_params                                                |
+| inline          |                                                   | src/convlayer.h:404 in convlayer_batch_tmr                                                   |
+| inline          |                                                   | src/convlayer.h:490 in convlayer_batch_mmv                                                   |
+| inline          |                                                   | src/interpret.hpp:62 in xnormul                                                              |
+| inline          |                                                   | src/interpret.hpp:67 in operator*                                                            |
+| inline          |                                                   | src/interpret.hpp:72 in operator*                                                            |
+| inline          |                                                   | src/interpret.hpp:80 in binary                                                               |
+| inline          |                                                   | src/interpret.hpp:89 in operator*                                                            |
+| inline          |                                                   | src/interpret.hpp:97 in operator*                                                            |
+| inline          |                                                   | src/interpret.hpp:102 in operator*                                                           |
+| inline          |                                                   | src/interpret.hpp:116 in operator()                                                          |
+| inline          |                                                   | src/interpret.hpp:122 in operator()                                                          |
+| inline          |                                                   | src/interpret.hpp:138 in container<tv>                                                       |
+| inline          |                                                   | src/interpret.hpp:143 in operator[]                                                          |
+| inline          |                                                   | src/interpret.hpp:147 in operator[]                                                          |
+| inline          |                                                   | src/interpret.hpp:151 in operator()                                                          |
+| inline          |                                                   | src/interpret.hpp:155 in operator const type-parameter-1-0 &                                 |
+| inline          |                                                   | src/interpret.hpp:163 in operator()                                                          |
+| inline          |                                                   | src/interpret.hpp:168 in operator()                                                          |
+| inline          |                                                   | src/interpret.hpp:173 in operator()                                                          |
+| inline          |                                                   | src/interpret.hpp:204 in container<tv>                                                       |
+| inline          |                                                   | src/interpret.hpp:207 in container<tv>                                                       |
+| inline          |                                                   | src/interpret.hpp:211 in operator()                                                          |
+| inline          |                                                   | src/interpret.hpp:215 in operator()                                                          |
+| inline          |                                                   | src/interpret.hpp:220 in operator[]                                                          |
+| inline          |                                                   | src/interpret.hpp:224 in operator const type-parameter-1-0 &                                 |
+| inline          |                                                   | src/interpret.hpp:232 in operator()                                                          |
+| inline          |                                                   | src/interpret.hpp:237 in operator()                                                          |
+| inline          |                                                   | src/interpret.hpp:242 in operator()                                                          |
+| inline          |                                                   | src/interpret.hpp:261 in container<tv>                                                       |
+| inline          |                                                   | src/interpret.hpp:264 in container<tv>                                                       |
+| inline          |                                                   | src/interpret.hpp:267 in container<tv>                                                       |
+| inline          |                                                   | src/interpret.hpp:271 in operator const type-parameter-1-0 &                                 |
+| inline          |                                                   | src/interpret.hpp:275 in operator()                                                          |
+| inline          |                                                   | src/interpret.hpp:279 in operator()                                                          |
+| inline          |                                                   | src/interpret.hpp:284 in operator[]                                                          |
+| inline          |                                                   | src/interpret.hpp:292 in operator()                                                          |
+| inline          |                                                   | src/interpret.hpp:297 in operator()                                                          |
+| inline          |                                                   | src/interpret.hpp:302 in operator()                                                          |
+| interface       | axis port=in0_V                                   | src/layer0_mt0.cpp:9 in multithreshold_0_block, in0_V                                        |
+| interface       | axis port=out_V                                   | src/layer0_mt0.cpp:10 in multithreshold_0_block, out_V                                       |
+| interface       | ap_ctrl_none port=return                          | src/layer0_mt0.cpp:11 in multithreshold_0_block, return                                      |
+| interface       | axis port=in0_V                                   | src/layer1_Im2Col0.cpp:31 in convolutioninputgenerator_hls_0, in0_V                          |
+| interface       | axis port=out_V                                   | src/layer1_Im2Col0.cpp:32 in convolutioninputgenerator_hls_0, out_V                          |
+| interface       | ap_ctrl_none port=return                          | src/layer1_Im2Col0.cpp:33 in convolutioninputgenerator_hls_0, return                         |
+| interface       | axis port=in0_V                                   | src/layer2_MVAU0.cpp:103 in mvau_hls_0, in0_V                                                |
+| interface       | axis port=out_V                                   | src/layer2_MVAU0.cpp:104 in mvau_hls_0, out_V                                                |
+| interface       | ap_ctrl_none port=return                          | src/layer2_MVAU0.cpp:105 in mvau_hls_0, return                                               |
+| interface       | axis port=weights_V                               | src/layer2_MVAU0.cpp:106 in mvau_hls_0, weights_V                                            |
+| array_partition | variable=threshs.m_thresholds complete dim=1      | src/layer2_MVAU0.cpp:107 in mvau_hls_0, threshs.m_thresholds                                 |
+| array_partition | variable=threshs.m_thresholds complete dim=3      | src/layer2_MVAU0.cpp:108 in mvau_hls_0, threshs.m_thresholds                                 |
+| inline          |                                                   | src/mac.hpp:89 in mul                                                                        |
+| inline          |                                                   | src/mac.hpp:114 in mul                                                                       |
+| bind_op         | variable=res op=mul impl=fabric                   | src/mac.hpp:116 in mul, res                                                                  |
+| inline          |                                                   | src/mac.hpp:140 in mul                                                                       |
+| bind_op         | variable=res op=mul impl=dsp                      | src/mac.hpp:142 in mul, res                                                                  |
+| inline          |                                                   | src/mac.hpp:171 in mac                                                                       |
+| unroll          |                                                   | src/mac.hpp:174 in mac                                                                       |
+| inline          |                                                   | src/mac.hpp:198 in mac                                                                       |
+| unroll          |                                                   | src/mac.hpp:201 in mac                                                                       |
+| inline          |                                                   | src/mac.hpp:208 in mac                                                                       |
+| unroll          |                                                   | src/maxpool.h:74 in streamingmaxpool                                                         |
+| pipeline        | style=flp II=1                                    | src/maxpool.h:83 in streamingmaxpool                                                         |
+| pipeline        | style=flp II=1                                    | src/maxpool.h:91 in streamingmaxpool                                                         |
+| array_partition | variable=buf complete dim=2                       | src/maxpool.h:146 in streamingmaxpool_precision, buf                                         |
+| unroll          |                                                   | src/maxpool.h:149 in streamingmaxpool_precision                                              |
+| pipeline        | style=flp II=1                                    | src/maxpool.h:159 in streamingmaxpool_precision                                              |
+| unroll          |                                                   | src/maxpool.h:162 in streamingmaxpool_precision                                              |
+| unroll          |                                                   | src/maxpool.h:176 in streamingmaxpool_precision                                              |
+| inline          |                                                   | src/maxpool.h:210 in streamingmaxpool_precision_batch                                        |
+| array_partition | variable=buf complete dim=2                       | src/maxpool.h:255 in streamingmaxpool_precision_1d, buf                                      |
+| pipeline        | style=flp II=1                                    | src/maxpool.h:258 in streamingmaxpool_precision_1d                                           |
+| unroll          |                                                   | src/maxpool.h:260 in streamingmaxpool_precision_1d                                           |
+| pipeline        | style=flp II=1                                    | src/maxpool.h:272 in streamingmaxpool_precision_1d                                           |
+| unroll          |                                                   | src/maxpool.h:275 in streamingmaxpool_precision_1d                                           |
+| pipeline        | style=flp II=1                                    | src/maxpool.h:288 in streamingmaxpool_precision_1d                                           |
+| unroll          |                                                   | src/maxpool.h:290 in streamingmaxpool_precision_1d                                           |
+| pipeline        | style=flp II=1                                    | src/maxpool.h:302 in streamingmaxpool_precision_1d                                           |
+| inline          |                                                   | src/maxpool.h:331 in streamingmaxpool_precision_batch_1d                                     |
+| pipeline        | style=flp II=1                                    | src/maxpool.h:370 in relu_batch                                                              |
+| unroll          |                                                   | src/maxpool.h:373 in relu_batch                                                              |
+| bind_storage    | variable=accumulators type=RAM_2P impl=LUTRAM     | src/maxpool.h:415 in accpool_batch, accumulators                                             |
+| pipeline        | style=flp II=1                                    | src/maxpool.h:421 in accpool_batch                                                           |
+| unroll          |                                                   | src/maxpool.h:425 in accpool_batch                                                           |
+| array_partition | variable=topval complete dim=1                    | src/maxpool.h:477 in labelselect_batch, topval                                               |
+| array_partition | variable=toplabels complete dim=1                 | src/maxpool.h:479 in labelselect_batch, toplabels                                            |
+| unroll          |                                                   | src/maxpool.h:484 in labelselect_batch                                                       |
+| pipeline        | style=flp II=1                                    | src/maxpool.h:489 in labelselect_batch                                                       |
+| unroll          |                                                   | src/maxpool.h:492 in labelselect_batch                                                       |
+| unroll          |                                                   | src/maxpool.h:501 in labelselect_batch                                                       |
+| unroll          |                                                   | src/maxpool.h:508 in labelselect_batch                                                       |
+| array_partition | variable=accu complete dim=0                      | src/maxpool.h:570 in pool_batch, accu                                                        |
+| pipeline        | style=flp II=1                                    | src/maxpool.h:576 in pool_batch                                                              |
+| unroll          |                                                   | src/maxpool.h:583 in pool_batch                                                              |
+| unroll          |                                                   | src/maxpool.h:590 in pool_batch                                                              |
+| unroll          |                                                   | src/maxpool.h:599 in pool_batch                                                              |
+| inline          |                                                   | src/mmv.hpp:53 in operator[]                                                                 |
+| array_partition | variable=inputBuf complete dim=0                  | src/mvau.hpp:111 in matrix_vector_activate_batch, inputBuf                                   |
+| array_partition | variable=accu complete dim=0                      | src/mvau.hpp:115 in matrix_vector_activate_batch, accu                                       |
+| pipeline        | style=flp II=1                                    | src/mvau.hpp:125 in matrix_vector_activate_batch                                             |
+| unroll          |                                                   | src/mvau.hpp:141 in matrix_vector_activate_batch                                             |
+| unroll          |                                                   | src/mvau.hpp:143 in matrix_vector_activate_batch                                             |
+| unroll          |                                                   | src/mvau.hpp:152 in matrix_vector_activate_batch                                             |
+| unroll          |                                                   | src/mvau.hpp:166 in matrix_vector_activate_batch                                             |
+| unroll          |                                                   | src/mvau.hpp:168 in matrix_vector_activate_batch                                             |
+| array_partition | variable=inputBuf complete dim=1                  | src/mvau.hpp:233 in matrix_vector_activate_stream_batch, inputBuf                            |
+| array_partition | variable=accu complete dim=0                      | src/mvau.hpp:236 in matrix_vector_activate_stream_batch, accu                                |
+| array_partition | variable=w.m_weights complete dim=0               | src/mvau.hpp:239 in matrix_vector_activate_stream_batch, w.m_weights                         |
+| pipeline        | style=flp II=1                                    | src/mvau.hpp:251 in matrix_vector_activate_stream_batch                                      |
+| unroll          |                                                   | src/mvau.hpp:268 in matrix_vector_activate_stream_batch                                      |
+| unroll          |                                                   | src/mvau.hpp:275 in matrix_vector_activate_stream_batch                                      |
+| unroll          |                                                   | src/mvau.hpp:282 in matrix_vector_activate_stream_batch                                      |
+| unroll          |                                                   | src/mvau.hpp:295 in matrix_vector_activate_stream_batch                                      |
+| bind_storage    | variable=inputBuf type=RAM_2P                     | src/slidingwindow.h:74 in memory_resource, inputBuf                                          |
+| bind_storage    | variable=inputBuf type=RAM_S2P impl=BRAM          | src/slidingwindow.h:95 in memory_resource, inputBuf                                          |
+| bind_storage    | variable=inputBuf type=RAM_S2P impl=URAM          | src/slidingwindow.h:116 in memory_resource, inputBuf                                         |
+| bind_storage    | variable=inputBuf type=RAM_S2P impl=LUTRAM        | src/slidingwindow.h:137 in memory_resource, inputBuf                                         |
+| array_partition | variable=inputBuf complete dim=1                  | src/slidingwindow.h:177 in convolutioninputgenerator, inputBuf                               |
+| pipeline        | style=flp II=1                                    | src/slidingwindow.h:192 in convolutioninputgenerator                                         |
+| dependence      | variable=inputBuf intra false                     | src/slidingwindow.h:243 in convolutioninputgenerator, inputBuf                               |
+| dependence      | variable=inputBuf inter false                     | src/slidingwindow.h:244 in convolutioninputgenerator, inputBuf                               |
+| dependence      | variable=current_block_write intra false          | src/slidingwindow.h:254 in convolutioninputgenerator, current_block_write                    |
+| dependence      | variable=inputBuf inter false                     | src/slidingwindow.h:308 in convolutioninputgenerator_mmv, inputBuf                           |
+| dependence      | variable=inputBuf intra false                     | src/slidingwindow.h:309 in convolutioninputgenerator_mmv, inputBuf                           |
+| array_partition | variable=inputBuf complete dim=1                  | src/slidingwindow.h:310 in convolutioninputgenerator_mmv, inputBuf                           |
+| array_partition | variable=inputBuf complete dim=2                  | src/slidingwindow.h:311 in convolutioninputgenerator_mmv, inputBuf                           |
+| pipeline        | style=flp II=1                                    | src/slidingwindow.h:326 in convolutioninputgenerator_mmv                                     |
+| unroll          |                                                   | src/slidingwindow.h:333 in convolutioninputgenerator_mmv                                     |
+| unroll          |                                                   | src/slidingwindow.h:359 in convolutioninputgenerator_mmv                                     |
+| unroll          |                                                   | src/slidingwindow.h:392 in convolutioninputgenerator_mmv                                     |
+| dependence      | variable=inputBuf intra false                     | src/slidingwindow.h:394 in convolutioninputgenerator_mmv, inputBuf                           |
+| dependence      | variable=inputBuf inter false                     | src/slidingwindow.h:395 in convolutioninputgenerator_mmv, inputBuf                           |
+| dependence      | variable=current_block_write intra false          | src/slidingwindow.h:406 in convolutioninputgenerator_mmv, current_block_write                |
+| array_partition | variable=inputBuf complete dim=1                  | src/slidingwindow.h:466 in convolutioninputgenerator_kernel_stride, inputBuf                 |
+| dependence      | variable=inputBuf inter false                     | src/slidingwindow.h:467 in convolutioninputgenerator_kernel_stride, inputBuf                 |
+| dependence      | variable=inputBuf intra false                     | src/slidingwindow.h:468 in convolutioninputgenerator_kernel_stride, inputBuf                 |
+| dependence      | variable=current_block_write intra false          | src/slidingwindow.h:476 in convolutioninputgenerator_kernel_stride, current_block_write      |
+| pipeline        | style=flp II=1                                    | src/slidingwindow.h:479 in convolutioninputgenerator_kernel_stride                           |
+| dependence      | variable=inputBuf inter false                     | src/slidingwindow.h:544 in convolutioninputgenerator_kernel_stride, inputBuf                 |
+| dependence      | variable=inputBuf intra false                     | src/slidingwindow.h:545 in convolutioninputgenerator_kernel_stride, inputBuf                 |
+| dependence      | variable=current_block_write intra false          | src/slidingwindow.h:554 in convolutioninputgenerator_kernel_stride, current_block_write      |
+| dependence      | variable=inputBuf inter false                     | src/slidingwindow.h:610 in convolutioninputgenerator_kernel_stride_mmv, inputBuf             |
+| dependence      | variable=inputBuf intra false                     | src/slidingwindow.h:611 in convolutioninputgenerator_kernel_stride_mmv, inputBuf             |
+| array_partition | variable=inputBuf complete dim=1                  | src/slidingwindow.h:612 in convolutioninputgenerator_kernel_stride_mmv, inputBuf             |
+| array_partition | variable=inputBuf complete dim=2                  | src/slidingwindow.h:613 in convolutioninputgenerator_kernel_stride_mmv, inputBuf             |
+| dependence      | variable=current_block_write intra false          | src/slidingwindow.h:628 in convolutioninputgenerator_kernel_stride_mmv, current_block_write  |
+| pipeline        | style=flp II=1                                    | src/slidingwindow.h:631 in convolutioninputgenerator_kernel_stride_mmv                       |
+| unroll          |                                                   | src/slidingwindow.h:638 in convolutioninputgenerator_kernel_stride_mmv                       |
+| unroll          |                                                   | src/slidingwindow.h:672 in convolutioninputgenerator_kernel_stride_mmv                       |
+| unroll          |                                                   | src/slidingwindow.h:705 in convolutioninputgenerator_kernel_stride_mmv                       |
+| dependence      | variable=current_block_write intra false          | src/slidingwindow.h:716 in convolutioninputgenerator_kernel_stride_mmv, current_block_write  |
+| array_partition | variable=inputBuf complete dim=1                  | src/slidingwindow.h:767 in convolutioninputgenerator_dws, inputBuf                           |
+| pipeline        | style=flp II=1                                    | src/slidingwindow.h:782 in convolutioninputgenerator_dws                                     |
+| dependence      | variable=inputBuf intra false                     | src/slidingwindow.h:833 in convolutioninputgenerator_dws, inputBuf                           |
+| dependence      | variable=inputBuf inter false                     | src/slidingwindow.h:834 in convolutioninputgenerator_dws, inputBuf                           |
+| dependence      | variable=current_block_write intra false          | src/slidingwindow.h:844 in convolutioninputgenerator_dws, current_block_write                |
+| array_partition | variable=inputBuf complete dim=1                  | src/slidingwindow.h:903 in convolutioninputgenerator_kernel_stride_dws, inputBuf             |
+| dependence      | variable=inputBuf inter false                     | src/slidingwindow.h:904 in convolutioninputgenerator_kernel_stride_dws, inputBuf             |
+| dependence      | variable=inputBuf intra false                     | src/slidingwindow.h:905 in convolutioninputgenerator_kernel_stride_dws, inputBuf             |
+| pipeline        | style=flp II=1                                    | src/slidingwindow.h:915 in convolutioninputgenerator_kernel_stride_dws                       |
+| dependence      | variable=current_block_write intra false          | src/slidingwindow.h:917 in convolutioninputgenerator_kernel_stride_dws, current_block_write  |
+| dependence      | variable=inputBuf inter false                     | src/slidingwindow.h:983 in convolutioninputgenerator_kernel_stride_dws, inputBuf             |
+| dependence      | variable=inputBuf intra false                     | src/slidingwindow.h:984 in convolutioninputgenerator_kernel_stride_dws, inputBuf             |
+| dependence      | variable=current_block_write intra false          | src/slidingwindow.h:993 in convolutioninputgenerator_kernel_stride_dws, current_block_write  |
+| dependence      | variable=inputBuf inter false                     | src/slidingwindow.h:1048 in convolutioninputgenerator_dws_mmv, inputBuf                      |
+| dependence      | variable=inputBuf intra false                     | src/slidingwindow.h:1049 in convolutioninputgenerator_dws_mmv, inputBuf                      |
+| array_partition | variable=inputBuf complete dim=1                  | src/slidingwindow.h:1050 in convolutioninputgenerator_dws_mmv, inputBuf                      |
+| array_partition | variable=inputBuf complete dim=2                  | src/slidingwindow.h:1051 in convolutioninputgenerator_dws_mmv, inputBuf                      |
+| pipeline        | style=flp II=1                                    | src/slidingwindow.h:1066 in convolutioninputgenerator_dws_mmv                                |
+| unroll          |                                                   | src/slidingwindow.h:1073 in convolutioninputgenerator_dws_mmv                                |
+| unroll          |                                                   | src/slidingwindow.h:1099 in convolutioninputgenerator_dws_mmv                                |
+| unroll          |                                                   | src/slidingwindow.h:1132 in convolutioninputgenerator_dws_mmv                                |
+| dependence      | variable=inputBuf intra false                     | src/slidingwindow.h:1134 in convolutioninputgenerator_dws_mmv, inputBuf                      |
+| dependence      | variable=inputBuf inter false                     | src/slidingwindow.h:1135 in convolutioninputgenerator_dws_mmv, inputBuf                      |
+| dependence      | variable=current_block_write intra false          | src/slidingwindow.h:1146 in convolutioninputgenerator_dws_mmv, current_block_write           |
+| performance     | target_ti=IFMDim*IFMDim*IFMChannels/SIMD          | src/slidingwindow.h:1191 in convolutioninputgenerator_2d_kernel1                             |
+| pipeline        | style=flp II=IFMChannels/SIMD                     | src/slidingwindow.h:1198 in convolutioninputgenerator_2d_kernel1                             |
+| pipeline        | style=flp II=1                                    | src/slidingwindow.h:1245 in convolutioninputgenerator_1d_kernel1                             |
+| array_partition | variable=inputBuf complete dim=1                  | src/slidingwindow.h:1300 in convolutioninputgenerator_nonsquare, inputBuf                    |
+| pipeline        | style=flp II=1                                    | src/slidingwindow.h:1315 in convolutioninputgenerator_nonsquare                              |
+| dependence      | variable=inputBuf intra false                     | src/slidingwindow.h:1366 in convolutioninputgenerator_nonsquare, inputBuf                    |
+| dependence      | variable=inputBuf inter false                     | src/slidingwindow.h:1367 in convolutioninputgenerator_nonsquare, inputBuf                    |
+| dependence      | variable=current_block_write intra false          | src/slidingwindow.h:1377 in convolutioninputgenerator_nonsquare, current_block_write         |
+| array_partition | variable=inputBuf complete dim=1                  | src/slidingwindow.h:1434 in convolutioninputgenerator_nonsquare_dws, inputBuf                |
+| pipeline        | style=flp II=1                                    | src/slidingwindow.h:1449 in convolutioninputgenerator_nonsquare_dws                          |
+| dependence      | variable=inputBuf intra false                     | src/slidingwindow.h:1500 in convolutioninputgenerator_nonsquare_dws, inputBuf                |
+| dependence      | variable=inputBuf inter false                     | src/slidingwindow.h:1501 in convolutioninputgenerator_nonsquare_dws, inputBuf                |
+| dependence      | variable=current_block_write intra false          | src/slidingwindow.h:1511 in convolutioninputgenerator_nonsquare_dws, current_block_write     |
+| array_partition | variable=inputBuf complete dim=1                  | src/slidingwindow.h:1575 in convolutioninputgenerator_nonsquare_dilated, inputBuf            |
+| pipeline        | style=flp II=1                                    | src/slidingwindow.h:1590 in convolutioninputgenerator_nonsquare_dilated                      |
+| dependence      | variable=inputBuf intra false                     | src/slidingwindow.h:1642 in convolutioninputgenerator_nonsquare_dilated, inputBuf            |
+| dependence      | variable=inputBuf inter false                     | src/slidingwindow.h:1643 in convolutioninputgenerator_nonsquare_dilated, inputBuf            |
+| dependence      | variable=current_block_write intra false          | src/slidingwindow.h:1653 in convolutioninputgenerator_nonsquare_dilated, current_block_write |
+| array_partition | variable=inputBuf complete                        | src/slidingwindow.h:1710 in convolutioninputgenerator_1d_parallel, inputBuf                  |
+| pipeline        | style=flp II=1                                    | src/slidingwindow.h:1718 in convolutioninputgenerator_1d_parallel                            |
+| unroll          |                                                   | src/slidingwindow.h:1739 in convolutioninputgenerator_1d_parallel                            |
+| dependence      | variable=inputBuf intra false                     | src/slidingwindow.h:1760 in convolutioninputgenerator_1d_parallel, inputBuf                  |
+| dependence      | variable=inputBuf inter false                     | src/slidingwindow.h:1761 in convolutioninputgenerator_1d_parallel, inputBuf                  |
+| dependence      | variable=current_block_write intra false          | src/slidingwindow.h:1768 in convolutioninputgenerator_1d_parallel, current_block_write       |
+| pipeline        | style=flp II=1                                    | src/slidingwindow.h:1824 in convolutioninputgenerator_1d_dws_naive                           |
+| pipeline        | style=flp II=1                                    | src/slidingwindow.h:1908 in convolutioninputgenerator_1d                                     |
+| pipeline        | style=flp II=1                                    | src/slidingwindow.h:1984 in convolutioninputgenerator_1d_dws                                 |
+| pipeline        | style=flp II=1                                    | src/slidingwindow.h:2063 in convolutioninputgenerator_1d_dws_stride                          |
+| pipeline        | style=flp II=1                                    | src/streamtools.h:78 in streamlimiter                                                        |
+| pipeline        | style=flp II=1                                    | src/streamtools.h:161 in sameresize                                                          |
+| pipeline        | style=flp II=1                                    | src/streamtools.h:235 in streamingcast                                                       |
+| pipeline        | style=flp II=1                                    | src/streamtools.h:281 in fmpadding_nonsquare                                                 |
+| inline          |                                                   | src/streamtools.h:375 in fmpadding                                                           |
+| pipeline        | style=flp II=1                                    | src/streamtools.h:452 in streamingdatawidthconverter_batch                                   |
+| pipeline        | style=flp II=1                                    | src/streamtools.h:472 in streamingdatawidthconverter_batch                                   |
+| pipeline        | style=flp II=1                                    | src/streamtools.h:483 in streamingdatawidthconverter_batch                                   |
+| pipeline        | style=flp II=1                                    | src/streamtools.h:592 in duplicatestreams                                                    |
+| pipeline        | style=flp II=1                                    | src/streamtools.h:650 in addstreams                                                          |
+| unroll          |                                                   | src/streamtools.h:655 in addstreams                                                          |
+| inline          |                                                   | src/streamtools.h:724 in addstreamslayer_batch                                               |
+| pipeline        | style=flp II=1                                    | src/streamtools.h:771 in multichandatawidthconverter_batch                                   |
+| unroll          |                                                   | src/streamtools.h:778 in multichandatawidthconverter_batch                                   |
+| pipeline        | style=flp II=1                                    | src/streamtools.h:794 in multichandatawidthconverter_batch                                   |
+| unroll          |                                                   | src/streamtools.h:800 in multichandatawidthconverter_batch                                   |
+| pipeline        | style=flp II=1                                    | src/streamtools.h:812 in multichandatawidthconverter_batch                                   |
+| unroll          |                                                   | src/streamtools.h:816 in multichandatawidthconverter_batch                                   |
+| pipeline        | style=flp II=1                                    | src/streamtools.h:852 in flattenmultichandata                                                |
+| unroll          |                                                   | src/streamtools.h:856 in flattenmultichandata                                                |
+| pipeline        | style=flp II=1                                    | src/streamtools.h:883 in packmultichandata                                                   |
+| unroll          |                                                   | src/streamtools.h:887 in packmultichandata                                                   |
+| pipeline        | style=flp II=1                                    | src/streamtools.h:976 in qdma2stream_batch                                                   |
+| pipeline        | style=flp II=1                                    | src/streamtools.h:999 in stream2qdma_batch                                                   |
+| array_partition | variable=red_ch_index complete dim=0              | src/tmrcheck.hpp:82 in tmrcheck, red_ch_index                                                |
+| pipeline        | style=flp II=1                                    | src/tmrcheck.hpp:91 in tmrcheck                                                              |
+| array_partition | variable=numerrors complete dim=0                 | src/tmrcheck.hpp:99 in tmrcheck, numerrors                                                   |
+| unroll          |                                                   | src/tmrcheck.hpp:103 in tmrcheck                                                             |
+| array_partition | variable=compute complete dim=0                   | src/tmrcheck.hpp:129 in tmrcheck, compute                                                    |
+| unroll          |                                                   | src/tmrcheck.hpp:132 in tmrcheck                                                             |
+| inline          |                                                   | src/weights.hpp:83 in tileindex                                                              |
+| inline          |                                                   | src/weights.hpp:88 in operator[]                                                             |
+| inline          |                                                   | src/weights.hpp:95 in weights                                                                |
+| inline          |                                                   | src/weights.hpp:127 in tileindex                                                             |
+| inline          |                                                   | src/weights.hpp:132 in operator[]                                                            |
+| unroll          |                                                   | src/weights.hpp:135 in operator[]                                                            |
+| inline          |                                                   | src/weights.hpp:145 in weights                                                               |
+| inline          |                                                   | src/weights.hpp:157 in operator[]                                                            |
+| unroll          |                                                   | src/weights.hpp:160 in operator[]                                                            |
++-----------------+---------------------------------------------------+----------------------------------------------------------------------------------------------+
+
+
